@@ -1,0 +1,7 @@
+*.log
+*.pyc
+*.csv
+bladecrawler/dist/
+bladecrawler/build/
+Playground*.py
+playground*.py
