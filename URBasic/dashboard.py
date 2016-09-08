@@ -20,15 +20,15 @@ class DashBoard(threading.Thread):
     See more at: http://www.universal-robots.com/how-tos-and-faqs/how-to/ur-how-tos/dashboard-server-port-29999-15690/
     '''
 
-    def __init__(self, host='localhost'):
+    def __init__(self, host='localhost', logger=logging.getLogger(__name__)):
         '''
         The constructor takes a hostname.
 
         Input parameters:
         host (string):  hostname or IP of RTDE server
         '''
-        self.logger = logging.getLogger("DashBoard")
-        self.running = False
+        self.__logger = logger
+        self.__running = False
         self._host = host
         self.last_respond = None
         self.__sock = None
@@ -323,7 +323,7 @@ class DashBoard(threading.Thread):
         '''
         Return True if Dash Board server is running
         '''
-        return self.running
+        return self.__running
 
     
     def run(self):
@@ -333,16 +333,16 @@ class DashBoard(threading.Thread):
             while not self._stop_event:
                 dat = self.__recv()
                 if dat is not None:
-                    self.logger.info(dat)
-                self.running = True
+                    self.__logger.info(dat)
+                self.__running = True
                 with self._dataEvent:
                     self._dataEvent.notifyAll()
         except:
-            if self.running:
-                self.running = False
-                self.logger.error("Dash Board Server stopped running")
+            if self.__running:
+                self.__running = False
+                self.__logger.error("Dash Board Server stopped running")
         
-        self.running = False        
+        self.__running = False        
         with self._dataEvent:
             self._dataEvent.notifyAll()
                 
@@ -363,7 +363,7 @@ class DashBoard(threading.Thread):
         '''
         buf = bytes(cmd, 'utf-8')
         if self.__sock is None:
-            self.logger.error('Unable to send: not connected to Robot')
+            self.__logger.error('Unable to send: not connected to Robot')
             return False
         
         (_, writable, _) = select.select([], [self.__sock], [], DEFAULT_TIMEOUT)

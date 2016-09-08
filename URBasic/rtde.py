@@ -10,8 +10,10 @@ import struct
 import select
 import logging
 import numpy as np
+import time
 import xml.etree.ElementTree as ET
 from ctypes.wintypes import UINT
+from URBasic.dataLogging import DataLogging
 
 DEFAULT_TIMEOUT = 1.0
 
@@ -41,14 +43,15 @@ class RTDE(threading.Thread):
     '''
 
 
-    def __init__(self, host='localhost', conf_filename='rtde_configuration.xml'):
+    def __init__(self, host='localhost', conf_filename='rtde_configuration.xml', logger = DataLogging()):
         '''
         The constructor takes a hostname.
 
         Input parameters:
         host (string):  hostname or IP of RTDE server
         '''
-        self.logger = logging.getLogger("rtde")
+        self.__logger = logger
+        self.__logger.AddEventLogging(__name__)
         self.data = DataObject()
         self.running = False
         self.__dataSend = DataObject()
@@ -65,6 +68,53 @@ class RTDE(threading.Thread):
         self.__buf = bytes()
 
 
+        '''Threading Data receive'''        
+    def run(self):
+        self._stop_event = False
+        wait = 1 #sec
+        while not self._stop_event:
+            try:
+                self.connect()
+                self.send_output_setup()
+                self.send_input_setup()
+                self.send_start()
+        
+                while not self._stop_event:
+                    self.data = self.receive()
+                    self.running = True
+                    with self._dataEvent:
+                        self._dataEvent.notifyAll()
+                self.disconnect()
+            except Exception as inst:
+                print('Martin')
+                if self.running:
+                    self.running = False
+                    self.__logger.URBasic_rtdeEvent.error("RTDE interface stopped running")
+                time.sleep(wait)
+                wait = wait*2
+                if wait > 600:
+                    wait = 600
+         
+        self.running = False        
+        with self._dataEvent:
+            self._dataEvent.notifyAll()
+                
+    def close(self):
+        if self._stop_event is False:
+            self._stop_event = True
+            self.wait()
+            self.disconnect()
+            self.join()
+            self.__logger.URBasic_rtdeEvent.info("Thread closed")
+
+
+    def wait(self):
+        '''Wait while the data receiving thread is receiving a new data set.'''
+        with self._dataEvent:
+            self._dataEvent.wait()
+
+
+    
     def connect(self):
         '''
         Initialize RTDE connection to host and set up data interfaces based on configuration XML.
@@ -90,7 +140,7 @@ class RTDE(threading.Thread):
         try:        
             self.get_controller_version()
             if not self.negotiate_protocol_version(1):
-                self.logger.error('Unable to negotiate protocol version')
+                self.__logger.URBasic_rtdeEvent.error('Unable to negotiate protocol version')
                 raise
     
         except (socket.timeout, socket.error):
@@ -137,9 +187,9 @@ class RTDE(threading.Thread):
         cmd = Command.RTDE_GET_URCONTROL_VERSION
         (major, minor, bugfix, build) = self.__sendAndReceive(cmd)
         if major and minor and bugfix:
-            self.logger.info('Controller version: ' + str(major) + '.' + str(minor) + '.' + str(bugfix) + '-' + str(build))
+            self.__logger.URBasic_rtdeEvent.info('Controller version: ' + str(major) + '.' + str(minor) + '.' + str(bugfix) + '-' + str(build))
             if major <= 3 and minor <= 2 and bugfix < 19171:
-                self.logger.error("Please upgrade your controller to minimally version 3.2.19171")
+                self.__logger.URBasic_rtdeEvent.error("Please upgrade your controller to minimally version 3.2.19171")
                 self.stop()
             return major, minor, bugfix
         return None, None, None
@@ -200,13 +250,13 @@ class RTDE(threading.Thread):
         elif type(variables) is str:
             payload = variables
         else:
-            self.logger.error('Variables must be list of stings or a single string, variables is: ' + str(type(variables)))
+            self.__logger.URBasic_rtdeEvent.error('Variables must be list of stings or a single string, variables is: ' + str(type(variables)))
             return None
         
         payload = bytes(payload, 'utf-8')
         result = self.__sendAndReceive(cmd, payload)
         if len(types)!=0 and not self.__list_equals(result.types, types):
-            self.logger.error('Data type inconsistency for input setup: ' +
+            self.__logger.URBasic_rtdeEvent.error('Data type inconsistency for input setup: ' +
                      str(types) + ' - ' +
                      str(result.types))
             return None
@@ -224,7 +274,7 @@ class RTDE(threading.Thread):
                 elif 'DOUBLE' == result.types[ii]:
                     self.set_data(variables[ii], (initValues[ii]))
                 else:
-                    self.logger.error('Unknown data type')
+                    self.__logger.URBasic_rtdeEvent.error('Unknown data type')
         return True
  
     def send_output_setup(self, variables=None, types=[]):
@@ -264,13 +314,13 @@ class RTDE(threading.Thread):
         elif type(variables) is str:
             payload = variables
         else:
-            self.logger.error('Variables must be list of stings or a single string, variables is: ' + str(type(variables)))
+            self.__logger.URBasic_rtdeEvent.error('Variables must be list of stings or a single string, variables is: ' + str(type(variables)))
             return None
         
         payload = bytes(payload, 'utf-8')
         result = self.__sendAndReceive(cmd, payload)
         if len(types)!=0 and not self.__list_equals(result.types, types):
-            self.logger.error('Data type inconsistency for output setup: ' +
+            self.__logger.URBasic_rtdeEvent.error('Data type inconsistency for output setup: ' +
                      str(types) + ' - ' +
                      str(result.types))
             return False
@@ -289,10 +339,10 @@ class RTDE(threading.Thread):
         cmd = Command.RTDE_CONTROL_PACKAGE_START
         success = self.__sendAndReceive(cmd)
         if success:
-            self.logger.info('RTDE synchronization started')
+            self.__logger.URBasic_rtdeEvent.info('RTDE synchronization started')
             self.__conn_state = ConnectionState.STARTED
         else:
-            self.logger.error('RTDE synchronization failed to start')
+            self.__logger.URBasic_rtdeEvent.error('RTDE synchronization failed to start')
         return success
         
     def send_pause(self):
@@ -307,10 +357,10 @@ class RTDE(threading.Thread):
         cmd = Command.RTDE_CONTROL_PACKAGE_PAUSE
         success = self.__sendAndReceive(cmd)
         if success:
-            self.logger.info('RTDE synchronization paused')
+            self.__logger.URBasic_rtdeEvent.info('RTDE synchronization paused')
             self.__conn_state = ConnectionState.PAUSED
         else:
-            self.logger.error('RTDE synchronization failed to pause')
+            self.__logger.URBasic_rtdeEvent.error('RTDE synchronization failed to pause')
         return success
 
     def send(self):
@@ -322,10 +372,10 @@ class RTDE(threading.Thread):
         success (boolean)
         '''
         if self.__conn_state != ConnectionState.STARTED:
-            self.logger.error('Cannot send when RTDE synchronization is inactive')
+            self.__logger.URBasic_rtdeEvent.error('Cannot send when RTDE synchronization is inactive')
             return
         if not (self.__dataSend.recipe_id in self.__input_config):
-            self.logger.error('Input configuration id not found: ' + str(self.__dataSend.recipe_id))
+            self.__logger.URBasic_rtdeEvent.error('Input configuration id not found: ' + str(self.__dataSend.recipe_id))
             return
         config = self.__input_config[self.__dataSend.recipe_id]
         return self.__sendall(Command.RTDE_DATA_PACKAGE, config.pack(self.__dataSend))
@@ -338,10 +388,11 @@ class RTDE(threading.Thread):
         output_data (DataObject): object with member variables matching the names of the configured RTDE variables
         '''
         if self.__output_config is None:
-            self.logger.error('Output configuration not initialized')
+            self.__logger.URBasic_rtdeEvent.error('Output configuration not initialized')
             return None
         if self.__conn_state != ConnectionState.STARTED:
-            self.logger.error('Cannot receive when RTDE synchronization is inactive')
+            self.__logger.URBasic_rtdeEvent.error('Cannot receive when RTDE synchronization is inactive')
+            raise Exception('Connection error')
             return None
         return self.__recv(Command.RTDE_DATA_PACKAGE)
 
@@ -450,7 +501,7 @@ class RTDE(threading.Thread):
         size = struct.calcsize(fmt) + len(payload)
         buf = struct.pack(fmt, size, command) + payload
         if self.__sock is None:
-            self.logger.error('Unable to send: not connected to Robot')
+            self.__logger.URBasic_rtdeEvent.error('Unable to send: not connected to Robot')
             return False
         
         (_, writable, _) = select.select([], [self.__sock], [], DEFAULT_TIMEOUT)
@@ -492,13 +543,13 @@ class RTDE(threading.Thread):
                     if command == command and len(self.__buf) == 0:
                         return data
                     if command == command and len(self.__buf) != 0:
-                        self.logger.info('skipping package')
+                        self.__logger.URBasic_rtdeEvent.info('skipping package')
                 else:
                     break
         return None
 
     def __trigger_disconnected(self):
-        self.logger.info("RTDE disconnected")
+        self.__logger.URBasic_rtdeEvent.info("RTDE disconnected")
         self.disconnect() #clean-up
 
     def __on_packet(self, cmd, payload):
@@ -515,7 +566,7 @@ class RTDE(threading.Thread):
         '''
         if cmd == Command.RTDE_REQUEST_PROTOCOL_VERSION:
             if len(payload) != 1:
-                self.logger.error('RTDE_REQUEST_PROTOCOL_VERSION: Wrong payload size')
+                self.__logger.URBasic_rtdeEvent.error('RTDE_REQUEST_PROTOCOL_VERSION: Wrong payload size')
                 return None
             return struct.unpack_from('>B', payload)[0]
         
@@ -525,13 +576,13 @@ class RTDE(threading.Thread):
             elif 16 == len(payload):
                 return np.array(struct.unpack_from('>IIII', payload))
             else:
-                self.logger.error('RTDE_GET_URCONTROL_VERSION: Wrong payload size')
+                self.__logger.URBasic_rtdeEvent.error('RTDE_GET_URCONTROL_VERSION: Wrong payload size')
                 return None
 
         
         elif cmd == Command.RTDE_TEXT_MESSAGE:
             if len(payload) < 1:
-                self.logger.error('RTDE_TEXT_MESSAGE: No payload')
+                self.__logger.URBasic_rtdeEvent.error('RTDE_TEXT_MESSAGE: No payload')
                 return None
             EXCEPTION_MESSAGE = 0
             ERROR_MESSAGE = 1
@@ -543,15 +594,15 @@ class RTDE(threading.Thread):
             message = ''.join(map(chr,out[1:])) 
             if(level == EXCEPTION_MESSAGE or 
                level == ERROR_MESSAGE):
-                self.logger.error('Server message: ' + message)
+                self.__logger.URBasic_rtdeEvent.error('Server message: ' + message)
             elif level == WARNING_MESSAGE:
-                self.logger.warning('Server message: ' + message)
+                self.__logger.URBasic_rtdeEvent.warning('Server message: ' + message)
             elif level == INFO_MESSAGE:
-                self.logger.info('Server message: ' + message)
+                self.__logger.URBasic_rtdeEvent.info('Server message: ' + message)
      
         elif cmd == Command.RTDE_CONTROL_PACKAGE_SETUP_OUTPUTS:
             if len(payload) < 1:
-                self.logger.error('RTDE_CONTROL_PACKAGE_SETUP_OUTPUTS: No payload')
+                self.__logger.URBasic_rtdeEvent.error('RTDE_CONTROL_PACKAGE_SETUP_OUTPUTS: No payload')
                 return None
             has_recipe_id = False
             output_config = DataConfig.unpack_recipe(payload, has_recipe_id)
@@ -559,7 +610,7 @@ class RTDE(threading.Thread):
 
         elif cmd == Command.RTDE_CONTROL_PACKAGE_SETUP_INPUTS:
             if len(payload) < 1:
-                self.logger.error('RTDE_CONTROL_PACKAGE_SETUP_INPUTS: No payload')
+                self.__logger.URBasic_rtdeEvent.error('RTDE_CONTROL_PACKAGE_SETUP_INPUTS: No payload')
                 return None
             has_recipe_id = True
             input_config = DataConfig.unpack_recipe(payload, has_recipe_id)
@@ -567,25 +618,25 @@ class RTDE(threading.Thread):
             
         elif cmd == Command.RTDE_CONTROL_PACKAGE_START:
             if len(payload) != 1:
-                self.logger.error('RTDE_CONTROL_PACKAGE_START: Wrong payload size')
+                self.__logger.URBasic_rtdeEvent.error('RTDE_CONTROL_PACKAGE_START: Wrong payload size')
                 return None
             return bool(struct.unpack_from('>B', payload)[0])
         
         elif cmd == Command.RTDE_CONTROL_PACKAGE_PAUSE:
             if len(payload) != 1:
-                self.logger.error('RTDE_CONTROL_PACKAGE_PAUSE: Wrong payload size')
+                self.__logger.URBasic_rtdeEvent.error('RTDE_CONTROL_PACKAGE_PAUSE: Wrong payload size')
                 return None
             return bool(struct.unpack_from('>B', payload)[0])
 
         elif cmd == Command.RTDE_DATA_PACKAGE:            
             if self.__output_config is None:
-                self.logger.error('RTDE_DATA_PACKAGE: Missing output configuration')
+                self.__logger.URBasic_rtdeEvent.error('RTDE_DATA_PACKAGE: Missing output configuration')
                 return None
             output = self.__output_config.unpack(payload)
             return output
         
         else:
-            self.logger.error('Unknown package command: ' + chr(cmd))
+            self.__logger.URBasic_rtdeEvent.error('Unknown package command: ' + chr(cmd))
 
 
     def __list_equals(self, l1, l2):
@@ -596,48 +647,6 @@ class RTDE(threading.Thread):
                 return False
         return True
 
-
-    '''Threading Data receive'''
-    def close(self):
-        if self._stop_event is False:
-            self._stop_event = True
-            self.wait()
-            self.disconnect()
-            self.join()
-        
-    def run(self):
-        try:
-            self._stop_event = False
-            self.connect()
-            self.send_output_setup()
-            self.send_input_setup()
-            self.send_start()
-    
-            while not self._stop_event:
-                self.data = self.receive()
-                self.running = True
-                with self._dataEvent:
-                    self._dataEvent.notifyAll()
-            self.disconnect()
-        except Exception as inst:
-            print(type(inst))    # the exception instance
-            print(inst.args)     # arguments stored in .args
-            print(inst)          # __str__ allows args to be printed directly,
-            #self.logger.warn('Error in RTDE run - Error type: %s', type(inst))
-            #self.logger.warn('Error in RTDE run - Error msg: %s', inst)
-            if self.running:
-                self.running = False
-                self.logger.error("RTDE interface stopped running")
-         
-        self.running = False        
-        with self._dataEvent:
-            self._dataEvent.notifyAll()
-                
-
-    def wait(self):
-        '''Wait while the data receiving thread is receiving a new data set.'''
-        with self._dataEvent:
-            self._dataEvent.wait()
 
 
 
