@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<Profiles>
+       <UR5_Gate1_Prototye>
+        <BCI>
+        </BCI>
+        <BCO>
+            <Signal id="0" use="EmergencyStop" safeState="NA"/>
+            <Signal id="1" use="EmergencyStop" safeState="NA" />
+            <Signal id="2" use="ServoDrive1On" safeState="False" />
+            <Signal id="3" use="ServoDrive2On" safeState="False" />
+            <Signal id="4" use="ServoDrive1Direction" safeState="NA" />
+            <Signal id="5" use="ServoDrive2Direction" safeState="NA" />
+            <Signal id="6" use="ServoDrive1SPD2" safeState="False" />
+            <Signal id="7" use="ServoDrive1SPD3" safeState="False" />
+        </BCO>
+        <BDI>
+                <Signal id="0" use="ToolVacuumOK" />
+                <Signal id="1" use="BaseVacuum1OK" />
+                <Signal id="2" use="BaseVacuum2OK" />
+                <Signal id="3" use="BaseVacuum3OK" />
+        </BDI>
+        
+        <BDO>
+            <Signal id="0" use="ToolVaccum" safeState="NA" />
+            <Signal id="1" use="ToolBlow" safeState="NA" />
+            <Signal id="2" use="BaseVacuum" safeState="NA" />
+            <Signal id="3" use="BaseBlow" safeState="NA" />
+        </BDO>
+    
+        <BAI>
+            <Signal id="0" use="ToolDistanceSensor" />
+        </BAI>
+    
+        <BAO>
+        </BAO>  
+        <TDI>
+        </TDI>
+        
+    </UR5_Gate1_Prototye>
+	
+	<UR10_Gate1_Prototye>
+		<BCI>
+		</BCI>
+		<BCO>
+			<Signal id="0" use="EmergencyStop"  safeState="NA"/>
+			<Signal id="1" use="EmergencyStop"  safeState="NA"/>
+			<Signal id="2" use="ServoDrive1On"  safeState="False"/>
+			<Signal id="3" use="ServoDrive2On"  safeState="False"/>
+			<Signal id="4" use="ServoDrive1Direction"  safeState="NA"/>
+			<Signal id="5" use="ServoDrive2Direction"  safeState="NA"/>
+			<Signal id="6" use="ServoDrive1SPD2"  safeState="False"/>
+			<Signal id="7" use="ServoDrive1SPD3"  safeState="False"/>
+		</BCO>
+		<BDI>
+				<Signal id="0" use="ToolVacuumOK" />
+				<Signal id="1" use="BaseVacuum1OK" />
+				<Signal id="2" use="BaseVacuum2OK" />
+				<Signal id="3" use="BaseVacuum3OK" />
+		</BDI>
+		
+		<BDO>
+			<Signal id="0" use="ToolVaccum"  safeState="NA"/>
+			<Signal id="1" use="ToolBlow"  safeState="False"/>
+			<Signal id="2" use="BaseVacuum"  safeState="NA"/>
+			<Signal id="3" use="BaseBlow"  safeState="False"/>
+		</BDO>
+
+		<BAI>
+			<Signal id="0" use="ToolDistanceSensor" />
+		</BAI>
+
+		<BAO>
+		</BAO>	
+		<TDI>
+		</TDI>
+		
+	</UR10_Gate1_Prototye>
+</Profiles>
