@@ -1,8 +1,29 @@
 '''
-Created on 5. jul. 2016
+Python 3.x library to control an UR robot through its TCP/IP interfaces
+Copyright (C) 2016  Martin Huus Bjerge, Rope Robotics ApS, Denmark
 
-@author: MartinHuusBjerge
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
+and associated documentation files (the "Software"), to deal in the Software without restriction, 
+including without limitation the rights to use, copy, modify, merge, publish, distribute, 
+sublicense, and/or sell copies of the Software, and to permit persons to whom the Software 
+is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies 
+or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
+PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL "Rope Robotics ApS" BE LIABLE FOR ANY CLAIM, 
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of "Rope Robotics ApS" shall not be used 
+in advertising or otherwise to promote the sale, use or other dealings in this Software 
+without prior written authorization from "Rope Robotics ApS".
 '''
+__author__ = "Martin Huus Bjerge"
+__copyright__ = "Copyright 2016, Rope Robotics ApS, Denmark"
+__license__ = "MIT License"
 
 import URBasic.dataLogging
 import threading
@@ -11,6 +32,7 @@ import struct
 import select
 import numpy as np
 import xml.etree.ElementTree as ET
+import time
 
 DEFAULT_TIMEOUT = 1.0
 
@@ -26,10 +48,12 @@ class Command:
 
 
 class ConnectionState:
-    DISCONNECTED = 0
-    CONNECTED = 1
-    STARTED = 2
+    ERROR = 0
+    DISCONNECTED = 1
+    CONNECTED = 2
     PAUSED = 3
+    STARTED = 4
+    
 
 
 class RTDE(threading.Thread):
@@ -37,26 +61,29 @@ class RTDE(threading.Thread):
     Interface to UR robot Real Time Data Exchange interface.
     For more detailes see this site:
     http://www.universal-robots.com/how-tos-and-faqs/how-to/ur-how-tos/real-time-data-exchange-rtde-guide-22229/ 
+
+    The constructor takes a UR robot hostname as input and a path to a RTDE configuration file.
+
+    Input parameters:
+    host (string):  Hostname or IP of UR Robot (RT CLient server)
+    conf_filename (string):  Path to xml file describing what channels to activate
+    logger (URBasis_DataLogging obj): A instance if a logger object if common logging is needed.
+
+    Example:
+    rob = URBasic.rtde.RTDE('192.168.56.101', 'rtde_configuration.xml')
+    rob.close_rtde()
     '''
 
 
     def __init__(self, host='localhost', conf_filename='rtde_configuration.xml', logger = URBasic.dataLogging.DataLogging()):
         '''
-        The constructor takes a UR robot hostname as input and a path to a RTDE configuration file.
-
-        Input parameters:
-        host (string):  Hostname or IP of UR Robot (RT CLient server)
-        conf_filename (string):  Path to xml file describing what channels to activate
-        logger (URBasis_DataLogging obj): A instance if a logger object if common logging is needed.
-
-        Example:
-        rob = URBasic.rtde.RTDE('192.168.56.101', 'rtde_configuration.xml')
+        Constructor see class description for more info.
         '''
         name = logger.AddEventLogging(__name__)        
         self._logger = logger.__dict__[name]
         self.__host = host
+        self.__reconnectTimeout = 60 #Seconds (while in run)
         self._data = DataObject()
-        self.__running = False
         self.__dataSend = DataObject()
         self.__conf_filename = conf_filename
         self.__stop_event = True
@@ -70,7 +97,7 @@ class RTDE(threading.Thread):
         self.__buf = bytes()
         self.start()
         self.__dataLogObj = RTDE_logger(self,logger)
-        self.wait()
+        self.wait_rtde()
         self._logger.info('RTDE constructor done')
 
 
@@ -93,18 +120,17 @@ class RTDE(threading.Thread):
             self.__conn_state = ConnectionState.CONNECTED
         except (socket.timeout, socket.error):
             self.__sock = None
-            raise
             return False
         
         try:        
+            time.sleep(2)
             self.get_controller_version()
-            if not self.negotiate_protocol_version(1):
+            if not self.__negotiate_protocol_version(1):
                 self._logger.error('Unable to negotiate protocol version')
-                raise
     
-        except (socket.timeout, socket.error):
+        except:
+            self.__sock.close()
             self.__sock = None
-            raise
             return False        
         
         return True
@@ -126,13 +152,14 @@ class RTDE(threading.Thread):
         Return value:
         open (boolean)
         '''
-        return self.__conn_state is not ConnectionState.DISCONNECTED
+        return self.__conn_state > ConnectionState.DISCONNECTED
         
-    def is_running(self):
+    def rtde_is_running(self):
         '''
         Return True if RTDE interface is running 
         '''
-        return self.__running
+        
+        return self.__conn_state >= ConnectionState.STARTED
     
     def get_controller_version(self):
         '''
@@ -153,7 +180,7 @@ class RTDE(threading.Thread):
             return major, minor, bugfix
         return None, None, None
 
-    def negotiate_protocol_version(self, protocol):
+    def __negotiate_protocol_version(self, protocol):
         '''
         Negotiate the protocol version with the server. 
         Returns True if the controller supports the specified protocol version. 
@@ -170,7 +197,7 @@ class RTDE(threading.Thread):
         payload = struct.pack('>H',protocol)
         return bool(self.__sendAndReceive(cmd, payload))
     
-    def send_input_setup(self, variables=None, types=[], initValues=None):
+    def send_rtde_input_setup(self, variables=None, types=[], initValues=None):
         '''
         Configure an input package that the external(this) application will send to the robot controller. 
         An input package is a collection of input variables that the external application will provide 
@@ -214,6 +241,9 @@ class RTDE(threading.Thread):
         
         payload = bytes(payload, 'utf-8')
         result = self.__sendAndReceive(cmd, payload)
+        if result is None:
+            self._logger.debug('Could not send input configuration')
+            return False
         if len(types)!=0 and not self.__list_equals(result.types, types):
             self._logger.error('Data type inconsistency for input setup: ' +
                      str(types) + ' - ' +
@@ -225,18 +255,18 @@ class RTDE(threading.Thread):
         if initValues is not None:
             for ii in range(len(variables)):
                 if 'UINT8' == result.types[ii]:
-                    self.set_data(variables[ii], int(initValues[ii]))
+                    self.set_rtde_data(variables[ii], int(initValues[ii]))
                 elif 'UINT32' == result.types[ii]:
-                    self.set_data(variables[ii], int(initValues[ii]))
+                    self.set_rtde_data(variables[ii], int(initValues[ii]))
                 elif 'INT32' == result.types[ii]:
-                    self.set_data(variables[ii], int(initValues[ii]))
+                    self.set_rtde_data(variables[ii], int(initValues[ii]))
                 elif 'DOUBLE' == result.types[ii]:
-                    self.set_data(variables[ii], (initValues[ii]))
+                    self.set_rtde_data(variables[ii], (initValues[ii]))
                 else:
                     self._logger.error('Unknown data type')
         return True
  
-    def send_output_setup(self, variables=None, types=[]):
+    def send_rtde_output_setup(self, variables=None, types=[]):
         '''
         Configure an output package that the robot controller will send to the 
         external(this) application at the control frequency. Variables is a list of 
@@ -278,6 +308,9 @@ class RTDE(threading.Thread):
         
         payload = bytes(payload, 'utf-8')
         result = self.__sendAndReceive(cmd, payload)
+        if result is None:
+            self._logger.debug('Could not send output configuration')
+            return False
         if len(types)!=0 and not self.__list_equals(result.types, types):
             self._logger.error('Data type inconsistency for output setup: ' +
                      str(types) + ' - ' +
@@ -287,7 +320,7 @@ class RTDE(threading.Thread):
         self.__output_config = result
         return True
 
-    def send_start(self):
+    def send_rtde_start(self):
         '''
         Sends a start command to the RTDE server to initiate the actual synchronization. 
         Setup of all inputs and outputs should be done before starting the synchronization.
@@ -301,10 +334,10 @@ class RTDE(threading.Thread):
             self._logger.info('RTDE synchronization started')
             self.__conn_state = ConnectionState.STARTED
         else:
-            self._logger.error('RTDE synchronization failed to start')
+            self._logger.debug('RTDE synchronization failed to start')
         return success
         
-    def send_pause(self):
+    def send_rtde_pause(self):
         '''
         Sends a pause command to the RTDE server to pause the synchronization. 
         When paused it is possible to change the input and output configurations 
@@ -319,10 +352,10 @@ class RTDE(threading.Thread):
             self._logger.info('RTDE synchronization paused')
             self.__conn_state = ConnectionState.PAUSED
         else:
-            self._logger.error('RTDE synchronization failed to pause')
+            self._logger.debug('RTDE synchronization failed to pause')
         return success
 
-    def send_data(self):
+    def send_rtde_data(self):
         '''
         Send the contents of a DataObject as input to the RTDE server. 
         Returns True if successful.
@@ -339,7 +372,7 @@ class RTDE(threading.Thread):
         config = self.__input_config[self.__dataSend.recipe_id]
         return self.__sendall(Command.RTDE_DATA_PACKAGE, config.pack(self.__dataSend))
 
-    def receive(self):
+    def __receive(self):
         '''
         Blocking call to receive next output DataObject from RTDE server.
 
@@ -350,11 +383,11 @@ class RTDE(threading.Thread):
             self._logger.error('Output configuration not initialized')
             return None
         if self.__conn_state != ConnectionState.STARTED:
-            self._logger.error('Cannot receive when RTDE synchronization is inactive')
+            self._logger.debug('Cannot receive when RTDE synchronization is inactive')
             return None
         return self.__recv(Command.RTDE_DATA_PACKAGE)
 
-    def has_get_data_attr(self,name):
+    def has_get_rtde_data_attr(self,name):
         '''
         Check if RTDE interface is configured with a given variable name.
         
@@ -363,7 +396,7 @@ class RTDE(threading.Thread):
         '''
         return hasattr(self._data, name)
 
-    def get_data(self, variable_name, wait=False):
+    def get_rtde_data(self, variable_name, wait=False):
         '''
         Get data from RTDE data stream when thread is running
         
@@ -376,12 +409,13 @@ class RTDE(threading.Thread):
         '''
         if not self.__stop_event:
             if wait:
-                self.wait()
-            if self.has_get_data_attr(variable_name):
+                if not self.wait_rtde():
+                    return None
+            if self.has_get_rtde_data_attr(variable_name):
                 return np.array(self._data.__dict__[variable_name])
         return None
 
-    def has_set_data_attr(self,name):
+    def has_set_rtde_data_attr(self,name):
         '''
         Check if RTDE interface is configured with a given variable name.
         
@@ -390,7 +424,7 @@ class RTDE(threading.Thread):
         '''
         return hasattr(self.__dataSend, name)
     
-    def set_data(self, variable_name, value):
+    def set_rtde_data(self, variable_name, value):
         '''
         Set data to be send to the UR controller by the send/recive thread.
         Object is locked while updating to avoid sending half updated values,
@@ -459,7 +493,7 @@ class RTDE(threading.Thread):
         size = struct.calcsize(fmt) + len(payload)
         buf = struct.pack(fmt, size, command) + payload
         if self.__sock is None:
-            self._logger.error('Unable to send: not connected to Robot')
+            self._logger.debug('Unable to send: not connected to Robot')
             return False
         
         (_, writable, _) = select.select([], [self.__sock], [], DEFAULT_TIMEOUT)
@@ -501,14 +535,14 @@ class RTDE(threading.Thread):
                     if command == command and len(self.__buf) == 0:
                         return data
                     if command == command and len(self.__buf) != 0:
-                        self._logger.info('skipping package')
+                        self._logger.warning('skipping package')
                 else:
                     break
         return None
 
     def __trigger_disconnected(self):
         self._logger.info("RTDE disconnected")
-        self.disconnect() #clean-up
+        self.__disconnect() #clean-up
 
     def __on_packet(self, cmd, payload):
         '''
@@ -607,48 +641,73 @@ class RTDE(threading.Thread):
 
 
     '''Threading Data receive'''
-    def close(self):
+    def close_rtde(self):
         self.__dataLogObj.close()
         if self.__stop_event is False:
             self.__stop_event = True
-            self.wait()
-            self.__disconnect()
+            self.wait_rtde()
             self.join()
+            self.__disconnect()
         
     def run(self):
-        try:
-            self.__stop_event = False
+        self.__stop_event = False
+        t0 = time.time()
+        while (time.time()-t0<self.__reconnectTimeout) and self.__conn_state != ConnectionState.STARTED:
             self.__connect()
-            self.send_output_setup()
-            self.send_input_setup()
-            self.send_start()
-    
-            while not self.__stop_event:
-                self._data = self.receive()
-                self.__running = True
+            self.send_rtde_output_setup()
+            self.send_rtde_input_setup()
+            if not self.send_rtde_start():
+                self._logger.warning("RTDE connection failed!")
+
+        if self.__conn_state != ConnectionState.STARTED:
+            self._logger.error("RTDE interface not able to connect and timed out!")
+            return
+        
+        while (not self.__stop_event) and (time.time()-t0<self.__reconnectTimeout):
+            try:
+                self._data = self.__receive()
+                #self.__conn_state = ConnectionState.STARTED  #This line was removed to avoid log spamming when no connection to robot.
                 with self.__dataEvent:
                     self.__dataEvent.notifyAll()
-            self.disconnect()
-        except Exception as inst:
-            print(type(inst))    # the exception instance
-            print(inst.args)     # arguments stored in .args
-            print(inst)          # __str__ allows args to be printed directly,
-            #self._logger.warn('Error in RTDE run - Error type: %s', type(inst))
-            #self._logger.warn('Error in RTDE run - Error msg: %s', inst)
-            if self.__running:
-                self.__running = False
-                self._logger.error("RTDE interface stopped running")
-         
-        self.__running = False        
+                t0 = time.time()
+            except Exception:
+                if self.__conn_state >= ConnectionState.STARTED:
+                    self.__conn_state = ConnectionState.ERROR
+                    self._logger.error("RTDE interface stopped running")
+
+                self.send_rtde_pause()
+                if not self.send_rtde_start():
+                    self.__disconnect()
+                    time.sleep(1)
+                    self.__connect()
+                    self.send_rtde_output_setup()
+                    self.send_rtde_input_setup()
+                    self.send_rtde_start()
+
+                if self.__conn_state == ConnectionState.STARTED:
+                    self._logger.info("RTDE interface restarted")
+                else:
+                    self._logger.warning("RTDE reconnection failed!")
+
+        self.send_rtde_pause()
         with self.__dataEvent:
             self.__dataEvent.notifyAll()
         self._logger.info("RTDE interface is stopped")
                 
 
-    def wait(self):
+    def wait_rtde(self):
         '''Wait while the data receiving thread is receiving a new data set.'''
+        cnt = 0
+        while self.__conn_state < ConnectionState.STARTED:
+            time.sleep(1)
+            cnt +=1
+            if cnt>5:
+                self._logger.warning('wait_rtde timed out while RTDE interface not running')
+                return False
+            
         with self.__dataEvent:
             self.__dataEvent.wait()
+        return True
 
 
 
@@ -785,21 +844,21 @@ class RTDE_logger(RTDE, threading.Thread):
         self.__rtdeDemon._logger.info('RTDE_logger constructor done')
          
     def logdata(self):
-        self.__rtdeDemon.wait()        
-        for tagname in self.__rtdeDemon._data.__dict__.keys():
-            if tagname != 'timestamp':
-                tp = type(self.__rtdeDemon._data.__dict__[tagname])
-                if tp is np.ndarray:
-                    if 6==len(self.__rtdeDemon._data.__dict__[tagname]):
-                        self.__dataLogger.info((tagname+';%s;%s;%s;%s;%s;%s;%s'), self.__rtdeDemon._data.__dict__['timestamp'], *self.__rtdeDemon._data.__dict__[tagname])
-                    elif 3==len(self.__rtdeDemon._data.__dict__[tagname]):
-                        self.__dataLogger.info((tagname+';%s;%s;%s;%s'), self.__rtdeDemon._data.__dict__['timestamp'], *self.__rtdeDemon._data.__dict__[tagname])
+        if self.__rtdeDemon.wait_rtde():        
+            for tagname in self.__rtdeDemon._data.__dict__.keys():
+                if tagname != 'timestamp':
+                    tp = type(self.__rtdeDemon._data.__dict__[tagname])
+                    if tp is np.ndarray:
+                        if 6==len(self.__rtdeDemon._data.__dict__[tagname]):
+                            self.__dataLogger.info((tagname+';%s;%s;%s;%s;%s;%s;%s'), self.__rtdeDemon._data.__dict__['timestamp'], *self.__rtdeDemon._data.__dict__[tagname])
+                        elif 3==len(self.__rtdeDemon._data.__dict__[tagname]):
+                            self.__dataLogger.info((tagname+';%s;%s;%s;%s'), self.__rtdeDemon._data.__dict__['timestamp'], *self.__rtdeDemon._data.__dict__[tagname])
+                        else:
+                            self.__rtdeDemon._logger.warning('Logger data unexpected type in rtde.py - class URRTDElogger - def logdata Type: ' + str(tp) + ' - Len: ' + str(len(self.__rtdeDemon._data.__dict__[tagname])))
+                    elif tp is bool or tp is float or tp is int: 
+                        self.__dataLogger.info((tagname+';%s;%s'), self.__rtdeDemon._data.__dict__['timestamp'], self.__rtdeDemon._data.__dict__[tagname])
                     else:
-                        self.__rtdeDemon._logger.warning('Logger data unexpected type in rtde.py - class URRTDElogger - def logdata Type: ' + str(tp) + ' - Len: ' + str(len(self.__rtdeDemon._data.__dict__[tagname])))
-                elif tp is bool or tp is float or tp is int: 
-                    self.__dataLogger.info((tagname+';%s;%s'), self.__rtdeDemon._data.__dict__['timestamp'], self.__rtdeDemon._data.__dict__[tagname])
-                else:
-                    self.__rtdeDemon._logger.warning('Logger data unexpected type in rtde.py - class URRTDElogger - def logdata Type: ' + str(tp))
+                        self.__rtdeDemon._logger.warning('Logger data unexpected type in rtde.py - class URRTDElogger - def logdata Type: ' + str(tp))
                     
     def close(self):
         if self.__stop_event is False:
@@ -809,5 +868,8 @@ class RTDE_logger(RTDE, threading.Thread):
     def run(self):
         self.__stop_event = False
         while not self.__stop_event:
-            self.logdata()
+            try:
+                self.logdata()
+            except:
+                self.__rtdeDemon._logger.warning("RTDE_logger error while running, but will retry")
         self.__rtdeDemon._logger.info("RTDE_logger is stopped")

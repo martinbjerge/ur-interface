@@ -1,8 +1,29 @@
 '''
-Created on 20. jul. 2016
+Python 3.x library to control an UR robot through its TCP/IP interfaces
+Copyright (C) 2016  Martin Huus Bjerge, Rope Robotics ApS, Denmark
 
-@author: MartinHuusBjerge
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
+and associated documentation files (the "Software"), to deal in the Software without restriction, 
+including without limitation the rights to use, copy, modify, merge, publish, distribute, 
+sublicense, and/or sell copies of the Software, and to permit persons to whom the Software 
+is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies 
+or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
+PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL "Rope Robotics ApS" BE LIABLE FOR ANY CLAIM, 
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of "Rope Robotics ApS" shall not be used 
+in advertising or otherwise to promote the sale, use or other dealings in this Software 
+without prior written authorization from "Rope Robotics ApS".
 '''
+__author__ = "Martin Huus Bjerge"
+__copyright__ = "Copyright 2016, Rope Robotics ApS, Denmark"
+__license__ = "MIT License"
 
 import ikpy  as ik
 import numpy as np
@@ -12,7 +33,7 @@ import scipy
 from rr.manipulation import *
 from scipy import linalg
 
-
+pi = np.pi
 # Disable the logging stream from ikpy
 ik.logs.manager.removeHandler(ik.logs.stream_handler)
 
@@ -215,18 +236,18 @@ def Jacobian_Numerical(rob=1,joint=[0,0,0,0,0,0]):
     q4=joint[4]
     q5=joint[5]
     if rob == 1:
-        J = np.matrix([[0.0823*sin(q0)*sin(q4)*cos(q1 + q2 + q3)  - 0.09465*sin(q0)*sin(q1 + q2 + q3) + 0.425*sin(q0)*cos(q1) + 0.39225*sin(q0)*cos(q1 + q2)  + 0.0823*cos(q0)*cos(q4) + 0.10915*cos(q0),  0.0823*sin(q0)*cos(q4) + 0.10915*sin(q0) - 0.0823*sin(q4)*cos(q0)*cos(q1 + q2 + q3)  + 0.09465*sin(q1 + q2 + q3)*cos(q0) - 0.425*cos(q0)*cos(q1) - 0.39225*cos(q0)*cos(q1 + q2), 0, 0, 0, 1], 
-                       [ 0.425*sin(q1)*cos(q0) + 0.0823*sin(q4)*sin(q1 + q2 + q3)*cos(q0) + 0.39225*sin(q1 + q2)*cos(q0)  + 0.09465*cos(q0)*cos(q1 + q2 + q3), 0.425*sin(q0)*sin(q1) + 0.0823*sin(q0)*sin(q4)*sin(q1 + q2 + q3) + 0.39225*sin(q0)*sin(q1 + q2)  + 0.09465*sin(q0)*cos(q1 + q2 + q3) , -0.0823*sin(q4)*cos(q1 + q2 + q3)  + 0.09465*sin(q1 + q2 + q3) - 0.425*cos(q1) - 0.39225*cos(q1 + q2), 1, 0, 0], 
-                       [ 0.0823*sin(q4)*sin(q1 + q2 + q3)*cos(q0) + 0.39225*sin(q1 + q2)*cos(q0)  + 0.09465*cos(q0)*cos(q1 + q2 + q3), 0.0823*sin(q0)*sin(q4)*sin(q1 + q2 + q3) + 0.39225*sin(q0)*sin(q1 + q2)  + 0.09465*sin(q0)*cos(q1 + q2 + q3) , -0.0823*sin(q4)*cos(q1 + q2 + q3)  + 0.09465*sin(q1 + q2 + q3) - 0.39225*cos(q1 + q2), 1, 0, 0], 
-                       [(0.0823*sin(q4)*sin(q1 + q2 + q3)  + 0.09465*cos(q1 + q2 + q3))*cos(q0), (0.0823*sin(q4)*sin(q1 + q2 + q3) + 0.09465*cos(q1 + q2 + q3))*sin(q0), -0.0823*sin(q4)*cos(q1 + q2 + q3) + 0.09465*sin(q1 + q2 + q3), 1, 0, 0], 
-                       [-0.0823*(1.0*sin(q0) )*sin(q4) - 0.0823*cos(q0)*cos(q4)*cos(q1 + q2 + q3), 0.0823*( 1.0*cos(q0))*sin(q4) - 0.0823*sin(q0)*cos(q4)*cos(q1 + q2 + q3),  - 0.0823*sin(q1 + q2 + q3)*cos(q4), 0, 0, 1], 
+        J = np.matrix([[0.0823*np.sin(q0)*np.sin(q4)*np.cos(q1 + q2 + q3)  - 0.09465*np.sin(q0)*np.sin(q1 + q2 + q3) + 0.425*np.sin(q0)*np.cos(q1) + 0.39225*np.sin(q0)*np.cos(q1 + q2)  + 0.0823*np.cos(q0)*np.cos(q4) + 0.10915*np.cos(q0),  0.0823*np.sin(q0)*np.cos(q4) + 0.10915*np.sin(q0) - 0.0823*np.sin(q4)*np.cos(q0)*np.cos(q1 + q2 + q3)  + 0.09465*np.sin(q1 + q2 + q3)*np.cos(q0) - 0.425*np.cos(q0)*np.cos(q1) - 0.39225*np.cos(q0)*np.cos(q1 + q2), 0, 0, 0, 1], 
+                       [ 0.425*np.sin(q1)*np.cos(q0) + 0.0823*np.sin(q4)*np.sin(q1 + q2 + q3)*np.cos(q0) + 0.39225*np.sin(q1 + q2)*np.cos(q0)  + 0.09465*np.cos(q0)*np.cos(q1 + q2 + q3), 0.425*np.sin(q0)*np.sin(q1) + 0.0823*np.sin(q0)*np.sin(q4)*np.sin(q1 + q2 + q3) + 0.39225*np.sin(q0)*np.sin(q1 + q2)  + 0.09465*np.sin(q0)*np.cos(q1 + q2 + q3) , -0.0823*np.sin(q4)*np.cos(q1 + q2 + q3)  + 0.09465*np.sin(q1 + q2 + q3) - 0.425*np.cos(q1) - 0.39225*np.cos(q1 + q2), 1, 0, 0], 
+                       [ 0.0823*np.sin(q4)*np.sin(q1 + q2 + q3)*np.cos(q0) + 0.39225*np.sin(q1 + q2)*np.cos(q0)  + 0.09465*np.cos(q0)*np.cos(q1 + q2 + q3), 0.0823*np.sin(q0)*np.sin(q4)*np.sin(q1 + q2 + q3) + 0.39225*np.sin(q0)*np.sin(q1 + q2)  + 0.09465*np.sin(q0)*np.cos(q1 + q2 + q3) , -0.0823*np.sin(q4)*np.cos(q1 + q2 + q3)  + 0.09465*np.sin(q1 + q2 + q3) - 0.39225*np.cos(q1 + q2), 1, 0, 0], 
+                       [(0.0823*np.sin(q4)*np.sin(q1 + q2 + q3)  + 0.09465*np.cos(q1 + q2 + q3))*np.cos(q0), (0.0823*np.sin(q4)*np.sin(q1 + q2 + q3) + 0.09465*np.cos(q1 + q2 + q3))*np.sin(q0), -0.0823*np.sin(q4)*np.cos(q1 + q2 + q3) + 0.09465*np.sin(q1 + q2 + q3), 1, 0, 0], 
+                       [-0.0823*(1.0*np.sin(q0) )*np.sin(q4) - 0.0823*np.cos(q0)*np.cos(q4)*np.cos(q1 + q2 + q3), 0.0823*( 1.0*np.cos(q0))*np.sin(q4) - 0.0823*np.sin(q0)*np.cos(q4)*np.cos(q1 + q2 + q3),  - 0.0823*np.sin(q1 + q2 + q3)*np.cos(q4), 0, 0, 1], 
                        [0, 0, 0, 1, 0, 0]])
     elif rob == 2:
-        J = np.matrix([[0.0922*sin(q0)*sin(q4)*cos(q1 + q2 + q3)  - 0.1157*sin(q0)*sin(q1 + q2 + q3) + 0.612*sin(q0)*cos(q1) + 0.5723*sin(q0)*cos(q1 + q2)  + 0.0922*cos(q0)*cos(q4) + 0.163941*cos(q0),  0.0922*sin(q0)*cos(q4) + 0.163941*sin(q0) - 0.0922*sin(q4)*cos(q0)*cos(q1 + q2 + q3)  + 0.1157*sin(q1 + q2 + q3)*cos(q0) - 0.612*cos(q0)*cos(q1) - 0.5723*cos(q0)*cos(q1 + q2), 0, 0, 0, 1], 
-                       [ 0.612*sin(q1)*cos(q0) + 0.0922*sin(q4)*sin(q1 + q2 + q3)*cos(q0) + 0.5723*sin(q1 + q2)*cos(q0)  + 0.1157*cos(q0)*cos(q1 + q2 + q3), 0.612*sin(q0)*sin(q1) + 0.0922*sin(q0)*sin(q4)*sin(q1 + q2 + q3) + 0.5723*sin(q0)*sin(q1 + q2)  + 0.1157*sin(q0)*cos(q1 + q2 + q3) , -0.0922*sin(q4)*cos(q1 + q2 + q3)  + 0.1157*sin(q1 + q2 + q3) - 0.612*cos(q1) - 0.5723*cos(q1 + q2), 1, 0, 0], 
-                       [ 0.0922*sin(q4)*sin(q1 + q2 + q3)*cos(q0) + 0.5723*sin(q1 + q2)*cos(q0) + 0.1157*cos(q0)*cos(q1 + q2 + q3), 0.0922*sin(q0)*sin(q4)*sin(q1 + q2 + q3) + 0.5723*sin(q0)*sin(q1 + q2)  + 0.1157*sin(q0)*cos(q1 + q2 + q3) , -0.0922*sin(q4)*cos(q1 + q2 + q3)  + 0.1157*sin(q1 + q2 + q3) - 0.5723*cos(q1 + q2), 1, 0, 0], 
-                       [(0.0922*sin(q4)*sin(q1 + q2 + q3)  + 0.1157*cos(q1 + q2 + q3))*cos(q0), (0.0922*sin(q4)*sin(q1 + q2 + q3)  + 0.1157*cos(q1 + q2 + q3))*sin(q0), -0.0922*sin(q4)*cos(q1 + q2 + q3)  + 0.1157*sin(q1 + q2 + q3), 1, 0, 0], 
-                       [-0.0922*(1.0*sin(q0) )*sin(q4) - 0.0922*cos(q0)*cos(q4)*cos(q1 + q2 + q3), 0.0922*( 1.0*cos(q0))*sin(q4) - 0.0922*sin(q0)*cos(q4)*cos(q1 + q2 + q3),  - 0.0922*sin(q1 + q2 + q3)*cos(q4), 0, 0, 1], 
+        J = np.matrix([[0.0922*np.sin(q0)*np.sin(q4)*np.cos(q1 + q2 + q3)  - 0.1157*np.sin(q0)*np.sin(q1 + q2 + q3) + 0.612*np.sin(q0)*np.cos(q1) + 0.5723*np.sin(q0)*np.cos(q1 + q2)  + 0.0922*np.cos(q0)*np.cos(q4) + 0.163941*np.cos(q0),  0.0922*np.sin(q0)*np.cos(q4) + 0.163941*np.sin(q0) - 0.0922*np.sin(q4)*np.cos(q0)*np.cos(q1 + q2 + q3)  + 0.1157*np.sin(q1 + q2 + q3)*np.cos(q0) - 0.612*np.cos(q0)*np.cos(q1) - 0.5723*np.cos(q0)*np.cos(q1 + q2), 0, 0, 0, 1], 
+                       [ 0.612*np.sin(q1)*np.cos(q0) + 0.0922*np.sin(q4)*np.sin(q1 + q2 + q3)*np.cos(q0) + 0.5723*np.sin(q1 + q2)*np.cos(q0)  + 0.1157*np.cos(q0)*np.cos(q1 + q2 + q3), 0.612*np.sin(q0)*np.sin(q1) + 0.0922*np.sin(q0)*np.sin(q4)*np.sin(q1 + q2 + q3) + 0.5723*np.sin(q0)*np.sin(q1 + q2)  + 0.1157*np.sin(q0)*np.cos(q1 + q2 + q3) , -0.0922*np.sin(q4)*np.cos(q1 + q2 + q3)  + 0.1157*np.sin(q1 + q2 + q3) - 0.612*np.cos(q1) - 0.5723*np.cos(q1 + q2), 1, 0, 0], 
+                       [ 0.0922*np.sin(q4)*np.sin(q1 + q2 + q3)*np.cos(q0) + 0.5723*np.sin(q1 + q2)*np.cos(q0) + 0.1157*np.cos(q0)*np.cos(q1 + q2 + q3), 0.0922*np.sin(q0)*np.sin(q4)*np.sin(q1 + q2 + q3) + 0.5723*np.sin(q0)*np.sin(q1 + q2)  + 0.1157*np.sin(q0)*np.cos(q1 + q2 + q3) , -0.0922*np.sin(q4)*np.cos(q1 + q2 + q3)  + 0.1157*np.sin(q1 + q2 + q3) - 0.5723*np.cos(q1 + q2), 1, 0, 0], 
+                       [(0.0922*np.sin(q4)*np.sin(q1 + q2 + q3)  + 0.1157*np.cos(q1 + q2 + q3))*np.cos(q0), (0.0922*np.sin(q4)*np.sin(q1 + q2 + q3)  + 0.1157*np.cos(q1 + q2 + q3))*np.sin(q0), -0.0922*np.sin(q4)*np.cos(q1 + q2 + q3)  + 0.1157*np.sin(q1 + q2 + q3), 1, 0, 0], 
+                       [-0.0922*(1.0*np.sin(q0) )*np.sin(q4) - 0.0922*np.cos(q0)*np.cos(q4)*np.cos(q1 + q2 + q3), 0.0922*( 1.0*np.cos(q0))*np.sin(q4) - 0.0922*np.sin(q0)*np.cos(q4)*np.cos(q1 + q2 + q3),  - 0.0922*np.sin(q1 + q2 + q3)*np.cos(q4), 0, 0, 1], 
                        [0, 0, 0, 1, 0, 0]])
     return J
 

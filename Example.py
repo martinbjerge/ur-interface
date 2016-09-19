@@ -1,10 +1,37 @@
 '''
-Created on 26. aug. 2016
+Python 3.x library to control an UR robot through its TCP/IP interfaces
+Copyright (C) 2016  Martin Huus Bjerge, Rope Robotics ApS, Denmark
 
-@author: MartinHuusBjerge
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
+and associated documentation files (the "Software"), to deal in the Software without restriction, 
+including without limitation the rights to use, copy, modify, merge, publish, distribute, 
+sublicense, and/or sell copies of the Software, and to permit persons to whom the Software 
+is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies 
+or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
+PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL "Rope Robotics ApS" BE LIABLE FOR ANY CLAIM, 
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of "Rope Robotics ApS" shall not be used 
+in advertising or otherwise to promote the sale, use or other dealings in this Software 
+without prior written authorization from "Rope Robotics ApS".
+
 '''
+__author__ = "Martin Huus Bjerge"
+__copyright__ = "Copyright 2016, Rope Robotics ApS, Denmark"
+__license__ = "MIT License"
+
 import URBasic
+import URplus
 import time
+
+#IP = '192.168.56.101'  #URSim - Running in Oracle VM VirtualBox  
+IP = '192.168.0.3'
 
 def ExampleDataLogging():
     logger = URBasic.dataLogging.DataLogging()
@@ -14,51 +41,109 @@ def ExampleDataLogging():
     logger.DemoData.info('Test entry in the Demo Data log')
 
 
-def ExampleRTDE(logger):
-    ip = '192.168.56.101'
-    #ip = '192.168.0.2'
-    rob = URBasic.rtde.RTDE(host=ip,conf_filename='rtde_configuration.xml', logger=logger)
+def ExampleRTDE():
+    rob = URBasic.rtde.RTDE(host=IP,conf_filename='rtde_configuration.xml')
+    time.sleep(10)
+    rob.close_rtde()
 
-    #rob.start()
-    time.sleep(60)
-    rob.close()
-
-def ExampleRTC(logger):
-    rob = URBasic.realTimeClient.RT_CLient('192.168.56.101', conf_filename='rtde_configuration.xml', logger=logger)
-    print('RTC Connection status: ' + str(rob.is_connected()))
+def ExampleRTC():
+    rob = URBasic.realTimeClient.RT_CLient(IP, rtde_conf_filename='rtde_configuration.xml')
+    print('RTC Connection status: ' + str(rob.is_rt_client_connected()))
     time.sleep(1)
-    t = time.time()
-    rob.send_program('''def myprg():
-    set_digital_out(0, True)
-    set_digital_out(1, True)
+    for a in range(2):
+        t = time.time()
+        rob.send_program('''def myprg():
+        set_digital_out(0, True)
+        set_digital_out(1, True)
 end 
 ''')
-    print(time.time()-t)
-    time.sleep(1)
-    t = time.time()
-    print(rob.send_program('set_digital_out(0, False)', wait=False))
-    print(time.time()-t)
-    rob.disconnect()
+        print(time.time()-t)
+        time.sleep(1)
+        t = time.time()
+        print(rob.send_program('set_digital_out(0, False)', wait=False))
+        print(time.time()-t)
+        time.sleep(5)
+    rob.close_rtc()
 
-def ExampleurScript(logger):
-    rob = URBasic.urScript.UrScript('192.168.56.101', rtde_conf_filename='rtde_configuration.xml', logger=logger)
-    rob.movej(q=[0.,-1.5,0., -1.5,0,0], a=1.2, v =0.9, t =0, r =0, wait=True)
-    rob.movej(pose=[0.5,0.4,0.4, 0,3.14,0], a=1.2, v =0.9, t =0, r =0, wait=True)
-    rob.servoj(q=[0.,-1.5,0., -1.5,0,0], t=5)
-    rob.movel(pose=[0.5,-0.4,0.4, 0,3.14,0], a=1.2, v =0.9, t =0, r =0, wait=True)
-    rob.force_mode(task_frame=[0., 0., 0.,  0., 0., 0.], selection_vector=[0,0,1,0,0,0], wrench=[0., 0., -20.,  0., 0., 0.], f_type=2, limits=[2, 2, 1.5, 1, 1, 1])
-    time.sleep(1)
-    rob.end_force_mode()
+def ExampleDbs():
+    dbs = URBasic.dashboard.DashBoard(IP)
+    for a in range(1):
+        dbs.ur_power_off()
+        time.sleep(2)
+        dbs.ur_robotmode()
+        dbs.wait_dbs()
+        if dbs.last_respond != 'Robotmode: RUNNING': #  'Robotmode: POWER_OFF': 
+            dbs.ur_power_on()
+            dbs.wait_dbs()
+            dbs.ur_brake_release()
+            dbs.wait_dbs()
+        dbs.ur_safetymode()
+        dbs.wait_dbs()
+        if dbs.last_respond != 'Safetymode: NORMAL':
+            dbs.ur_unlock_protective_stop()
+            dbs.wait_dbs()
+            dbs.ur_close_safety_popup()
+            dbs.wait_dbs()
+            dbs.ur_brake_release()
+            dbs.wait_dbs()
+    dbs.close_dbs()
+
+def ExampleurScript():
+    rob = URBasic.urScript.UrScript(IP, rtde_conf_filename='rtde_configuration.xml')
+    print('movej with joint specification')
+    if rob.movej(q=[0.,-1.5,0., -1.5,0,0], a=1.2, v =0.9, t =0, r =0, wait=True):
+        print('movej with pose specification')
+        if rob.movej(pose=[0.5,0.4,0.4, 0,3.14,0], a=1.2, v =0.9, t =0, r =0, wait=True):
+            print('movel with pose specification')
+            if rob.movel(pose=[0.5,-0.4,0.4, 0,3.14,0], a=1.2, v =0.9, t =0, r =0, wait=True):
+                print('forcs_mode')
+                if rob.force_mode(task_frame=[0., 0., 0.,  0., 0., 0.], selection_vector=[0,0,1,0,0,0], wrench=[0., 0., -20.,  0., 0., 0.], f_type=2, limits=[2, 2, 1.5, 1, 1, 1]):
+                    time.sleep(1)
+                    rob.end_force_mode()
+    rob.close_rtc()
+
+def ExampleurScriptExt():
+    rob = URBasic.urScriptExt.UrScriptExt(IP, rtde_conf_filename='rtde_configuration.xml')
+    print('movej with joint specification')
+    if not rob.movej(q=[0.,-1.5,-1.5, -1.5,1.5,0], a=1.2, v =0.9, t =0, r =0, wait=True):
+        rob.reset_error()
+        
+    print('movej with pose specification')
+    if not rob.movej(pose=[0.3,0.3,0.6, 0,3.14,0], a=1.2, v =0.9, t =0, r =0, wait=True):
+        rob.reset_error()
+
+    print('servoj with joint specification')
+    if not rob.servoj(q=[0.,-1.5,-1.5, -1.5,1.5,0], t=3):
+        rob.reset_error()
+
+    print('movel with pose specification')
+    if not rob.movel(pose=[0.5,0.4,0.4, 0,3.14,0], a=1.2, v =0.9, t =0, r =0, wait=True):
+        rob.reset_error()
+
+    print('forcs_mode')
+    if rob.force_mode(task_frame=[0., 0., 0.,  0., 0., 0.], selection_vector=[0,0,1,0,0,0], wrench=[0., 0., -20.,  0., 0., 0.], f_type=2, limits=[2, 2, 1.5, 1, 1, 1]):
+        rob.end_force_mode()
+
+    rob.close_urScriptExt()
+
+
+def ExampleFT_sensor():
+    logger = URBasic.dataLogging.DataLogging()
+    rob = URBasic.urScriptExt.UrScriptExt(IP, rtde_conf_filename='rtde_configuration.xml', logger=logger)
+    rob.ft_demon = URplus.forceTorqueSensor.ForceTorqueSensor(IP, logger=logger)
+    time.sleep(4)
+    rob.ft_demon.close_ft() 
+    rob.close_urScriptExt()
     
-    rob.disconnect()
-
+    
 
 
 if __name__ == '__main__':
-    #ExampleDataLogging()
-    logger = URBasic.dataLogging.DataLogging()
-    #ExampleRTDE(logger=logger)
-    #ExampleRTC(logger)
-    ExampleurScript(logger)
-    
+    #ExampleDataLogging()   
+    #ExampleRTDE()
+    #ExampleRTC()
+    #ExampleDbs()
+    #ExampleurScript()
+    #ExampleurScriptExt()
+    ExampleFT_sensor()
     
