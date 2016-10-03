@@ -55,8 +55,15 @@ class ConnectionState:
     STARTED = 4
     
 
+class Singleton(type):
+    _instances = {}
+    def __call__(self, *args, **kwargs):
+        if self not in self._instances:
+            self._instances[self] = super(Singleton, self).__call__(*args, **kwargs)
+        return self._instances[self]
 
-class RTDE(threading.Thread):
+
+class RTDE(threading.Thread): #, metaclass=Singleton
     '''
     Interface to UR robot Real Time Data Exchange interface.
     For more detailes see this site:
@@ -75,10 +82,11 @@ class RTDE(threading.Thread):
     '''
 
 
-    def __init__(self, host='localhost', conf_filename='rtde_configuration.xml', logger = URBasic.dataLogging.DataLogging()):
+    def __init__(self, host='localhost', conf_filename='rtde_configuration.xml'):
         '''
         Constructor see class description for more info.
         '''
+        logger = URBasic.dataLogging.DataLogging()
         name = logger.AddEventLogging(__name__)        
         self._logger = logger.__dict__[name]
         self.__host = host

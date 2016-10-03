@@ -57,14 +57,15 @@ class UrScriptExt(URBasic.urScript.UrScript):
     '''
 
 
-    def __init__(self, host='localhost', rtde_conf_filename='rtde_configuration.xml', logger = URBasic.dataLogging.DataLogging()):
+    def __init__(self, host='localhost', rtde_conf_filename='rtde_configuration.xml'):
         '''
         Constructor see class description for more info.
         '''
-        super().__init__(host, rtde_conf_filename, logger)        
+        super().__init__(host, rtde_conf_filename)        
+        logger = URBasic.dataLogging.DataLogging()
         name = logger.AddEventLogging(__name__)        
         self.__logger = logger.__dict__[name]
-        self.dbh_demon = URBasic.dashboard.DashBoard(host,logger)
+        self.dbh_demon = URBasic.dashboard.DashBoard(host)
         self.__logger.info('Init done')
         
     def close_urScriptExt(self):

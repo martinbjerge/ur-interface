@@ -43,19 +43,27 @@ class ConnectionState:
     PAUSED = 3
     STARTED = 4
 
+class Singleton(type):
+    _instances = {}
+    def __call__(self, *args, **kwargs):
+        if self not in self._instances:
+            self._instances[self] = super(Singleton, self).__call__(*args, **kwargs)
+        return self._instances[self]
 
-class ForceTorqueSensor(threading.Thread):
+
+class ForceTorqueSensor(threading.Thread, metaclass=Singleton):
     '''
     Interface to the Robotiq FT 300 Sensor
     http://support.robotiq.com/display/FTS2
     '''
 
 
-    def __init__(self, host='localhost', logger = URBasic.dataLogging.DataLogging()):
+    def __init__(self, host='localhost'):
         '''
         Constructor
         '''     
         self.last_respond = None
+        logger = URBasic.dataLogging.DataLogging()
         name = logger.AddEventLogging(__name__)        
         self._logger = logger.__dict__[name]
         self.__host = host
@@ -208,7 +216,8 @@ class ForceTorqueSensorLogger(threading.Thread):
  
     def run(self):
         self.__stop_event = False
+        t = time.time()
         while not self.__stop_event:
             if self.__ftDemon.wait_ft():
-                self.__dataLogger.info(('ForceTorqueSensor;NA;%s;%s;%s;%s;%s;%s'), *self.__ftDemon.last_respond)
+                self.__dataLogger.info(('ForceTorqueSensor;%s;%s;%s;%s;%s;%s;%s'), (time.time()-t), *self.__ftDemon.last_respond)
         

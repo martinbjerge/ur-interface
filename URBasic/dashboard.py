@@ -42,8 +42,15 @@ class ConnectionState:
     PAUSED = 3
     STARTED = 4
 
+class Singleton(type):
+    _instances = {}
+    def __call__(self, *args, **kwargs):
+        if self not in self._instances:
+            self._instances[self] = super(Singleton, self).__call__(*args, **kwargs)
+        return self._instances[self]
 
-class DashBoard(threading.Thread): 
+
+class DashBoard(threading.Thread, metaclass=Singleton): 
     '''
     A Universal Robot can be controlled from remote by sending simple commands to the 
     GUI over a TCP/IP socket. This interface is called the "DashBoard server". 
@@ -64,10 +71,11 @@ class DashBoard(threading.Thread):
     
     '''
 
-    def __init__(self, host='localhost', logger = URBasic.dataLogging.DataLogging()):
+    def __init__(self, host='localhost'):
         '''
         Constructor see class description for more info.
         '''
+        logger = URBasic.dataLogging.DataLogging()
         name = logger.AddEventLogging(__name__)        
         self._logger = logger.__dict__[name]
         self.__host = host

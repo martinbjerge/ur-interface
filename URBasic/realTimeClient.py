@@ -43,7 +43,15 @@ class ConnectionState:
     STARTED = 4
 
 
-class RT_CLient(URBasic.rtde.RTDE):
+class Singleton(type):
+    _instances = {}
+    def __call__(self, *args, **kwargs):
+        if self not in self._instances:
+            self._instances[self] = super(Singleton, self).__call__(*args, **kwargs)
+        return self._instances[self]
+
+
+class RT_CLient(URBasic.rtde.RTDE, metaclass=Singleton):
     '''
     Interface to UR robot Real Time Client interface.
     For more detailes see this site:
@@ -68,11 +76,12 @@ class RT_CLient(URBasic.rtde.RTDE):
     '''
 
 
-    def __init__(self, host='localhost', rtde_conf_filename='rtde_configuration.xml', logger = URBasic.dataLogging.DataLogging()):
+    def __init__(self, host='localhost', rtde_conf_filename='rtde_configuration.xml'):
         '''
         Constructor see class description for more info.
         '''
-        super().__init__(host, rtde_conf_filename, logger) 
+        super().__init__(host, rtde_conf_filename) 
+        logger = URBasic.dataLogging.DataLogging()
         name = logger.AddEventLogging(__name__)        
         self.__logger = logger.__dict__[name]
         self.__host = host

@@ -31,7 +31,9 @@ import URplus
 import time
 
 #IP = '192.168.56.101'  #URSim - Running in Oracle VM VirtualBox  
-IP = '192.168.0.3'
+IP = '192.168.0.2'
+acc = 0.9
+vel = 0.9
 
 def ExampleDataLogging():
     logger = URBasic.dataLogging.DataLogging()
@@ -91,11 +93,11 @@ def ExampleDbs():
 def ExampleurScript():
     rob = URBasic.urScript.UrScript(IP, rtde_conf_filename='rtde_configuration.xml')
     print('movej with joint specification')
-    if rob.movej(q=[0.,-1.5,0., -1.5,0,0], a=1.2, v =0.9, t =0, r =0, wait=True):
+    if rob.movej(q=[0.,-1.5,0., -1.5,0,0], a=1.2, v=vel, t =0, r =0, wait=True):
         print('movej with pose specification')
-        if rob.movej(pose=[0.5,0.4,0.4, 0,3.14,0], a=1.2, v =0.9, t =0, r =0, wait=True):
+        if rob.movej(pose=[0.5,0.4,0.4, 0,3.14,0], a=1.2, v=vel, t =0, r =0, wait=True):
             print('movel with pose specification')
-            if rob.movel(pose=[0.5,-0.4,0.4, 0,3.14,0], a=1.2, v =0.9, t =0, r =0, wait=True):
+            if rob.movel(pose=[0.5,-0.4,0.4, 0,3.14,0], a=1.2, v=vel, t =0, r =0, wait=True):
                 print('forcs_mode')
                 if rob.force_mode(task_frame=[0., 0., 0.,  0., 0., 0.], selection_vector=[0,0,1,0,0,0], wrench=[0., 0., -20.,  0., 0., 0.], f_type=2, limits=[2, 2, 1.5, 1, 1, 1]):
                     time.sleep(1)
@@ -105,11 +107,11 @@ def ExampleurScript():
 def ExampleurScriptExt():
     rob = URBasic.urScriptExt.UrScriptExt(IP, rtde_conf_filename='rtde_configuration.xml')
     print('movej with joint specification')
-    if not rob.movej(q=[0.,-1.5,-1.5, -1.5,1.5,0], a=1.2, v =0.9, t =0, r =0, wait=True):
+    if not rob.movej(q=[0.,-1.5,-1.5, -1.5,1.5,0], a=1.2, v=vel, t =0, r =0, wait=True):
         rob.reset_error()
         
     print('movej with pose specification')
-    if not rob.movej(pose=[0.3,0.3,0.6, 0,3.14,0], a=1.2, v =0.9, t =0, r =0, wait=True):
+    if not rob.movej(pose=[0.3,0.3,0.6, 0,3.14,0], a=1.2, v=vel, t =0, r =0, wait=True):
         rob.reset_error()
 
     print('servoj with joint specification')
@@ -117,20 +119,19 @@ def ExampleurScriptExt():
         rob.reset_error()
 
     print('movel with pose specification')
-    if not rob.movel(pose=[0.5,0.4,0.4, 0,3.14,0], a=1.2, v =0.9, t =0, r =0, wait=True):
+    if not rob.movel(pose=[0.5,0.4,0.4, 0,3.14,0], a=1.2, v=vel, t =0, r =0, wait=True):
         rob.reset_error()
 
-    print('forcs_mode')
-    if rob.force_mode(task_frame=[0., 0., 0.,  0., 0., 0.], selection_vector=[0,0,1,0,0,0], wrench=[0., 0., -20.,  0., 0., 0.], f_type=2, limits=[2, 2, 1.5, 1, 1, 1]):
-        rob.end_force_mode()
+    #print('forcs_mode')
+    #if rob.force_mode(task_frame=[0., 0., 0.,  0., 0., 0.], selection_vector=[0,0,1,0,0,0], wrench=[0., 0., 20.,  0., 0., 0.], f_type=2, limits=[2, 2, 1.5, 1, 1, 1]):
+    #    rob.end_force_mode()
 
     rob.close_urScriptExt()
 
 
 def ExampleFT_sensor():
-    logger = URBasic.dataLogging.DataLogging()
-    rob = URBasic.urScriptExt.UrScriptExt(IP, rtde_conf_filename='rtde_configuration.xml', logger=logger)
-    rob.ft_demon = URplus.forceTorqueSensor.ForceTorqueSensor(IP, logger=logger)
+    rob = URBasic.urScriptExt.UrScriptExt(IP, rtde_conf_filename='rtde_configuration.xml')
+    rob.ft_demon = URplus.forceTorqueSensor.ForceTorqueSensor(IP)
     time.sleep(4)
     rob.ft_demon.close_ft() 
     rob.close_urScriptExt()

@@ -53,11 +53,12 @@ class UrScript(URBasic.realTimeClient.RT_CLient):
     '''
 
 
-    def __init__(self, host='localhost', rtde_conf_filename='rtde_configuration.xml', logger = URBasic.dataLogging.DataLogging()):
+    def __init__(self, host='localhost', rtde_conf_filename='rtde_configuration.xml'):
         '''
         Constructor see class description for more info.
         '''
-        super().__init__(host, rtde_conf_filename, logger)        
+        super().__init__(host, rtde_conf_filename)
+        logger = URBasic.dataLogging.DataLogging()        
         name = logger.AddEventLogging(__name__)        
         self.__logger = logger.__dict__[name]
         self.__logger.info('Init done')
@@ -202,7 +203,7 @@ end'''
         prg = 'servoc(p{pose}, {a}, {v}, {r})'
         return self.send_program(prg.format(**locals()), wait)
 
-    def servoj(self, q, t =0.008, lookahead_time=0.1, gain=300, wait=True):
+    def servoj(self, q, t =0.008, lookahead_time=0.1, gain=100, wait=True):
         '''
         Servo to position (linear in joint-space)
         Servo function used for online control of the robot. The lookahead time
@@ -217,7 +218,7 @@ end'''
         lookahead_time: time [S], range [0.03,0.2] smoothens the trajectory with this lookahead time
         gain:           proportional gain for following target position, range [100,2000]
         '''
-        prg = 'servoj({q}, 0, 0, {t}, {lookahead_time}, {gain})'
+        prg = 'servoj({q}, 0.5, 0.5, {t}, {lookahead_time}, {gain})'
         return self.send_program(prg.format(**locals()), wait)
         
     def speedj(self, qd, a, t , wait=True):
