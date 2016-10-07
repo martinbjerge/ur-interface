@@ -33,6 +33,7 @@ import select
 import numpy as np
 import xml.etree.ElementTree as ET
 import time
+import os.path
 
 DEFAULT_TIMEOUT = 1.0
 
@@ -294,8 +295,11 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         success (boolean)
         '''
         
-        if variables is None:        
-            tree = ET.parse(self.__conf_filename)
+        if variables is None: 
+            if not os.path.isfile(self.__conf_filename):        
+                self._logger.error("Configuration file don't exist : " + self.__conf_filename)
+                return False
+            tree = ET.parse(self.__conf_filename)      
             root = tree.getroot()
 
             #Setup data to be recived
@@ -421,6 +425,7 @@ class RTDE(threading.Thread): #, metaclass=Singleton
                     return None
             if self.has_get_rtde_data_attr(variable_name):
                 return np.array(self._data.__dict__[variable_name])
+            self._logger.warning('"get_rtde_data" tried to access non existing data tag: ' + variable_name)
         return None
 
     def has_set_rtde_data_attr(self,name):

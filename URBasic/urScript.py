@@ -62,6 +62,8 @@ class UrScript(URBasic.realTimeClient.RT_CLient):
         name = logger.AddEventLogging(__name__)        
         self.__logger = logger.__dict__[name]
         self.__logger.info('Init done')
+
+#############   Module motion   ###############
         
     def movej(self, q=None, a=1.4, v =1.05, t =0, r =0, wait=True, pose=None):
         '''
@@ -473,6 +475,7 @@ end'''
         prg = 'set_pos({q})'
         return self.send_program(prg.format(**locals()), wait)
 
+####################   Module internals    ####################
     
     def force(self):
         '''
@@ -483,7 +486,7 @@ end'''
         Return Value
         The force in Newtons (ﬂoat)
         '''
-
+        return None
 
         
     def get_actual_joint_positions(self):
@@ -499,6 +502,7 @@ end'''
         The current actual joint angular position vector in rad : [Base,
         Shoulder, Elbow, Wrist1, Wrist2, Wrist3]
         '''
+        return None
         
     def get_actual_joint_speeds(self):
         '''
@@ -513,8 +517,9 @@ end'''
         The current actual joint angular velocity vector in rad/s:
         [Base, Shoulder, Elbow, Wrist1, Wrist2, Wrist3]
         '''
+        return None
         
-    def get_actual_tcp_pose(self):
+    def get_actual_tcp_pose(self, wait=True):
         '''
         Returns the current measured tool pose
         
@@ -525,6 +530,7 @@ end'''
         Return Value
         The current actual TCP vector : ([X, Y, Z, Rx, Ry, Rz])
         '''
+        return self.get_rtde_data('actual_TCP_pose', wait)
         
     def get_actual_tcp_speed(self):
         '''
@@ -537,6 +543,7 @@ end'''
         Return Value
         The current actual TCP velocity vector; ([X, Y, Z, Rx, Ry, Rz])
         '''
+        return None
         
     def get_actual_tool_ﬂange_pose(self):
         '''
@@ -552,6 +559,7 @@ end'''
         
         Note: See get actual tcp pose for the actual 6d pose including TCP offset.
         '''
+        return None
         
     def get_controller_temp(self):
         '''
@@ -562,3 +570,1137 @@ end'''
         Return Value:
         A temperature in degrees Celcius (ﬂoat)
         '''
+        return None
+        
+    def get_inverse_kin(self, x, qnear =[-1.6, -1.7, -2.2, -0.8, 1.6, 0.0], maxPositionError =0.0001, maxOrientationError =0.0001):
+        '''
+        Inverse kinematic transformation (tool space -> joint space). 
+        Solution closest to current joint positions is returned, unless qnear deﬁnes one.
+        
+        Parameters:
+        x:                   tool pose (spatial vector)
+        qnear:               joint positions to select solution. 
+                             Optional.
+        maxPositionError:    Deﬁne the max allowed position error. 
+                             Optional.
+        maxOrientationError: Deﬁne the max allowed orientation error. 
+                             Optional.
+        
+        Return Value:
+        joint positions        
+        '''
+        return None
+
+    def get_joint_temp(self,j):
+        '''
+        Returns the temperature of joint j
+        
+        The temperature of the joint house of joint j, counting from zero. j=0 is
+        the base joint, and j=5 is the last joint before the tool ﬂange.
+        
+        Parameters:
+        j: The joint number (int)
+        
+        Return Value:
+        A temperature in degrees Celcius (ﬂoat)
+        '''
+        return None
+    
+    def get_joint_torques(self):
+        '''
+        Returns the torques of all joints
+        
+        The torque on the joints, corrected by the torque
+        robot itself (gravity, friction, etc.), returned as
+        
+        Return Value:
+        The joint torque vector in ; ([ﬂoat])
+        '''
+        return None
+        
+    def get_target_joint_positions(self):
+        '''
+        Returns the desired angular position of all joints
+        
+        The angular target positions are expressed in radians and returned as a
+        vector of length 6. Note that the output might differ from the output of
+        get actual joint positions(), especially durring acceleration and heavy
+        loads.
+        
+        Return Value:
+        The current target joint angular position vector in rad: [Base,
+        Shoulder, Elbow, Wrist1, Wrist2, Wrist3]
+        '''
+        return None
+    
+    def get_target_joint_speeds(self):
+        '''
+        Returns the desired angular velocities of all joints
+        
+        The angular target velocities are expressed in radians pr. second and
+        returned as a vector of length 6. Note that the output might differ from
+        the output of get actual joint speeds(), especially durring acceleration
+        and heavy loads.
+        
+        Return Value:
+        The current target joint angular velocity vector in rad/s:
+        [Base, Shoulder, Elbow, Wrist1, Wrist2, Wrist3]
+        '''
+        return None
+    
+    def get_target_tcp_pose(self):
+        '''
+        Returns the current target tool pose
+        
+        Returns the 6d pose representing the tool position and orientation
+        speciﬁed in the base frame. The calculation of this pose is  based on
+        the current target joint positions.
+        
+        Return Value:
+        The current target TCP vector; ([X, Y, Z, Rx, Ry, Rz])
+        '''
+        return None
+    
+    def get_target_tcp_speed(self):
+        '''
+        Returns the current target TCP speed
+        
+        The desired speed of the TCP returned in a pose structure. The ﬁrst
+        three values are the cartesian speeds along x,y,z, and the last three
+        deﬁne the current rotation axis, rx,ry,rz, and the length |rz,ry,rz| deﬁnes
+        the angular velocity in radians/s.
+        
+        Return Value:
+        The TCP speed; (pose)
+        '''
+        return None
+    
+    def get_tcp_force(self):
+        '''
+        Returns the wrench (Force/Torque vector) at the TCP
+        
+        The external wrench is computed based on the error between the joint
+        torques required to stay on the trajectory and the expected joint
+        torques. The function returns ”p[Fx (N), Fy(N), Fz(N), TRx (Nm), TRy (Nm),
+        TRz (Nm)]”. where Fx, Fy, and Fz are the forces in the axes of the robot
+        base coordinate system measured in Newtons, and TRx, TRy, and TRz
+        are the torques around these axes measured in Newton times Meters.
+        
+        Return Value:
+        the wrench (pose)
+        '''
+        return None
+        
+    def get_tool_accelerometer_reading(self):
+        '''
+        Returns the current reading of the tool accelerometer as a
+        three-dimensional vector.
+        
+        The accelerometer axes are aligned with the tool coordinates, and
+        pointing an axis upwards results in a positive reading.
+        
+        Return Value:
+        X, Y, and Z composant of the measured acceleration in
+        SI-units (m/sˆ2).
+        '''
+        return None
+        
+    def get_tool_current(self):
+        '''
+        Returns the tool current
+        
+        The tool current consumption measured in ampere.
+        
+        Return Value:
+        The tool current in ampere.
+        '''
+        return None
+    
+    def is_steady(self):
+        '''
+        Checks if robot is fully at rest.
+        
+        True when the robot is fully at rest, and ready to accept higher external
+        forces and torques, such as from industrial screwdrivers. It is useful in
+        combination with the GUI’s wait node, before starting the screwdriver
+        or other actuators inﬂuencing the position of the robot.
+        
+        Note: This function will always return false in modes other than the
+        standard position mode, e.g. false in force and teach mode.
+        
+        Return Value:
+        True when the robot is fully at rest. Returns False otherwise
+        (bool)
+        '''
+        return None
+    
+    def is_within_safety_limits(self, pose):
+        '''
+        Checks if the given pose is reachable and within the current safety
+        limits of the robot.
+        
+        This check considers joint limits (if the target pose is speciﬁed as joint
+        positions), safety planes limits, TCP orientation deviation limits and
+        range of the robot. If a solution is found when applying the inverse
+        kinematics to the given target TCP pose, this pose is considered
+        reachable.
+        
+        Parameters:
+        pose: Target pose (which can also be speciﬁed as joint positions)
+        
+        Return Value:
+        True if within limits, false otherwise (bool)
+        '''
+        return None
+    
+    def popup(self, s, title='Popup', warning=False, error =False):
+        '''
+        Display popup on GUI
+        
+        Display message in popup window on GUI.
+        
+        Parameters:
+        s:       message string
+        title:   title string
+        warning: warning message?
+        error:   error message?
+        '''
+        return None
+    
+    def powerdown(self):
+        '''
+        Shutdown the robot, and power off the robot and controller.
+        '''
+        return None
+    
+    def set_gravity(self, d):
+        '''
+        Set the direction of the acceleration experienced by the robot. When
+        the robot mounting is ﬁxed, this corresponds to an accleration of g
+        away from the earth’s centre.
+        
+        >>> set gravity([0, 9.82*sin(theta), 9.82*cos(theta)])
+        
+        will set the acceleration for a robot that is rotated ”theta” radians
+        around the x-axis of the robot base coordinate system
+        
+        Parameters:
+        d: 3D vector, describing the direction of the gravity, relative to the base of the robot.
+        '''
+        return None
+    
+    def set_payload(self, m, CoG):
+        '''
+        Set payload mass and center of gravity
+        
+        Alternatively one could use set payload mass and set payload cog.
+        
+        Sets the mass and center of gravity (abbr. CoG) of the payload.
+        
+        This function must be called, when the payload weight or weight
+        distribution changes - i.e when the robot picks up or puts down a
+        heavy workpiece.
+        
+        The CoG argument is optional - if not provided, the Tool Center Point
+        (TCP) will be used as the Center of Gravity (CoG). If the CoG argument
+        is omitted, later calls to set tcp(pose) will change CoG to the new TCP.
+        
+        The CoG is speciﬁed as a vector, [CoGx, CoGy, CoGz], displacement,
+        from the toolmount.
+        
+        Parameters:
+        m:   mass in kilograms
+        CoG: Center of Gravity: [CoGx, CoGy, CoGz] in meters.
+             Optional.
+        '''
+        return None
+    
+    def set_payload_cog(self, CoG):
+        '''
+        Set center of gravity
+        
+        See also set payload.
+        
+        Sets center of gravity (abbr. CoG) of the payload.
+        
+        This function must be called, when the weight distribution changes - i.e
+        when the robot picks up or puts down a heavy workpiece.
+        
+        The CoG is speciﬁed as a vector, [CoGx, CoGy, CoGz], displacement,
+        from the toolmount.
+        
+        Parameters:
+        CoG: Center of Gravity: [CoGx, CoGy, CoGz] in meters.
+        '''
+        return None
+        
+    def set_payload_mass(self, m):
+        '''
+        Set payload mass
+        
+        See also set payload.
+        
+        Sets the mass of the payload.
+        
+        This function must be called, when the payload weight changes - i.e
+        when the robot picks up or puts down a heavy workpiece.
+        
+        Parameters:
+        m: mass in kilograms
+        '''
+        return None
+    
+    def set_tcp(self, pose):
+        '''
+        Set the Tool Center Point
+        
+        Sets the transformation from the output ﬂange coordinate system to
+        the TCP as a pose.
+        
+        Parameters:
+        pose: A pose describing the transformation.
+        '''
+        return None
+    
+    def sleep(self, t):
+        '''
+        Sleep for an amount of time
+        
+        Parameters:
+        t: time [s]
+        '''
+        return None
+    
+    def sync(self):
+        '''
+        Uses up the remaining ”physical” time a thread has in the current
+        frame.
+        '''
+        return None
+    
+    def textmsg(self, s1, s2=''):
+        '''
+        Send text message to log
+        
+        Send message with s1 and s2 concatenated to be shown on the GUI
+        log-tab
+        Parameters
+        s1: message string, variables of other types (int, bool poses
+        etc.) can also be sent
+        s2: message string, variables of other types (int, bool poses
+        etc.) can also be sent
+        '''
+        return None
+    
+############    Module urmath    #################        
+
+
+############    Module interfaces  #################
+        
+    def get_conﬁgurable_digital_in(self, n):
+        '''
+        Get conﬁgurable digital input signal level
+        
+        See also get standard digital in and get tool digital in.
+        
+        Parameters:
+        n: The number (id) of the input, integer: [0:7]
+        
+        Return Value:
+        boolean, The signal level. 
+        '''
+        return None
+        
+    def get_conﬁgurable_digital_out(self, n):
+        '''
+        Get conﬁgurable digital output signal level
+        
+        See also get standard digital out and get tool digital out.
+        
+        Parameters:
+        n: The number (id) of the output, integer: [0:7]
+        
+        Return Value:
+        boolean, The signal level.
+        '''
+        return None
+    
+    def get_euromap_input(self, port_number):
+        '''
+        Reads the current value of a speciﬁc Euromap67 input signal. See
+        http://universal-robots.com/support for signal speciﬁcations.
+        
+        >>> var = get euromap input(3)
+        
+        Parameters:
+        port number: An integer specifying one of the available
+        Euromap67 input signals.
+        
+        Return Value:
+        A boolean, either True or False
+        '''
+        return None
+        
+    def get_euromap_output(self, port_number):
+        '''
+        Reads the current value of a speciﬁc Euromap67 output signal. This
+        means the value that is sent from the robot to the injection moulding
+        machine. See http://universal-robots.com/support for signal
+        speciﬁcations.
+        
+        >>> var = get euromap output(3)
+        
+        Parameters:
+        port number: An integer specifying one of the available
+        Euromap67 output signals.
+        
+        Return Value:
+        A boolean, either True or False
+        '''
+        return None
+        
+    def get_ﬂag(self, n):
+        '''
+        Flags behave like internal digital outputs. The keep information
+        between program runs.
+        Parameters
+        n: The number (id) of the ﬂag, intereger: [0:32]
+        Return Value
+        Boolean, The stored bit.
+        '''
+        return None
+        
+    def get_standard_analog_in(self, n):
+        '''
+        Get standard analog input signal level
+        
+        See also get tool analog in.
+        
+        Parameters:
+        n: The number (id) of the input, integer: [0:1]
+        
+        Return Value:
+        boolean, The signal level.
+        '''
+        return None
+    
+    def get_standard_analog_out(self, n):
+        '''
+        Get standard analog output level
+        
+        Parameters:
+        n: The number (id) of the input, integer: [0:1]
+        
+        Return Value:
+        ﬂoat, The signal level [0;1]
+        '''
+        return None
+        
+    def get_standard_digital_in(self, n, wait=True):
+        '''
+        Get standard digital input signal level
+        
+        See also get configurable digital in and get tool digital in.
+        
+        Parameters:
+        n: The number (id) of the input, integer: [0:7]
+        
+        Return Value:
+        boolean, The signal level.
+        '''
+        
+        iobit = self.get_rtde_data('actual_digital_output_bits', wait)
+        if iobit is None:
+            return None
+        
+        if iobit & (1 << n):
+            return True
+        
+        return False
+
+        
+    def get_standard_digital_out(self, n):
+        '''
+        Get standard digital output signal level
+        
+        See also get configurable digital out and get tool digital out.
+        
+        Parameters:
+        n: The number (id) of the input, integer: [0:7]
+        
+        Return Value:
+        boolean, The signal level.
+        '''
+        return None
+    
+    def get_tool_analog_in(self, n):
+        '''
+        Get tool analog input level
+        
+        See also get standard analog in.
+        
+        Parameters:
+        n: The number (id) of the input, integer: [0:1]
+        
+        Return Value:
+        ﬂoat, The signal level [0,1]
+        '''
+        return None
+    
+    def get_tool_digital_in(self, n):
+        '''
+        Get tool digital input signal level
+        
+        See also get configurable digital in and
+        get standard digital in.
+        
+        Parameters:
+        n: The number (id) of the input, integer: [0:1]
+        
+        Return Value:
+        boolean, The signal level.
+        '''
+        return None
+    
+    def get_tool_digital_out(self, n):
+        '''
+        Get tool digital output signal level
+        
+        See also get standard digital out and
+        get configurable digital out.
+        
+        Parameters:
+        n: The number (id) of the output, integer: [0:1]
+        
+        Return Value:
+        boolean, The signal level.
+        '''
+        return None
+    
+    def modbus_add_signal(self, IP, slave_number, signal_address, signal_type, signal_name):
+        '''
+        Adds a new modbus signal for the controller to supervise. Expects no
+        response.
+        
+        >>> modbus add signal("172.140.17.11", 255, 5, 1, "output1")
+        Parameters:
+        IP:             A string specifying the IP address of the modbus unit 
+                        to which the modbus signal is connected.
+                        
+        slave_number:   An integer normally not used and set to 255, but is a 
+                        free choice between 0 and 255.
+                        
+        signal_address: An integer specifying the address of the either the coil 
+                        or the register that this new signal should reﬂect. 
+                        Consult the conﬁguration of the modbus unit for this information.
+        
+        signal_type:    An integer specifying the type of signal to add. 
+                        0 = digital input, 1 = digital output, 
+                        2 = register input and 3 = register output.
+                        
+        signal_name:    A string uniquely identifying the signal. 
+                        If a string is supplied which is equal to an already added signal, 
+                        the new signal will replace the old one.
+        '''
+        return None
+    
+    def modbus_delete_signal(self, signal_name):
+        '''
+        Deletes the signal identiﬁed by the supplied signal name.
+        
+        >>> modbus delete signal("output1")
+        
+        Parameters:
+        signal_name: A string equal to the name of the signal that should be deleted.
+        '''
+        return None
+    
+    def modbus_get_signal_status(self, signal_name, is_secondary_program):
+        '''
+        Reads the current value of a speciﬁc signal.
+        
+        >>> modbus get signal status("output1",False)
+        
+        Parameters:
+        signal name:          A string equal to the name of the signal for which 
+                              the value should be gotten.
+        
+        is_secondary_program: A boolean for interal use only.
+                              Must be set to False.
+        
+        Return Value:
+        An integer or a boolean. For digital signals: True or False. For
+        register signals: The register value expressed as an unsigned
+        integer.
+        '''
+        return None
+    
+    def modbus_send_custom_command(self, IP, slave_number, function_code, data):
+        '''
+        Sends a command speciﬁed by the user to the modbus unit located
+        on the speciﬁed IP address. Cannot be used to request data, since the
+        response will not be received. The user is responsible for supplying data
+        which is meaningful to the supplied function code. The builtin function
+        takes care of constructing the modbus frame, so the user should not
+        be concerned with the length of the command.
+        
+        >>> modbus send custom command("172.140.17.11",103,6,[17,32,2,88])
+        
+        The above example sets the watchdog timeout on a Beckhoff BK9050
+        to 600 ms. That is done using the modbus function code 6 (preset single
+        register) and then supplying the register address in the ﬁrst two bytes of
+        the data array ([17,32] = [0x1120]) and the desired register content in
+        the last two bytes ([2,88] = [0x0258] = dec 600).
+        
+        Parameters:
+        IP:            A string specifying the IP address locating the modbus 
+                       unit to which the custom command should be send.
+        
+        slave_number:  An integer specifying the slave number to use for the custom command.
+        
+        function_code: An integer specifying the function code for the custom command.
+        
+        data:          An array of integers in which each entry must be a valid byte (0-255) value.
+        '''
+        return None
+    
+    def modbus_set_output_register(self, signal_name, register_value, is_secondary_program):
+        '''
+        Sets the output register signal identiﬁed by the given name to the given
+        value.
+        
+        >>> modbus set output register("output1",300,False)
+        
+        Parameters:
+        signal_name:          A string identifying an output register signal that in advance has been added.
+        register_value:       An integer which must be a valid word (0-65535) value.
+        is_secondary_program: A boolean for interal use only. Must be set to False.
+        '''
+        return None
+        
+    def modbus_set_output_signal(self, signal_name, digital_value, is_secondary_program):
+        '''
+        Sets the output digital signal identiﬁed by the given name to the given
+        value.
+        
+        >>> modbus set output signal("output2",True,False)
+        
+        Parameters:
+        signal_name:          A string identifying an output digital signal that in advance has been added.
+        digital_value:        A boolean to which value the signal will be set.
+        is_secondary_program: A boolean for interal use only. Must be set to False.
+        '''
+        return None
+        
+    def modbus_set_runstate_dependent_choice(self, signal_name, runstate_choice):
+        '''
+        Sets whether an output signal must preserve its state from a program,
+        or it must be set either high or low when a program is not running.
+        
+        >>> modbus set runstate dependent choice("output2",1)
+        
+        Parameters:
+        signal_name:     A string identifying an output digital signal that in advance has been added.
+        runstate_choice: An integer: 0 = preserve program state, 1 = set low when a program is not running, 2 = set high when a program is not running.
+        '''
+        return None
+        
+    def modbus_set_signal_update_frequency(self, signal_name, update_frequency):
+        '''
+        Sets the frequency with which the robot will send requests to the
+        Modbus controller to either read or write the signal value.
+        
+        >>> modbus set signal update frequency("output2",20)
+        
+        Parameters:
+        signal_name: A string identifying an output digital signal that in advance has been added.
+        update_frequency: An integer in the range 0-125 specifying the update frequency in Hz.
+        '''
+        return None
+    
+    def read_input_boolean_register(self, address):
+        '''
+        Reads the boolean from one of the input registers, which can also be
+        accessed by a Field bus. Note, uses it’s own memory space.
+        
+        >>> bool val = read input boolean register(3)
+        
+        Parameters:
+        address: Address of the register (0:63)
+        
+        Return Value:
+        The boolean value held by the register (True, False)
+        '''
+        return None
+    
+    def read_input_ﬂoat_register(self, address):
+        '''
+        Reads the ﬂoat from one of the input registers, which can also be
+        accessed by a Field bus. Note, uses it’s own memory space.
+        
+        >>> float val = read input float register(3)
+        
+        Parameters:
+        address: Address of the register (0:23)
+        
+        Return Value:
+        The value held by the register (ﬂoat)
+        '''
+        return None
+    
+    def read_input_integer_register(self, address):
+        '''
+        Reads the integer from one of the input registers, which can also be
+        accessed by a Field bus. Note, uses it’s own memory space.
+        
+        >>> int val = read input integer register(3)
+        
+        Parameters:
+        address: Address of the register (0:23)
+        
+        Return Value:
+        The value held by the register [-2,147,483,648 : 2,147,483,647]
+        '''
+        return None
+    
+    def read_output_boolean_register(self, address):
+        '''
+        Reads the boolean from one of the output registers, which can also be
+        accessed by a Field bus. Note, uses it’s own memory space.
+        
+        >>> bool val = read output boolean register(3)
+        
+        Parameters:
+        address: Address of the register (0:63)
+        
+        Return Value:
+        The boolean value held by the register (True, False)
+        '''
+        return None
+    
+    def read_output_ﬂoat_register(self, address):
+        '''
+        Reads the ﬂoat from one of the output registers, which can also be
+        accessed by a Field bus. Note, uses it’s own memory space.
+        
+        >>> float val = read output float register(3)
+        
+        Parameters:
+        address: Address of the register (0:23)
+        
+        Return Value:
+        The value held by the register (ﬂoat)
+        '''
+        return None
+    
+    def read_output_integer_register(self, address):
+        '''
+        Reads the integer from one of the output registers, which can also be
+        accessed by a Field bus. Note, uses it’s own memory space.
+        
+        >>> int val = read output integer register(3)
+        
+        Parameters:
+        address: Address of the register (0:23)
+        
+        Return Value:
+        The int value held by the register [-2,147,483,648 :
+        2,147,483,647]
+        '''
+        return None
+    
+    def read_port_bit(self, address):
+        '''
+        Reads one of the ports, which can also be accessed by Modbus clients
+        
+        >>> boolval = read port bit(3)
+        
+        Parameters:
+        address: Address of the port (See portmap on Support site,
+        page ”UsingModbusServer” )
+        
+        Return Value:
+        The value held by the port (True, False)
+        '''
+        return None
+    
+    def read_port_register(self, address):
+        '''
+        Reads one of the ports, which can also be accessed by Modbus clients
+        
+        >>> intval = read port register(3)
+        
+        Parameters:
+        address: Address of the port (See portmap on Support site,
+        page ”UsingModbusServer” )
+        
+        Return Value:
+        The signed integer value held by the port (-32768 : 32767)
+        '''
+        return None
+    
+    def rpc_factory(self, type, url ):
+        '''
+        Creates a new Remote Procedure Call (RPC) handle. Please read the
+        subsection ef{Remote Procedure Call (RPC)} for a more detailed
+        description of RPCs.
+        
+        >>> proxy = rpc factory("xmlrpc", "http://127.0.0.1:8080/RPC2")
+        
+        Parameters
+        type: The type of RPC backed to use. Currently only the ”xmlrpc” protocol is available.
+        
+        url: The URL to the RPC server. Currently two protocols are
+        supported: pstream and http. The pstream URL looks
+        like ”<ip-address>:<port>”, for instance
+        ”127.0.0.1:8080” to make a local connection on port
+        8080. A http URL generally looks like
+        ”http://<ip-address>:<port>/<path>”, whereby the
+        <path> depends on the setup of the http server. In
+        the example given above a connection to a local
+        Python webserver on port 8080 is made, which
+        expects XMLRPC calls to come in on the path
+        ”RPC2”.
+        
+        Return Value:
+        A RPC handle with a connection to the speciﬁed server using
+        the designated RPC backend. If the server is not available
+        the function and program will fail. Any function that is made
+        available on the server can be called using this instance. For
+        example ”bool isTargetAvailable(int number, ...)” would be
+        ”proxy.isTargetAvailable(var 1, ...)”, whereby any number of
+        arguments are supported (denoted by the ...).
+        Note: Giving the RPC instance a good name makes programs much
+        more readable (i.e. ”proxy” is not a very good name).
+        '''
+        return None
+    
+    def rtde_set_watchdog(self, variable_name, min_frequency, action='pause'):
+        '''
+        This function will activate a watchdog for a particular input variable to
+        the RTDE. When the watchdog did not receive an input update for the
+        speciﬁed variable in the time period speciﬁed by min frequency (Hz),
+        the corresponding action will be taken. All watchdogs are removed on
+        program stop.
+        
+        >>> rtde set watchdog("input int register 0", 10, "stop")
+        
+        Parameters:
+        variable name: Input variable name (string), as speciﬁed
+        by the RTDE interface
+        min frequency: The minimum frequency (ﬂoat) an input
+        update is expected to arrive.
+        action: Optional: Either ”ignore”, ”pause” or
+        ”stop” the program on a violation of the
+        minimum frequency. The default action is
+        ”pause”.
+        
+        Return Value:
+        None
+        Note: Only one watchdog is necessary per RTDE input package to
+        guarantee the speciﬁed action on missing updates.
+        '''
+        return None
+        
+    def set_analog_inputrange(self, port, range):
+        '''
+        Deprecated: Set range of analog inputs
+        
+        Port 0 and 1 is in the controller box, 2 and 3 is in the tool connector.
+        
+        Parameters:
+        port: analog input port number, 0,1 = controller, 2,3 = tool
+        range: Controller analog input range 0: 0-5V (maps
+        automatically onto range 2) and range 2: 0-10V.
+        range: Tool analog input range 0: 0-5V (maps
+        automatically onto range 1), 1: 0-10V and 2:
+        4-20mA.
+        Deprecated: The set standard analog input domain and
+        set tool analog input domain replace this function. Ports 2-3 should
+        be changed to 0-1 for the latter function. This function might be
+        removed in the next major release.
+        Note: For Controller inputs ranges 1: -5-5V and 3: -10-10V are no longer
+        supported and will show an exception in the GUI.
+        '''
+        return None
+    
+    def set_analog_outputdomain(self, port, domain):
+        '''
+        Set domain of analog outputs
+        
+        Parameters:
+        port: analog output port number
+        domain: analog output domain: 0: 4-20mA, 1: 0-10V
+        '''
+        return None
+    
+    def set_conﬁgurable_digital_out(self, n, b):
+        '''
+        Set conﬁgurable digital output signal level
+        
+        See also set standard digital out and set tool digital out.
+        
+        Parameters:
+        n: The number (id) of the output, integer: [0:7]
+        b: The signal level. (boolean)
+        '''
+        return None
+    
+    def set_euromap_output(self, port_number, signal_value):
+        '''
+        Sets the value of a speciﬁc Euromap67 output signal. This means the
+        value that is sent from the robot to the injection moulding machine.
+        See http://universal-robots.com/support for signal speciﬁcations.
+        
+        >>> set euromap output(3,True)
+        
+        Parameters:
+        port number: An integer specifying one of the available
+        Euromap67 output signals.
+        signal value: A boolean, either True or False
+        '''
+        return None
+    
+    def set_euromap_runstate_dependent_choice(self, port_number, runstate_choice):
+        '''
+        Sets whether an Euromap67 output signal must preserve its state from a
+        program, or it must be set either high or low when a program is not
+        running. See http://universal-robots.com/support for signal
+        speciﬁcations.
+        
+        >>> set euromap runstate dependent choice(3,0)
+        
+        Parameters:
+        port number: An integer specifying a Euromap67
+        output signal.
+        runstate choice: An integer: 0 = preserve program state,
+        1 = set low when a program is not
+        running, 2 = set high when a program is
+        not running.
+        '''
+        return None
+    
+    def set_ﬂag(self, n, b):
+        '''
+        Flags behave like internal digital outputs. The keep information
+        between program runs.
+        
+        Parameters:
+        n: The number (id) of the ﬂag, integer: [0:32]
+        b: The stored bit. (boolean)
+        '''
+        return None
+    
+    def set_runstate_conﬁgurable_digital_output_to_value(self, outputId, state):
+        '''
+        Sets the output signal levels depending on the state of the program
+        (running or stopped).
+        
+        Example: Set conﬁgurable digital output 5 to high when program is not
+        running.
+        
+        >>> set runstate configurable digital output to value(5, 2)
+        
+        Parameters:
+        outputId: The output signal number (id), integer: [0:7]
+        state: The state of the output, integer: 0 = Preserve
+        state, 1 = Low when program is not running, 2 =
+        High when program is not running, 3 = High
+        when program is running and low when it is
+        stopped.
+        '''
+        return None
+    
+    def set_runstate_standard_analog_output_to_value(self, outputId, state):
+        '''
+        Sets the output signal levels depending on the state of the program
+        (running or stopped).
+        
+        Example: Set standard analog output 1 to high when program is not
+        running.
+        
+        >>> set runstate standard analog output to value(1, 2)
+        
+        Parameters:
+        outputId: The output signal number (id), integer: [0:1]
+        state: The state of the output, integer: 0 = Preserve
+        state, 1 = Min when program is not running, 2 =
+        Max when program is not running, 3 = Max when
+        program is running and Min when it is stopped.
+        '''
+        return None
+    
+    def set_runstate_standard_digital_output_to_value(self, outputId, state):
+        '''
+        Sets the output signal levels depending on the state of the program
+        (running or stopped).
+        
+        Example: Set standard digital output 5 to high when program is not
+        running.
+        
+        >>> set runstate standard digital output to value(5, 2)
+        Parameters
+        outputId: The output signal number (id), integer: [0:7]
+        state: The state of the output, integer: 0 = Preserve
+        state, 1 = Low when program is not running, 2 =
+        High when program is not running, 3 = High
+        when program is running and low when it is
+        stopped.
+        '''
+        return None
+    
+    def set_runstate_tool_digital_output_to_value(self, outputId, state):
+        '''
+        Sets the output signal levels depending on the state of the program
+        (running or stopped).
+        
+        Example: Set tool digital output 1 to high when program is not running.
+        
+        >>> set runstate tool digital output to value(1, 2)
+        
+        Parameters:
+        outputId: The output signal number (id), integer: [0:1]
+        state: The state of the output, integer: 0 = Preserve
+        state, 1 = Low when program is not running, 2 =
+        High when program is not running, 3 = High
+        when program is running and low when it is
+        stopped.
+        '''
+        return None
+    
+    def set_standard_analog_input_domain(self, port, domain):
+        '''
+        Set domain of standard analog inputs in the controller box
+        
+        For the tool inputs see set tool analog input domain.
+        
+        Parameters:
+        port: analog input port number: 0 or 1
+        domain: analog input domains: 0: 4-20mA, 1: 0-10V
+        '''
+        return None
+    
+    def set_standard_analog_out(self, n, f):
+        '''
+        Set standard analog output level
+        Parameters
+        n: The number (id) of the input, integer: [0:1]
+        f: The relative signal level [0;1] (ﬂoat)
+        '''
+        return None
+    
+    def set_standard_digital_out(self, n, b):
+        '''
+        Set standard digital output signal level
+        
+        See also set configurable digital out and set tool digital out.
+        
+        Parameters:
+        n: The number (id) of the input, integer: [0:7]
+        b: The signal level. (boolean)
+        '''
+        return None
+    
+    def set_tool_analog_input_domain(self, port, domain):
+        '''
+        Set domain of analog inputs in the tool
+        
+        For the controller box inputs see set standard analog input domain.
+        
+        Parameters:
+        port: analog input port number: 0 or 1
+        domain: analog input domains: 0: 4-20mA, 1: 0-10V
+        '''
+        return None
+    
+    def set_tool_digital_out(self, n, b):
+        '''
+        Set tool digital output signal level
+        
+        See also set configurable digital out and
+        set standard digital out.
+        
+        Parameters:
+        n: The number (id) of the output, integer: [0:1]
+        b: The signal level. (boolean)
+        '''
+        return None
+    
+    def set_tool_voltage(self, voltage):
+        '''
+        Sets the voltage level for the power supply that delivers power to the
+        connector plug in the tool ﬂange of the robot. The votage can be 0, 12
+        or 24 volts.
+        
+        Parameters:
+        voltage: The voltage (as an integer) at the tool connector,
+        integer: 0, 12 or 24.
+        '''
+        return None
+    
+    def write_output_boolean_register(self, address, value):
+        '''
+        Writes the boolean value into one of the output registers, which can
+        also be accessed by a Field bus. Note, uses it’s own memory space.
+        
+        >>> write output boolean register(3, True)
+        
+        Parameters:
+        address: Address of the register (0:63)
+        value: Value to set in the register (True, False)
+        '''
+        
+    def write_output_float_register(self, address, value):
+        '''
+        Writes the ﬂoat value into one of the output registers, which can also
+        be accessed by a Field bus. Note, uses it’s own memory space.
+        
+        >>> write output float register(3, 37.68)
+        
+        Parameters:
+        address: Address of the register (0:23)
+        value: Value to set in the register (ﬂoat)
+        '''
+        return None
+    
+    def write_output_integer_register(self, address, value):
+        '''
+        Writes the integer value into one of the output registers, which can also
+        be accessed by a Field bus. Note, uses it’s own memory space.
+        
+        >>> write output integer register(3, 12)
+        
+        Parameters:
+        address: Address of the register (0:23)
+        value: Value to set in the register [-2,147,483,648 :
+        2,147,483,647]
+        '''
+        return None
+    
+    def write_port_bit(self, address, value):
+        '''
+        Writes one of the ports, which can also be accessed by Modbus clients
+        
+        >>> write port bit(3,True)
+        
+        Parameters:
+        address: Address of the port (See portmap on Support site,
+        page ”UsingModbusServer” )
+        value: Value to be set in the register (True, False)
+        '''
+        return None
+    
+    def write_port_register(self, address, value):
+        '''
+        Writes one of the ports, which can also be accessed by Modbus clients
+        
+        >>> write port register(3,100)
+        
+        Parameters:
+        address: Address of the port (See portmap on Support site,
+        page ”UsingModbusServer” )
+        value: Value to be set in the port (0 : 65536) or (-32768 :
+        32767)
+        '''
+        return None
+    

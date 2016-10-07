@@ -31,7 +31,8 @@ import URplus
 import time
 
 #IP = '192.168.56.101'  #URSim - Running in Oracle VM VirtualBox  
-IP = '192.168.0.2'
+#IP = '192.168.0.2'
+IP = '192.168.25.128'   #URSim - Running in VMware player
 acc = 0.9
 vel = 0.9
 
@@ -116,6 +117,7 @@ def ExampleurScriptExt():
 
     print('servoj with joint specification')
     if not rob.servoj(q=[0.,-1.5,-1.5, -1.5,1.5,0], t=3):
+        print(rob.get_safety_status()['NormalMode'])
         rob.reset_error()
 
     print('movel with pose specification')
@@ -145,6 +147,6 @@ if __name__ == '__main__':
     #ExampleRTC()
     #ExampleDbs()
     #ExampleurScript()
-    #ExampleurScriptExt()
-    ExampleFT_sensor()
+    ExampleurScriptExt()
+    #ExampleFT_sensor()
     

@@ -12,6 +12,9 @@
         <field name="robot_mode" type="INT32"/>
         <field name="actual_tool_accelerometer" type="VECTOR3D"/>
         <field name="actual_momentum" type="DOUBLE"/>
+		<field name="robot_status_bits" type="UINT32"/>
+        <field name="safety_status_bits" type="UINT32"/>
+
         <field name="analog_io_types" type="UINT32"/>
         <field name="standard_analog_input0" type="DOUBLE"/>
         <field name="standard_analog_input1" type="DOUBLE"/>
