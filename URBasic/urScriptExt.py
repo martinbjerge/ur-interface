@@ -86,22 +86,30 @@ class UrScriptExt(URBasic.urScript.UrScript):
         return True
     
     def reset_error(self):
-        self.dbh_demon.ur_robotmode()
-        self.dbh_demon.wait_dbs()
-        if self.dbh_demon.last_respond != 'Robotmode: RUNNING': #  'Robotmode: POWER_OFF': 
+        '''
+        Check if the UR controller is powered on and ready to run.
+        If controller isn’t power on it will be power up. 
+        If there is a safety error, it will be tried rest it once.
+
+        Return Value:
+        state (boolean): True of power is on and no safety errors active.
+        
+        '''
+        
+        if not self.get_robot_status()['PowerOn']:
             self.dbh_demon.ur_power_on()
             self.dbh_demon.wait_dbs()
             self.dbh_demon.ur_brake_release()
             self.dbh_demon.wait_dbs()
-        self.dbh_demon.ur_safetymode()
-        self.dbh_demon.wait_dbs()
-        if self.dbh_demon.last_respond != 'Safetymode: NORMAL':
+        if self.get_safety_status()['StoppedDueToSafety']:
             self.dbh_demon.ur_unlock_protective_stop()
             self.dbh_demon.wait_dbs()
             self.dbh_demon.ur_close_safety_popup()
             self.dbh_demon.wait_dbs()
             self.dbh_demon.ur_brake_release()
             self.dbh_demon.wait_dbs()
+            
+        return self.get_robot_status()['PowerOn'] & (not self.get_safety_status()['StoppedDueToSafety'])
             
     def get_in(self, port, wait=True):
         '''
@@ -152,7 +160,7 @@ class UrScriptExt(URBasic.urScript.UrScript):
          
         statbit = self.get_rtde_data('safety_status_bits', wait=True)
         if statbit is None:
-            return False 
+            return None 
         
         if statbit & (1 << 0):
             SafetyState['NormalMode'] = True
@@ -179,6 +187,39 @@ class UrScriptExt(URBasic.urScript.UrScript):
 
         return SafetyState
         
+
+    def get_robot_status(self):
+        '''
+        Return the robot state of the UR robot as a dict.
+        
+        Bits 0-3: 
+        0:  Is power on
+        1:  Is program running
+        2:  Is teach button pressed
+        3:  Is power button pressed
+        '''
+        
+        RobotState = { 'PowerOn'            : False, 
+                        'ProgramRunning'     : False, 
+                        'TeachButtonPressed' : False, 
+                        'PowerButtonPressed' : False}
+         
+        statbit = self.get_rtde_data('robot_status_bits', wait=True)
+        if statbit is None:
+            return None 
+        
+        if statbit & (1 << 0):
+            RobotState['PowerOn'] = True
+        if statbit & (1 << 1):
+            RobotState['ProgramRunning'] = True
+        if statbit & (1 << 2):
+            RobotState['TeachButtonPressed'] = True
+        if statbit & (1 << 3):
+            RobotState['PowerButtonPressed'] = True
+
+        return RobotState
+
+
 
 class HardwareProfile():
     '''

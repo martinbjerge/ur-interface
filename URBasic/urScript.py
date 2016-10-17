@@ -27,6 +27,7 @@ __license__ = "MIT License"
 
 import URBasic.dataLogging
 import URBasic.realTimeClient
+import numpy as np
 
 class UrScript(URBasic.realTimeClient.RT_CLient):
     '''
@@ -102,6 +103,8 @@ class UrScript(URBasic.realTimeClient.RT_CLient):
         t:    time [S]
         r:    blend radius [m]
         '''
+        pose = np.round(pose, 4)
+        pose = pose.tolist()
         prg = 'movel(p{pose}, {a}, {v}, {t}, {r})'
         return self.send_program(prg.format(**locals()), wait)
 
@@ -970,7 +973,7 @@ end'''
         '''
         return None
         
-    def get_standard_analog_in(self, n):
+    def get_standard_analog_in(self, n, wait=True):
         '''
         Get standard analog input signal level
         
@@ -978,23 +981,36 @@ end'''
         
         Parameters:
         n: The number (id) of the input, integer: [0:1]
+        wait (bool): If True, waits for next data packet before returning. (Default True)
         
         Return Value:
         boolean, The signal level.
         '''
-        return None
+        
+        if n == 0:
+            return self.get_rtde_data('standard_analog_input0', wait)
+        elif n == 1:
+            return self.get_rtde_data('standard_analog_input1', wait)
+        else:
+            return None
     
-    def get_standard_analog_out(self, n):
+    def get_standard_analog_out(self, n, wait=True):
         '''
         Get standard analog output level
         
         Parameters:
         n: The number (id) of the input, integer: [0:1]
+        wait (bool): If True, waits for next data packet before returning. (Default True)
         
         Return Value:
         ﬂoat, The signal level [0;1]
         '''
-        return None
+        if n == 0:
+            return self.get_rtde_data('standard_analog_output0', wait)
+        elif n == 1:
+            return self.get_rtde_data('standard_analog_output1', wait)
+        else:
+            return None
         
     def get_standard_digital_in(self, n, wait=True):
         '''
@@ -1003,7 +1019,8 @@ end'''
         See also get configurable digital in and get tool digital in.
         
         Parameters:
-        n: The number (id) of the input, integer: [0:7]
+        n (int):     The number (id) of the input, integer: [0:7]
+        wait (bool): If True, waits for next data packet before returning. (Default True)
         
         Return Value:
         boolean, The signal level.
