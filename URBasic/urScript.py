@@ -121,7 +121,7 @@ class UrScript(URBasic.realTimeClient.RT_CLient):
         v:    tool speed [m/s]
         r:    blend radius [m]
         '''
-        prg = 'movep({pose}, {a}, {v}, {r})'
+        prg = 'movep(p{pose}, {a}, {v}, {r})'
         return self.send_program(prg.format(**locals()), wait)
         
     def movec(self, pose_via, pose_to, a=1.2, v =0.25, r =0, wait=True):
@@ -533,7 +533,7 @@ end'''
         Return Value
         The current actual TCP vector : ([X, Y, Z, Rx, Ry, Rz])
         '''
-        return self.get_rtde_data('actual_TCP_pose', wait)
+        return np.array(self.get_rtde_data('actual_TCP_pose', wait))
         
     def get_actual_tcp_speed(self):
         '''
@@ -837,7 +837,7 @@ end'''
         '''
         return None
         
-    def set_payload_mass(self, m):
+    def set_payload_mass(self, m, wait=True):
         '''
         Set payload mass
         
@@ -851,9 +851,10 @@ end'''
         Parameters:
         m: mass in kilograms
         '''
-        return None
-    
-    def set_tcp(self, pose):
+        prg = 'set_payload_mass({m})'
+        return self.send_program(prg.format(**locals()), wait)
+
+    def set_tcp(self, pose, wait=True):
         '''
         Set the Tool Center Point
         
@@ -863,7 +864,8 @@ end'''
         Parameters:
         pose: A pose describing the transformation.
         '''
-        return None
+        prg = 'set_tcp(p{pose})'
+        return self.send_program(prg.format(**locals()), wait)
     
     def sleep(self, t):
         '''
