@@ -500,7 +500,15 @@ end
             return False
 
 
-    def move_force(self, start_tolerance=0.01, stop_tolerance=0.01, wrench_gain=[1.0, 1.0, 1.0,  1.0, 1.0, 1.0], timeout=10, task_frame=[0.0, 0.0, 0.0,  0.0, 0.0, 0.0], selection_vector=[0, 0, 0,  0, 0, 0], wrench=[0.0, 0.0, 0.0,  0.0, 0.0, 0.0], limits=[0.1, 0.1, 0.1,  0.1, 0.1, 0.1],f_type=2):
+    def move_force_2stop(self,  start_tolerance=0.01, 
+                                stop_tolerance=0.01, 
+                                wrench_gain=[1.0, 1.0, 1.0,  1.0, 1.0, 1.0], 
+                                timeout=10, 
+                                task_frame=[0.0, 0.0, 0.0,  0.0, 0.0, 0.0], 
+                                selection_vector=[0, 0, 0,  0, 0, 0], 
+                                wrench=[0.0, 0.0, 0.0,  0.0, 0.0, 0.0], 
+                                limits=[0.1, 0.1, 0.1,  0.1, 0.1, 0.1],
+                                f_type=2):
         '''
         Move force will set the robot in force mode (see force_mode) and move the TCP until it meets an object making the TCP stand still.
 
@@ -581,6 +589,115 @@ end
             return False
         else:
             return True
+
+
+    def move_force(self, pose=None, 
+                         a=1.2, 
+                         v=0.25, 
+                         r=0.0, 
+                         movetype='p',
+                         task_frame=[0.0, 0.0, 0.0,  0.0, 0.0, 0.0], 
+                         selection_vector=[0, 0, 0,  0, 0, 0], 
+                         wrench=[0.0, 0.0, 0.0,  0.0, 0.0, 0.0], 
+                         limits=[0.1, 0.1, 0.1,  0.1, 0.1, 0.1],
+                         f_type=2,
+                         wait=True,
+                         q=None):   
+                                     
+        """
+        Concatenate several move commands and applies a blending radius
+        pose or q is a list of pose or joint-pose, and apply a force in a direction
+        
+        Parameters:
+        pose: list of target pose (pose can also be speciﬁed as joint
+              positions, then forward kinematics is used to calculate the corresponding pose see q)
+
+        a:    tool acceleration [m/sˆ2]
+
+        v:    tool speed [m/s]
+
+        r:    blend radius [m]
+
+        start_tolerance (float): sum of all elements in a pose vector defining a robot has started moving (60 samples)
+
+        stop_tolerance (float): sum of all elements in a pose vector defining a standing still robot (60 samples)
+
+        wrench_gain (6D vector): Gain multiplied with wrench each 8ms sample  
+        
+        timeout (float): Seconds to timeout if tolerance not reached        
+        
+        task frame: A pose vector that defines the force frame relative to the base frame.
+        
+        selection vector: A 6d vector that may only contain 0 or 1. 1 means that the robot will be
+                          compliant in the corresponding axis of the task frame, 0 means the robot is
+                          not compliant along/about that axis.
+
+        wrench: The forces/torques the robot is to apply to its environment. These values
+                have different meanings whether they correspond to a compliant axis or not.
+                Compliant axis: The robot will adjust its position along/about the axis in order
+                to achieve the specified force/torque. Non-compliant axis: The robot follows
+                the trajectory of the program but will account for an external force/torque
+                of the specified value.
+
+        limits: A 6d vector with float values that are interpreted differently for
+                compliant/non-compliant axes: 
+                Compliant axes: The limit values for compliant axes are the maximum
+                                allowed tcp speed along/about the axis. 
+                Non-compliant axes: The limit values for non-compliant axes are the
+                                    maximum allowed deviation along/about an axis between the
+                                    actual tcp position and the one set by the program.
+
+        f_type: An integer specifying how the robot interprets the force frame. 
+                1: The force frame is transformed in a way such that its y-axis is aligned with a vector
+                   pointing from the robot tcp towards the origin of the force frame. 
+                2: The force frame is not transformed. 
+                3: The force frame is transformed in a way such that its x-axis is the projection of
+                   the robot tcp velocity vector onto the x-y plane of the force frame. 
+                All other values of f_type are invalid.
+
+        wait: function return when movement is finished
+
+        q:    list of target joint positions  
+
+
+        Return Value:
+        Status (bool): Status, True if signal set successfully.
+        
+        """
+        prg =  '''def move_force():
+    thread Force_thread():
+        while (True):
+            force_mode(p{task_frame}, {selection_vector}, {wrench}, {f_type}, {limits})
+            sync()
+        end
+    end
+    global thread_handler = run Force_thread()
+{movestr}
+    stopl({a}, {a})
+    kill thread_handler
+    end_force_mode()
+end
+'''
+        prefix="p"
+        if pose is None:
+            prefix=""
+            pose=q
+        pose = np.array(pose)
+
+        movestr = ''
+        if np.size(pose.shape)==2:
+            for idx in range(np.size(pose, 0)):
+                posex = np.round(pose[idx], 4)
+                posex = posex.tolist()
+                movestr +=  '    move{movetype}({prefix}{posex}, a={a}, v={v}, r={r})\n'.format(**locals())
+        else:
+            posex = np.round(pose, 4)
+            posex = posex.tolist()
+            movestr +=  '    move{movetype}({prefix}{posex}, a={a}, v={v}, r={r})\n'.format(**locals())
+
+        self.send_program(prg.format(**locals()),wait)
+        #print(prg.format(**locals()))
+
 
     def print_actual_tcp_pose(self):
         '''
