@@ -238,6 +238,7 @@ class RT_CLient(URBasic.rtde.RTDE, metaclass=Singleton):
             self.__logger.error('Program re-sending timed out - Could not send program!')
             return False
 
+        wait_for_program_start = 10 + len(prg)/50
         t = time.time()
         notrun = 0
         prg = 'def resetRegister():\n  write_output_boolean_register(0, False)\n  write_output_boolean_register(1, False)\nend'
@@ -250,7 +251,7 @@ class RT_CLient(URBasic.rtde.RTDE, metaclass=Singleton):
             elif (3&ctrlBits) == 0:
                 self.__logger.debug('send_program: Program not started')
                 notrun += 1
-                if notrun > 10:
+                if notrun > wait_for_program_start:
                     self.__logger.warning('send_program: Program not able to run')
                     self.send_program(prg, wait=False)
                     return False
