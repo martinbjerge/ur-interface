@@ -103,25 +103,72 @@ class UrScript(URBasic.realTimeClient.RT_CLient):
         t:    time [S]
         r:    blend radius [m]
         '''
-        pose = np.round(pose, 4)
-        pose = pose.tolist()
-        prg = 'movel(p{pose}, {a}, {v}, {t}, {r})'
+#        pose = np.round(pose, 4)
+#        pose = pose.tolist()
+        prg =  '''def move_l():
+{movestr}
+stopl({a}, {a})
+end
+'''
+        movetype = 'l'
+        prefix="p"
+        pose = np.array(pose)
+
+        movestr = ''
+        if np.size(pose.shape)==2:
+            for idx in range(np.size(pose, 0)):
+                posex = np.round(pose[idx], 4)
+                posex = posex.tolist()
+                movestr +=  '    move{movetype}({prefix}{posex}, a={a}, v={v}, r={r})\n'.format(**locals())
+        else:
+            posex = np.round(pose, 4)
+            posex = posex.tolist()
+            movestr +=  '    move{movetype}({prefix}{posex}, a={a}, v={v}, r={r})\n'.format(**locals())
+
+        
+        
+        #prg = 'movel(p{pose}, {a}, {v}, {t}, {r})'
         return self.send_program(prg.format(**locals()), wait)
 
-    def movep(self, pose, a=1.2, v =0.25, r =0, wait=True):
+    def movep(self, pose=None, a=1.2, v =0.25, r =0, wait=True, q=None):
         '''
         Move Process
         
         Blend circular (in tool-space) and move linear (in tool-space) to
         position. Accelerates to and moves with constant tool speed v.
         Parameters:
-        pose: target pose (pose can also be speciﬁed as joint
+        pose: list of target pose (pose can also be speciﬁed as joint
               positions, then forward kinematics is used to calculate the corresponding pose)
         a:    tool acceleration [m/sˆ2]
         v:    tool speed [m/s]
         r:    blend radius [m]
+        wait: function return when movement is finished
+        q:    list of target joint positions  
         '''
-        prg = 'movep(p{pose}, {a}, {v}, {r})'
+
+        prg =  '''def move_p():
+{movestr}
+stopl({a}, {a})
+end
+'''
+        movetype = 'p'
+        prefix="p"
+        if pose is None:
+            prefix=""
+            pose=q
+        pose = np.array(pose)
+
+        movestr = ''
+        if np.size(pose.shape)==2:
+            for idx in range(np.size(pose, 0)):
+                posex = np.round(pose[idx], 4)
+                posex = posex.tolist()
+                movestr +=  '    move{movetype}({prefix}{posex}, a={a}, v={v}, r={r})\n'.format(**locals())
+        else:
+            posex = np.round(pose, 4)
+            posex = posex.tolist()
+            movestr +=  '    move{movetype}({prefix}{posex}, a={a}, v={v}, r={r})\n'.format(**locals())
+
         return self.send_program(prg.format(**locals()), wait)
         
     def movec(self, pose_via, pose_to, a=1.2, v =0.25, r =0, wait=True):
@@ -134,13 +181,53 @@ class UrScript(URBasic.realTimeClient.RT_CLient):
         Parameters:
         pose_via: path point (note: only position is used). (pose via can also be speciﬁed as joint positions,
                   then forward kinematics is used to calculate the corresponding pose)
-        pose to:  target pose (pose to can also be speciﬁed as joint positions, then forward kinematics 
+        pose_to:  target pose (pose to can also be speciﬁed as joint positions, then forward kinematics 
                   is used to calculate the corresponding pose)
         a:        tool acceleration [m/sˆ2]
         v:        tool speed [m/s]
         r:        blend radius (of target pose) [m]
         '''
         prg = 'movec({pose_via}, {pose_to}, {a}, {v}, {r})'
+        return self.send_program(prg.format(**locals()), wait)
+ 
+    def __move(self, pose=None, a=1.2, v =0.25, t =0, r =0, wait=True, q=None):
+        '''
+        General move Process
+        
+        Blend circular (in tool-space) and move linear (in tool-space) to
+        position. Accelerates to and moves with constant tool speed v.
+        Parameters:
+        pose: list of target pose (pose can also be speciﬁed as joint
+              positions, then forward kinematics is used to calculate the corresponding pose)
+        a:    tool acceleration [m/sˆ2]
+        v:    tool speed [m/s]
+        r:    blend radius [m]
+        wait: function return when movement is finished
+        q:    list of target joint positions  
+        '''
+
+        prg =  '''def move_p():
+{movestr}
+end
+'''
+        movetype = 'p'
+        prefix="p"
+        if pose is None:
+            prefix=""
+            pose=q
+        pose = np.array(pose)
+
+        movestr = ''
+        if np.size(pose.shape)==2:
+            for idx in range(np.size(pose, 0)):
+                posex = np.round(pose[idx], 4)
+                posex = posex.tolist()
+                movestr +=  '    move{movetype}({prefix}{posex}, a={a}, v={v}, r={r})\n'.format(**locals())
+        else:
+            posex = np.round(pose, 4)
+            posex = posex.tolist()
+            movestr +=  '    move{movetype}({prefix}{posex}, a={a}, v={v}, r={r})\n'.format(**locals())
+
         return self.send_program(prg.format(**locals()), wait)
  
     def force_mode(self, task_frame=[0.,0.,0., 0.,0.,0.], selection_vector=[0,0,1,0,0,0], wrench=[0.,0.,0., 0.,0.,0.], f_type=2, limits=[2, 2, 1.5, 1, 1, 1], wait=False, timeout=60):
@@ -776,7 +863,7 @@ end'''
         '''
         return None
     
-    def set_gravity(self, d):
+    def set_gravity(self, d, wait=True):
         '''
         Set the direction of the acceleration experienced by the robot. When
         the robot mounting is ﬁxed, this corresponds to an accleration of g
@@ -789,8 +876,13 @@ end'''
         
         Parameters:
         d: 3D vector, describing the direction of the gravity, relative to the base of the robot.
+        
+        Exampel:
+        set_gravity([0,0,9.82])  #Robot mounted at flore
         '''
-        return None
+    
+        prg = 'set_gravity({d})'
+        return self.send_program(prg.format(**locals()), wait)
     
     def set_payload(self, m, CoG):
         '''
