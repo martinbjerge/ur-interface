@@ -84,50 +84,35 @@ class UrScript(URBasic.realTimeClient.RT_CLient):
         v:    joint speed of leading axis [rad/s]
         t:    time [S]
         r:    blend radius [m]
+        wait: function return when movement is finished
         pose: target pose
         '''
-        if q is None:
-            prg = 'movej(p{pose}, {a}, {v}, {t}, {r})'
-        else:
-            prg = 'movej({q}, {a}, {v}, {t}, {r})'
+        prg =  '''def move_j():
+{movestr}
+end
+'''
+        movestr = self.__move(movetype='j', pose=pose, a=a, v=v, t=t, r=r, wait=wait, q=q)
         return self.send_program(prg.format(**locals()), wait)
         
-    def movel(self, pose, a=1.2, v =0.25, t =0, r =0, wait=True):
+    def movel(self, pose, a=1.2, v =0.25, t =0, r =0, wait=True, q=None):
         '''
         Move to position (linear in tool-space)
         See movej.
         Parameters:
-        pose: target pose
+        pose: target pose (Can also be a joint position)
         a:    tool acceleration [m/sˆ2]
         v:    tool speed [m/s]
         t:    time [S]
         r:    blend radius [m]
+        wait: function return when movement is finished
+        q:    joint position
         '''
-#        pose = np.round(pose, 4)
-#        pose = pose.tolist()
+
         prg =  '''def move_l():
 {movestr}
-stopl({a}, {a})
 end
 '''
-        movetype = 'l'
-        prefix="p"
-        pose = np.array(pose)
-
-        movestr = ''
-        if np.size(pose.shape)==2:
-            for idx in range(np.size(pose, 0)):
-                posex = np.round(pose[idx], 4)
-                posex = posex.tolist()
-                movestr +=  '    move{movetype}({prefix}{posex}, a={a}, v={v}, r={r})\n'.format(**locals())
-        else:
-            posex = np.round(pose, 4)
-            posex = posex.tolist()
-            movestr +=  '    move{movetype}({prefix}{posex}, a={a}, v={v}, r={r})\n'.format(**locals())
-
-        
-        
-        #prg = 'movel(p{pose}, {a}, {v}, {t}, {r})'
+        movestr = self.__move(movetype='l', pose=pose, a=a, v=v, t=t, r=r, wait=wait, q=q)
         return self.send_program(prg.format(**locals()), wait)
 
     def movep(self, pose=None, a=1.2, v =0.25, r =0, wait=True, q=None):
@@ -148,30 +133,12 @@ end
 
         prg =  '''def move_p():
 {movestr}
-stopl({a}, {a})
 end
 '''
-        movetype = 'p'
-        prefix="p"
-        if pose is None:
-            prefix=""
-            pose=q
-        pose = np.array(pose)
-
-        movestr = ''
-        if np.size(pose.shape)==2:
-            for idx in range(np.size(pose, 0)):
-                posex = np.round(pose[idx], 4)
-                posex = posex.tolist()
-                movestr +=  '    move{movetype}({prefix}{posex}, a={a}, v={v}, r={r})\n'.format(**locals())
-        else:
-            posex = np.round(pose, 4)
-            posex = posex.tolist()
-            movestr +=  '    move{movetype}({prefix}{posex}, a={a}, v={v}, r={r})\n'.format(**locals())
-
+        movestr = self.__move(movetype='p', pose=pose, a=a, v=v, t=0, r=r, wait=wait, q=q)
         return self.send_program(prg.format(**locals()), wait)
         
-    def movec(self, pose_via, pose_to, a=1.2, v =0.25, r =0, wait=True):
+    def movec(self, pose_via=None, pose_to=None, a=1.2, v =0.25, r =0, wait=True, q_via=None, q_to=None):
         '''
         Move Circular: Move to position (circular in tool-space)
 
@@ -186,17 +153,26 @@ end
         a:        tool acceleration [m/sˆ2]
         v:        tool speed [m/s]
         r:        blend radius (of target pose) [m]
+        wait:     function return when movement is finished
+        q_via:    list of via joint positions
+        q_to:     list of target joint positions
         '''
-        prg = 'movec({pose_via}, {pose_to}, {a}, {v}, {r})'
+
+        prg =  '''def move_p():
+{movestr}
+end
+'''
+        movestr = self.__move(movetype='p', pose=pose_to, a=a, v=v, t=0, r=r, wait=wait, q=q_to,pose_via=pose_via, q_via=q_via)
         return self.send_program(prg.format(**locals()), wait)
  
-    def __move(self, pose=None, a=1.2, v =0.25, t =0, r =0, wait=True, q=None):
+    def __move(self, movetype, pose=None, a=1.2, v=0.25, t=0, r=0, wait=True, q=None, pose_via=None, q_via=None):
         '''
         General move Process
         
         Blend circular (in tool-space) and move linear (in tool-space) to
         position. Accelerates to and moves with constant tool speed v.
         Parameters:
+        movetype: j, l, p, c
         pose: list of target pose (pose can also be speciﬁed as joint
               positions, then forward kinematics is used to calculate the corresponding pose)
         a:    tool acceleration [m/sˆ2]
@@ -206,29 +182,52 @@ end
         q:    list of target joint positions  
         '''
 
-        prg =  '''def move_p():
-{movestr}
-end
-'''
-        movetype = 'p'
         prefix="p"
+        t_val=''
+        pose_via_val=''
         if pose is None:
             prefix=""
             pose=q
         pose = np.array(pose)
-
+        if movetype == 'j' or movetype == 'l':
+            tval='t={t},'.format(**locals())
+        
+        if movetype =='c':
+            if pose_via is None:
+                prefix_via=""
+                pose_via=q_via
+            else:
+                prefix_via="p"
+            
+            pose_via = np.array(pose_via)
+            
+            #Check if pose and pose_via have same shape 
+            if (pose.shape != pose_via.shape):
+                return False
+        
         movestr = ''
         if np.size(pose.shape)==2:
             for idx in range(np.size(pose, 0)):
                 posex = np.round(pose[idx], 4)
                 posex = posex.tolist()
-                movestr +=  '    move{movetype}({prefix}{posex}, a={a}, v={v}, r={r})\n'.format(**locals())
+                if movetype =='c':
+                    pose_via_x = np.round(pose_via[idx], 4)
+                    pose_via_x = pose_via_x.tolist()
+                    pose_via_val='{prefix_via}{pose_via_x},'
+                    
+                movestr +=  '    move{movetype}({pose_via_val} {prefix}{posex}, a={a}, v={v}, {t_val} r={r})\n'.format(**locals())
         else:
             posex = np.round(pose, 4)
             posex = posex.tolist()
-            movestr +=  '    move{movetype}({prefix}{posex}, a={a}, v={v}, r={r})\n'.format(**locals())
-
-        return self.send_program(prg.format(**locals()), wait)
+            if movetype =='c':
+                pose_via_x = np.round(pose_via, 4)
+                pose_via_x = pose_via_x.tolist()
+                pose_via_val='{prefix_via}{pose_via_x},'
+            movestr +=  '    move{movetype}({pose_via_val} {prefix}{posex}, a={a}, v={v}, {t_val} r={r})\n'.format(**locals())
+            
+        movestr +=  '    stopl({a}, {a})\n'.format(**locals())
+        
+        return movestr
  
     def force_mode(self, task_frame=[0.,0.,0., 0.,0.,0.], selection_vector=[0,0,1,0,0,0], wrench=[0.,0.,0., 0.,0.,0.], f_type=2, limits=[2, 2, 1.5, 1, 1, 1], wait=False, timeout=60):
         '''

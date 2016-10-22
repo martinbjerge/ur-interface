@@ -594,6 +594,7 @@ end
     def move_force(self, pose=None, 
                          a=1.2, 
                          v=0.25, 
+                         t=0,
                          r=0.0, 
                          movetype='p',
                          task_frame=[0.0, 0.0, 0.0,  0.0, 0.0, 0.0], 
@@ -615,17 +616,13 @@ end
         a:    tool acceleration [m/sˆ2]
 
         v:    tool speed [m/s]
+        
+        t:    time [S]
 
         r:    blend radius [m]
 
-        start_tolerance (float): sum of all elements in a pose vector defining a robot has started moving (60 samples)
-
-        stop_tolerance (float): sum of all elements in a pose vector defining a standing still robot (60 samples)
-
-        wrench_gain (6D vector): Gain multiplied with wrench each 8ms sample  
-        
-        timeout (float): Seconds to timeout if tolerance not reached        
-        
+        movetype: (str): 'j', 'l', 'p', 'c'
+                
         task frame: A pose vector that defines the force frame relative to the base frame.
         
         selection vector: A 6d vector that may only contain 0 or 1. 1 means that the robot will be
@@ -673,30 +670,13 @@ end
     end
     global thread_handler = run Force_thread()
 {movestr}
-    stopl({a}, {a})
     kill thread_handler
     end_force_mode()
 end
 '''
-        prefix="p"
-        if pose is None:
-            prefix=""
-            pose=q
-        pose = np.array(pose)
-
-        movestr = ''
-        if np.size(pose.shape)==2:
-            for idx in range(np.size(pose, 0)):
-                posex = np.round(pose[idx], 4)
-                posex = posex.tolist()
-                movestr +=  '    move{movetype}({prefix}{posex}, a={a}, v={v}, r={r})\n'.format(**locals())
-        else:
-            posex = np.round(pose, 4)
-            posex = posex.tolist()
-            movestr +=  '    move{movetype}({prefix}{posex}, a={a}, v={v}, r={r})\n'.format(**locals())
-
+        
+        movestr = self.__move(movetype, pose, a, v, t, r, wait, q)
         self.send_program(prg.format(**locals()),wait)
-        #print(prg.format(**locals()))
 
 
     def print_actual_tcp_pose(self):
