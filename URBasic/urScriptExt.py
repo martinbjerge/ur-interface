@@ -103,8 +103,10 @@ class UrScriptExt(URBasic.urScript.UrScript):
         '''
         
         if not self.get_robot_status()['PowerOn']:
+            #while not self.set_gravity([0,-9.82,0]): pass
             self.dbh_demon.ur_power_on()
             self.dbh_demon.wait_dbs()
+            #while not self.set_gravity([0,-9.82,0]): pass
             self.dbh_demon.ur_brake_release()
             self.dbh_demon.wait_dbs()
             time.sleep(2)
@@ -675,7 +677,7 @@ end
 end
 '''
         
-        movestr = self.__move(movetype, pose, a, v, t, r, wait, q)
+        movestr = self._move(movetype, pose, a, v, t, r, wait, q)
         self.send_program(prg.format(**locals()),wait)
 
 

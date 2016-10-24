@@ -91,7 +91,7 @@ class UrScript(URBasic.realTimeClient.RT_CLient):
 {movestr}
 end
 '''
-        movestr = self.__move(movetype='j', pose=pose, a=a, v=v, t=t, r=r, wait=wait, q=q)
+        movestr = self._move(movetype='j', pose=pose, a=a, v=v, t=t, r=r, wait=wait, q=q)
         return self.send_program(prg.format(**locals()), wait)
         
     def movel(self, pose, a=1.2, v =0.25, t =0, r =0, wait=True, q=None):
@@ -112,7 +112,7 @@ end
 {movestr}
 end
 '''
-        movestr = self.__move(movetype='l', pose=pose, a=a, v=v, t=t, r=r, wait=wait, q=q)
+        movestr = self._move(movetype='l', pose=pose, a=a, v=v, t=t, r=r, wait=wait, q=q)
         return self.send_program(prg.format(**locals()), wait)
 
     def movep(self, pose=None, a=1.2, v =0.25, r =0, wait=True, q=None):
@@ -135,7 +135,7 @@ end
 {movestr}
 end
 '''
-        movestr = self.__move(movetype='p', pose=pose, a=a, v=v, t=0, r=r, wait=wait, q=q)
+        movestr = self._move(movetype='p', pose=pose, a=a, v=v, t=0, r=r, wait=wait, q=q)
         return self.send_program(prg.format(**locals()), wait)
         
     def movec(self, pose_via=None, pose_to=None, a=1.2, v =0.25, r =0, wait=True, q_via=None, q_to=None):
@@ -162,10 +162,10 @@ end
 {movestr}
 end
 '''
-        movestr = self.__move(movetype='p', pose=pose_to, a=a, v=v, t=0, r=r, wait=wait, q=q_to,pose_via=pose_via, q_via=q_via)
+        movestr = self._move(movetype='p', pose=pose_to, a=a, v=v, t=0, r=r, wait=wait, q=q_to,pose_via=pose_via, q_via=q_via)
         return self.send_program(prg.format(**locals()), wait)
  
-    def __move(self, movetype, pose=None, a=1.2, v=0.25, t=0, r=0, wait=True, q=None, pose_via=None, q_via=None):
+    def _move(self, movetype, pose=None, a=1.2, v=0.25, t=0, r=0, wait=True, q=None, pose_via=None, q_via=None):
         '''
         General move Process
         
