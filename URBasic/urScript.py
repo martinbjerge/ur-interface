@@ -215,6 +215,8 @@ end
                     pose_via_x = pose_via_x.tolist()
                     pose_via_val='{prefix_via}{pose_via_x},'
                     
+                if (np.size(pose, 0)-1)==idx:
+                    r=0
                 movestr +=  '    move{movetype}({pose_via_val} {prefix}{posex}, a={a}, v={v}, {t_val} r={r})\n'.format(**locals())
         else:
             posex = np.round(pose, 4)
