@@ -82,7 +82,7 @@ class DataLogging(metaclass=Singleton):
             self.__dict__[name].addHandler(self.fileLogHandler)
         if log2Consol:
             self.__dict__[name].addHandler(self.streamLogHandler)
-        self.__dict__[name].setLevel(logging.INFO)
+        self.__dict__[name].setLevel(logging.ERROR)
         return name
 
     def AddDataLogging(self,name='root'):

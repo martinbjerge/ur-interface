@@ -685,7 +685,14 @@ end
         '''
         print the actual TCP pose 
         '''
-        print('[{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*self.get_actual_tcp_pose()))
+        self.print_pose(self.get_actual_tcp_pose())
+
+    def print_pose(self, pose):
+        '''
+        print a pose 
+        '''
+        print('[{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*pose))
+
 
 class HardwareProfile():
     '''

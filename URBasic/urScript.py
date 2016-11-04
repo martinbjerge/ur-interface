@@ -218,6 +218,8 @@ end
                 if (np.size(pose, 0)-1)==idx:
                     r=0
                 movestr +=  '    move{movetype}({pose_via_val} {prefix}{posex}, a={a}, v={v}, {t_val} r={r})\n'.format(**locals())
+                
+            movestr +=  '    stopl({a}, {a})\n'.format(**locals())
         else:
             posex = np.round(pose, 4)
             posex = posex.tolist()
@@ -227,7 +229,7 @@ end
                 pose_via_val='{prefix_via}{pose_via_x},'
             movestr +=  '    move{movetype}({pose_via_val} {prefix}{posex}, a={a}, v={v}, {t_val} r={r})\n'.format(**locals())
             
-        movestr +=  '    stopl({a}, {a})\n'.format(**locals())
+
         
         return movestr
  
@@ -580,7 +582,7 @@ end'''
         return None
 
         
-    def get_actual_joint_positions(self):
+    def get_actual_joint_positions(self, wait=True):
         '''
         Returns the actual angular positions of all joints
         
@@ -593,9 +595,9 @@ end'''
         The current actual joint angular position vector in rad : [Base,
         Shoulder, Elbow, Wrist1, Wrist2, Wrist3]
         '''
-        return None
+        return np.array(self.get_rtde_data('actual_q', wait))
         
-    def get_actual_joint_speeds(self):
+    def get_actual_joint_speeds(self, wait=True):
         '''
         Returns the actual angular velocities of all joints
         
@@ -957,6 +959,9 @@ end'''
         Parameters:
         pose: A pose describing the transformation.
         '''
+        
+        if type(pose).__module__ == np.__name__:
+            pose = pose.tolist()
         prg = 'set_tcp(p{pose})'
         return self.send_program(prg.format(**locals()), wait)
     
