@@ -37,7 +37,3 @@ from URBasic.urScript import UrScript
 from URBasic.dashboard import DashBoard
 
 from URBasic.urScriptExt import UrScriptExt
-
-from URBasic.kinematic import *
-
-from URBasic.manipulation import *

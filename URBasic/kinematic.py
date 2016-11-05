@@ -30,129 +30,21 @@ import numpy as np
 import sympy as sp
 import math
 import scipy
+from rr.manipulation import *
 from scipy import linalg
-from URBasic.manipulation import *
 
 pi = np.pi
 # Disable the logging stream from ikpy
 ik.logs.manager.removeHandler(ik.logs.stream_handler)
 
-def Forwardkin_manip(joints,rob='ur10'):    
-    '''
-    This function solves forward kinematics, it returns pose vector
-    '''
-    M,Slist = Robot_parameter_screw_axes(rob)
-    thetalist = joints
-    fk = FKinFixed(M, Slist, thetalist)
-    return np.round(Tran_Mat2Pose(Tran_Mat=fk),4)
-    
-def Invkine_manip(target_pos,init_joint_pos=[0,0,0, 0,0,0],rob='ur10',tcpOffset=[0,0,0, 0,0,0]):
-    '''
-    A numerical inverse kinematics routine based on Newton-Raphson method.
-    Takes a list of fixed screw axes (Slist) expressed in end-effector body frame, the end-effector zero
-    configuration (M), the desired end-effector configuration (T_sd), an initial guess of joint angles
-    (thetalist_init), and small positive scalar thresholds (wthresh, vthresh) controlling how close the
-    final solution thetas must be to the desired thetas.
-    '''
-    M,Slist = Robot_parameter_screw_axes(rob)
-    wthresh =0.001
-    vthresh = 0.0001
-    #T_sd = Pose2Tran_Mat(pose=target_pos)
-    T_target = Pose2Tran_Mat(pose=target_pos)
-    T_tcp = Pose2Tran_Mat(pose=tcpOffset)
-    T_sd = T_target@np.linalg.inv(T_tcp)
-    thetalist_init = init_joint_pos
-    
-    ik_init = np.round(IKinFixed(Slist, M, T_sd, thetalist_init, wthresh, vthresh), 3)
-    ik = ik_init[-1][:] #choose the closest solution
-    
-    error = []
-    for kk in ik_init:
-        out=[]
-        for ii in range(6):
-            k = np.round((kk[ii]-init_joint_pos[ii])/2/np.pi)
-            out.append(kk[ii]-k*2*np.pi)
-        error.append(np.abs(np.sum(init_joint_pos-out)))
-        
-    ix = error==np.min(error)
-    ix = np.where(ix==True)[0][0]
-    ik = ik_init[ix][:] #choose the closest solution
 
-    out=[]
-    for ii in range(6):
-        k = np.round((ik[ii]-init_joint_pos[ii])/2/np.pi)
-        out.append(ik[ii]-k*2*np.pi)
-
-    
-    #error = (pi+ik-init_joint_pos)%(2*pi)-pi
-    
-    
-    print('***************************************************************************')
-    print('Pose  : [{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*target_pos))
-    print('Init q: [{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*init_joint_pos))
-    print('---------------------------------------------------------------------------')
-    print(ik_init)
-    print('---------------------------------------------------------------------------')
-#    print(error)
-#    print('---------------------------------------------------------------------------')
-    print('Joints Candidate: [{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*ik))
-    print('Joints Returned: [{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*out))   #init_joint_pos+error))
-    print('***************************************************************************')
-    
-    return out
-    #return init_joint_pos+error
-    
-
-
-
-def rotate_tcp(gradient_vec=[0,0,0]):
-    '''
-    Convert gradient vector to axis angle vector
-    
-    Parameters:
-    gradient_vec (3D float): [dx, dy, dz] displacement in x, y, z 
-    
-    Return value:
-    axis vector (3D float): [rx, ry, rz]
-    
-    Exampel:
-    Rotate 5deg around x axis and 10 deg around y axis 
-    dz = 0.2
-    dy = np.tan(10/180*np.pi)*dz
-    dx = np.tan(5/180*np.pi)*dz 
-    
-    r = rotate_tcp(gradient_vec=[dx,dy,dz])
-    '''
-    
-    v_0 = [0,0,1] # this is the UR zero degree angle in the base frame
-    v_in_u = gradient_vec / np.linalg.norm(gradient_vec)
-
-    v1_u = v_in_u / np.linalg.norm(v_in_u)
-    v2_u = v_0 / np.linalg.norm(v_0)
-    rot_angle = np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
-
-    min_angle  =0.01
-    
-    if rot_angle < min_angle:
-        rotation_vec = [0,0,0]
-    elif rot_angle > np.pi - min_angle :
-        rotation_vec = [0,-np.pi,0]
-    else:
-        vec_norm = np.cross(v_0, v_in_u)
-        vec_norm = vec_norm/np.linalg.norm(vec_norm)
-        rotation_vec = vec_norm * rot_angle
-       
-    return rotation_vec
-
-    
-def Robot_parameter_screw_axes(rob='ur10'):
+def Robot_parameter_screw_axes(rob=1):
     '''
     This function defines robot with fixed screw axes(used in manipulation.py)
-    rob='ur5'  : ur5
-    rob='ur10' : ur10
-    https://www.universal-robots.com/how-tos-and-faqs/faq/ur-faq/actual-center-of-mass-for-robot-17264/ 
+    rob=1 : ur5
+    rob=2 : ur10 
     '''
-    if str(rob).lower()=='ur5':
+    if rob==1:
         M_ur5 = [[1,0,0,-.81725],[0,0,-1,-.19145],[0,1,0,-.0055],[0,0,0,1]]
         S1_ur5 = [0,0,1,0,0,0]
         S2_ur5 = [0,-1,0,.089159,0,0]
@@ -162,7 +54,7 @@ def Robot_parameter_screw_axes(rob='ur10'):
         S6_ur5 = [0,-1,0,-.0055,0,.81725]
         Slist_ur5 = [S1_ur5,S2_ur5,S3_ur5,S4_ur5,S5_ur5,S6_ur5]
         return M_ur5,Slist_ur5
-    elif str(rob).lower()=='ur10':
+    elif rob==2:
         M_ur10 = [[1,0,0,-1.1843],[0,0,-1,-0.2561],[0,1,0,0.0116],[0,0,0,1]]
         S1_ur10 = [0,0,1,0,0,0]
         S2_ur10 = [0,-1,0,.1273,0,0]
@@ -176,15 +68,15 @@ def Robot_parameter_screw_axes(rob='ur10'):
         print('Wrong robot selected')
         return False
     
-def Robot_DH_Numerical(rob='ur10',joint=[0,0,0,0,0,0]):
+def Robot_DH_Numerical(rob=1,joint=[0,0,0,0,0,0]):
     '''
     This function returns the DH parameter of a robot
-    rob='ur5'  : ur5
-    rob='ur10' : ur10 
+    rob=1 : ur5
+    rob=2 : ur10 
     joint: the robot joint vectors
     '''
     j = joint
-    if str(rob).lower()=='ur5':
+    if rob == 1: 
         dh_ur=np.matrix([
                         [0, pi/2, 0.089159,j[0]],
                         [-0.425,0,0,j[1]],
@@ -193,7 +85,7 @@ def Robot_DH_Numerical(rob='ur10',joint=[0,0,0,0,0,0]):
                         [0, -pi/2, 0.09465,j[4]],
                         [0, 0, 0.0823,j[5]]])
         return dh_ur
-    elif str(rob).lower()=='ur10':
+    elif rob == 2:
         dh_ur=np.matrix([
                         [0, pi/2, 0.1273,j[0]],
                         [-0.612 ,0,0,j[1]],
@@ -207,15 +99,15 @@ def Robot_DH_Numerical(rob='ur10',joint=[0,0,0,0,0,0]):
         return         
     
     
-def Robot_DH_Symbol(rob='ur10' ):
+def Robot_DH_Symbol(rob=1):
     '''
     This function returns the DH parameter of a robot
-    rob='ur5'  : ur5
-    rob='ur10' : ur10 
+    rob=1 : ur5
+    rob=2 : ur10 
     '''
     # set up our joint angle symbols (6th angle doesn't affect any kinematics)
     q = [sp.Symbol('q%i'%ii) for ii in range(6)]
-    if str(rob).lower()=='ur5': 
+    if rob == 1: 
         dh_ur=np.matrix([
                         [0, pi/2, 0.089159,q[0]],
                         [-0.425,0,0,q[1]],
@@ -224,7 +116,7 @@ def Robot_DH_Symbol(rob='ur10' ):
                         [0, -pi/2, 0.09465,q[4]],
                         [0, 0, 0.0823,q[5]]])
         return dh_ur
-    elif str(rob).lower()=='ur10':
+    elif rob == 2:
         dh_ur=np.matrix([
                         [0, pi/2, 0.1273,q[0]],
                         [-0.612 ,0,0,q[1]],
@@ -237,11 +129,11 @@ def Robot_DH_Symbol(rob='ur10' ):
         print('Wrong robot selected')
         return         
 
-def TransMatrix_DH_Symbol(rob='ur10' ,joint_num=6):
+def TransMatrix_DH_Symbol(rob=1,joint_num=6):
     '''
     This function gives the transfer matrix of robot(DH method)
-    rob='ur5'  : ur5
-    rob='ur10' : ur10 
+    rob=1 : ur5
+    rob=2 : ur10 
     joint_num: the transform matrix for joint_num (from 1 to 6) 
     '''
     T=[]
@@ -277,11 +169,11 @@ def TransMatrix_DH_Symbol(rob='ur10' ,joint_num=6):
     
 
 
-def TransMatrix_DH_Numerical(rob='ur10' ,joint=[0,0,0,0,0,0]):
+def TransMatrix_DH_Numerical(rob=1,joint=[0,0,0,0,0,0]):
     '''
     This function gives the transfer matrix of robot(DH method)
-    rob='ur5'  : ur5
-    rob='ur10' : ur10 
+    rob=1 : ur5
+    rob=2 : ur10 
     joint: the robot joint vectors
     '''
     T=[]
@@ -301,7 +193,7 @@ def TransMatrix_DH_Numerical(rob='ur10' ,joint=[0,0,0,0,0,0]):
 
 
 
-def Jacobian_Symbol(rob='ur10' ,joint_num=6):
+def Jacobian_Symbol(rob=1,joint_num=6):
     '''
     This function returns a 6*6 symbolic jacobian matrix 
     Tx: transfermation matrix
@@ -331,7 +223,7 @@ def Jacobian_Symbol(rob='ur10' ,joint_num=6):
     return J        
 
 
-def Jacobian_Numerical(rob='ur10' ,joint=[0,0,0,0,0,0]):
+def Jacobian_Numerical(rob=1,joint=[0,0,0,0,0,0]):
     '''
     This function returns the numerical result of Jacobian
     joint: joint vector
@@ -343,14 +235,14 @@ def Jacobian_Numerical(rob='ur10' ,joint=[0,0,0,0,0,0]):
     q3=joint[3]
     q4=joint[4]
     q5=joint[5]
-    if str(rob).lower()=='ur5':
+    if rob == 1:
         J = np.matrix([[0.0823*np.sin(q0)*np.sin(q4)*np.cos(q1 + q2 + q3)  - 0.09465*np.sin(q0)*np.sin(q1 + q2 + q3) + 0.425*np.sin(q0)*np.cos(q1) + 0.39225*np.sin(q0)*np.cos(q1 + q2)  + 0.0823*np.cos(q0)*np.cos(q4) + 0.10915*np.cos(q0),  0.0823*np.sin(q0)*np.cos(q4) + 0.10915*np.sin(q0) - 0.0823*np.sin(q4)*np.cos(q0)*np.cos(q1 + q2 + q3)  + 0.09465*np.sin(q1 + q2 + q3)*np.cos(q0) - 0.425*np.cos(q0)*np.cos(q1) - 0.39225*np.cos(q0)*np.cos(q1 + q2), 0, 0, 0, 1], 
                        [ 0.425*np.sin(q1)*np.cos(q0) + 0.0823*np.sin(q4)*np.sin(q1 + q2 + q3)*np.cos(q0) + 0.39225*np.sin(q1 + q2)*np.cos(q0)  + 0.09465*np.cos(q0)*np.cos(q1 + q2 + q3), 0.425*np.sin(q0)*np.sin(q1) + 0.0823*np.sin(q0)*np.sin(q4)*np.sin(q1 + q2 + q3) + 0.39225*np.sin(q0)*np.sin(q1 + q2)  + 0.09465*np.sin(q0)*np.cos(q1 + q2 + q3) , -0.0823*np.sin(q4)*np.cos(q1 + q2 + q3)  + 0.09465*np.sin(q1 + q2 + q3) - 0.425*np.cos(q1) - 0.39225*np.cos(q1 + q2), 1, 0, 0], 
                        [ 0.0823*np.sin(q4)*np.sin(q1 + q2 + q3)*np.cos(q0) + 0.39225*np.sin(q1 + q2)*np.cos(q0)  + 0.09465*np.cos(q0)*np.cos(q1 + q2 + q3), 0.0823*np.sin(q0)*np.sin(q4)*np.sin(q1 + q2 + q3) + 0.39225*np.sin(q0)*np.sin(q1 + q2)  + 0.09465*np.sin(q0)*np.cos(q1 + q2 + q3) , -0.0823*np.sin(q4)*np.cos(q1 + q2 + q3)  + 0.09465*np.sin(q1 + q2 + q3) - 0.39225*np.cos(q1 + q2), 1, 0, 0], 
                        [(0.0823*np.sin(q4)*np.sin(q1 + q2 + q3)  + 0.09465*np.cos(q1 + q2 + q3))*np.cos(q0), (0.0823*np.sin(q4)*np.sin(q1 + q2 + q3) + 0.09465*np.cos(q1 + q2 + q3))*np.sin(q0), -0.0823*np.sin(q4)*np.cos(q1 + q2 + q3) + 0.09465*np.sin(q1 + q2 + q3), 1, 0, 0], 
                        [-0.0823*(1.0*np.sin(q0) )*np.sin(q4) - 0.0823*np.cos(q0)*np.cos(q4)*np.cos(q1 + q2 + q3), 0.0823*( 1.0*np.cos(q0))*np.sin(q4) - 0.0823*np.sin(q0)*np.cos(q4)*np.cos(q1 + q2 + q3),  - 0.0823*np.sin(q1 + q2 + q3)*np.cos(q4), 0, 0, 1], 
                        [0, 0, 0, 1, 0, 0]])
-    elif str(rob).lower()=='ur10':
+    elif rob == 2:
         J = np.matrix([[0.0922*np.sin(q0)*np.sin(q4)*np.cos(q1 + q2 + q3)  - 0.1157*np.sin(q0)*np.sin(q1 + q2 + q3) + 0.612*np.sin(q0)*np.cos(q1) + 0.5723*np.sin(q0)*np.cos(q1 + q2)  + 0.0922*np.cos(q0)*np.cos(q4) + 0.163941*np.cos(q0),  0.0922*np.sin(q0)*np.cos(q4) + 0.163941*np.sin(q0) - 0.0922*np.sin(q4)*np.cos(q0)*np.cos(q1 + q2 + q3)  + 0.1157*np.sin(q1 + q2 + q3)*np.cos(q0) - 0.612*np.cos(q0)*np.cos(q1) - 0.5723*np.cos(q0)*np.cos(q1 + q2), 0, 0, 0, 1], 
                        [ 0.612*np.sin(q1)*np.cos(q0) + 0.0922*np.sin(q4)*np.sin(q1 + q2 + q3)*np.cos(q0) + 0.5723*np.sin(q1 + q2)*np.cos(q0)  + 0.1157*np.cos(q0)*np.cos(q1 + q2 + q3), 0.612*np.sin(q0)*np.sin(q1) + 0.0922*np.sin(q0)*np.sin(q4)*np.sin(q1 + q2 + q3) + 0.5723*np.sin(q0)*np.sin(q1 + q2)  + 0.1157*np.sin(q0)*np.cos(q1 + q2 + q3) , -0.0922*np.sin(q4)*np.cos(q1 + q2 + q3)  + 0.1157*np.sin(q1 + q2 + q3) - 0.612*np.cos(q1) - 0.5723*np.cos(q1 + q2), 1, 0, 0], 
                        [ 0.0922*np.sin(q4)*np.sin(q1 + q2 + q3)*np.cos(q0) + 0.5723*np.sin(q1 + q2)*np.cos(q0) + 0.1157*np.cos(q0)*np.cos(q1 + q2 + q3), 0.0922*np.sin(q0)*np.sin(q4)*np.sin(q1 + q2 + q3) + 0.5723*np.sin(q0)*np.sin(q1 + q2)  + 0.1157*np.sin(q0)*np.cos(q1 + q2 + q3) , -0.0922*np.sin(q4)*np.cos(q1 + q2 + q3)  + 0.1157*np.sin(q1 + q2 + q3) - 0.5723*np.cos(q1 + q2), 1, 0, 0], 
@@ -380,8 +272,6 @@ def AxisAng2RotaMatri(angle_vec):
     angle_vec need to be a 3D Axis angle  
     '''
     theta = math.sqrt(angle_vec[0]**2+angle_vec[1]**2+angle_vec[2]**2)
-    if theta==0.:
-        return np.identity(3, dtype=float)
     
     cs = np.cos(theta)
     si = np.sin(theta)
@@ -411,7 +301,9 @@ def Rotat2TransMarix(Rota_Matrix,pose):
     tran_mat[3,3] = 1
     tran_mat[:3,3] = pose[:3]
     return tran_mat
-        
+    
+    
+    
 def Pose2Tran_Mat(pose):
     '''
     Convert an pose to a transformation matrix
@@ -433,6 +325,47 @@ def Tran_Mat2Pose(Tran_Mat):
     pose[-3:] = angle_vec
     return pose
 
+
+
+def Forward_kin(joint):
+    '''
+    Find the forward kinematics 
+    '''
+    # Define a robot from URDF file
+    my_chain = ik.chain.Chain.from_urdf_file('URDF/UR5.URDF')
+    # add a [0] in joint anlges, due to the defination of URDF
+    joint_new = np.zeros([7])
+    joint_new[1:] = joint[:]
+    fk = my_chain.forward_kinematics(joint_new)
+    #convert transfer matrix to pos
+    axis_ang = Tran_Mat2Pose(fk)  
+    return axis_ang
+    
+    
+def Inverse_kin(target_pos,init_joint_pos=None):
+    '''
+    Find the inverse kinematics
+    target_pos = the target pos vector
+    init_joint_pos (optional) = the initial joint vector
+    '''
+    # Define a robot from URDF file
+    my_chain = ik.chain.Chain.from_urdf_file('URDF/UR5.URDF')        
+    #Convert pos to transfer matrix
+    Mar = Pose2Tran_Mat(target_pos)
+
+    #Inverse kinematics       
+    if len(init_joint_pos)<6 :            
+        return None
+    else:
+        joint_init = init_joint_pos.copy()       
+    # add a [0] at the base frame
+    joint_initadd = np.zeros([7])
+    joint_initadd[1:] = joint_init[:]        
+    ikin = my_chain.inverse_kinematics(target=Mar,initial_position=joint_initadd)
+    return ikin[1:]
+    
+
+
 def cmpleate_rotation_matrix(start_vector):  
     ''' This function make rotation matrix where the first column is the 
         input vector.
@@ -446,54 +379,37 @@ def cmpleate_rotation_matrix(start_vector):
     Vh[2] = np.cross(a,Vh[1]) 
     Vh = np.transpose(Vh)
     return np.array(Vh)
-   
-def Inverse_kin(target_pos,init_joint_pos=[0,0,0,0,0,0],tcpOffset=[0,0,0, 0,0,0]):
-    '''
-    Find the inverse kinematics
-    target_pos = the target pos vector
-    init_joint_pos (optional) = the initial joint vector
-    '''
-    # Define a robot from URDF file
-    my_chain = ik.chain.Chain.from_urdf_file('URDF/UR5.URDF')        
-    #Convert pos to transfer matrix
-    #Mar = Pose2Tran_Mat(target_pos)
 
-    T_target = Pose2Tran_Mat(pose=target_pos)
-    T_tcp = Pose2Tran_Mat(pose=tcpOffset)
-    Mar = T_target@np.linalg.inv(T_tcp)
 
-    #Inverse kinematics       
-    if len(init_joint_pos)<6 :            
-        return None
-    else:
-        joint_init = init_joint_pos.copy()       
-    # add a [0] at the base frame
-    joint_initadd = np.zeros([7])
-    joint_initadd[1:] = joint_init[:]        
-    ikin = my_chain.inverse_kinematics(target=Mar,initial_position=joint_initadd.copy())
+### From manipulation.py
+def Invkine_manip(target_pos,init_joint_pos=[0,0,0, 0,0,0],rob=1):
+    '''
+    A numerical inverse kinematics routine based on Newton-Raphson method.
+    Takes a list of fixed screw axes (Slist) expressed in end-effector body frame, the end-effector zero
+    configuration (M), the desired end-effector configuration (T_sd), an initial guess of joint angles
+    (thetalist_init), and small positive scalar thresholds (wthresh, vthresh) controlling how close the
+    final solution thetas must be to the desired thetas.
+    '''
+    M,Slist = Robot_parameter_screw_axes(rob)
+    wthresh =0.001
+    vthresh = 0.0001
+    T_sd = Pose2Tran_Mat(pose=target_pos)
+    thetalist_init = init_joint_pos
     
-    print('***************************************************************************')
-    print('Pose: [{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*target_pos))
-    print('---------------------------------------------------------------------------')
-    print(ikin)
-    print('---------------------------------------------------------------------------')
-    print('Joints Returned: [{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*ikin[1:]))
-    print('***************************************************************************')
+    ik_init = np.round(IKinFixed(Slist, M, T_sd, thetalist_init, wthresh, vthresh), 3)
+    ik = ik_init[-1][:] #choose the closest solution
+    error = (pi+ik-init_joint_pos)%(2*pi)-pi
+    return init_joint_pos+error
+    
+def Forwardkin_manip(joints,rob=1):    
+    '''
+    This function solves forward kinematics, it returns pose vector
+    '''
+    M,Slist = Robot_parameter_screw_axes(rob)
+    thetalist = joints
+    fk = FKinFixed(M, Slist, thetalist)
+    return np.round(Tran_Mat2Pose(Tran_Mat=fk),4)
+    
 
     
-    return ikin[1:]
-    
-def Forward_kin(joint):
-    '''
-    Find the forward kinematics 
-    '''
-    # Define a robot from URDF file
-    my_chain = ik.chain.Chain.from_urdf_file('URDF/UR5.URDF')
-    # add a [0] in joint anlges, due to the defination of URDF
-    joint_new = np.zeros([7])
-    joint_new[1:] = joint[:]
-    fk = my_chain.forward_kinematics(joint_new)
-    #convert transfer matrix to pos
-    axis_ang = Tran_Mat2Pose(fk)  
-    return axis_ang    
     
