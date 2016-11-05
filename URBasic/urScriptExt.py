@@ -693,7 +693,6 @@ end
         '''
         print('Robot Pose: [{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*pose))
 
-
 class HardwareProfile():
     '''
     Load a hardware / IO profile of a robot

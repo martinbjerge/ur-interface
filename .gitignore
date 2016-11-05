@@ -5,3 +5,5 @@ bladecrawler/dist/
 bladecrawler/build/
 Playground*.py
 playground*.py
+URConnect/RobotServer/obj/
+URConnect/TestGui/obj/Debug/
