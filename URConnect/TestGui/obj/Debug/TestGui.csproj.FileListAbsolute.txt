@@ -1,0 +1,20 @@
+c:\users\torbengoetzsche\documents\visual studio 2015\Projects\RopeRobotics\TestGui\bin\Debug\TestGui.exe.config
+c:\users\torbengoetzsche\documents\visual studio 2015\Projects\RopeRobotics\TestGui\bin\Debug\TestGui.exe
+c:\users\torbengoetzsche\documents\visual studio 2015\Projects\RopeRobotics\TestGui\bin\Debug\TestGui.pdb
+c:\users\torbengoetzsche\documents\visual studio 2015\Projects\RopeRobotics\TestGui\obj\Debug\TestGui.csprojResolveAssemblyReference.cache
+c:\users\torbengoetzsche\documents\visual studio 2015\Projects\RopeRobotics\TestGui\obj\Debug\MainWindow.g.cs
+c:\users\torbengoetzsche\documents\visual studio 2015\Projects\RopeRobotics\TestGui\obj\Debug\App.g.cs
+c:\users\torbengoetzsche\documents\visual studio 2015\Projects\RopeRobotics\TestGui\obj\Debug\TestGui_MarkupCompile.cache
+c:\users\torbengoetzsche\documents\visual studio 2015\Projects\RopeRobotics\TestGui\obj\Debug\TestGui_MarkupCompile.lref
+c:\users\torbengoetzsche\documents\visual studio 2015\Projects\RopeRobotics\TestGui\obj\Debug\MainWindow.baml
+c:\users\torbengoetzsche\documents\visual studio 2015\Projects\RopeRobotics\TestGui\obj\Debug\TestGui.g.resources
+c:\users\torbengoetzsche\documents\visual studio 2015\Projects\RopeRobotics\TestGui\obj\Debug\TestGui.Properties.Resources.resources
+c:\users\torbengoetzsche\documents\visual studio 2015\Projects\RopeRobotics\TestGui\obj\Debug\TestGui.csproj.GenerateResource.Cache
+c:\users\torbengoetzsche\documents\visual studio 2015\Projects\RopeRobotics\TestGui\obj\Debug\TestGui.exe
+c:\users\torbengoetzsche\documents\visual studio 2015\Projects\RopeRobotics\TestGui\obj\Debug\TestGui.pdb
+c:\users\torbengoetzsche\documents\visual studio 2015\Projects\RopeRobotics\TestGui\bin\Debug\RobotServer.dll
+c:\users\torbengoetzsche\documents\visual studio 2015\Projects\RopeRobotics\TestGui\bin\Debug\RobotServer.pdb
+c:\users\torbengoetzsche\documents\visual studio 2015\Projects\RopeRobotics\TestGui\bin\Debug\Resources\rtde_configuration.xml
+C:\SourceCode\ur-interface\URConnect\TestGui\bin\Debug\TestGui.exe.config
+C:\SourceCode\ur-interface\URConnect\TestGui\obj\Debug\TestGui.exe
+C:\SourceCode\ur-interface\URConnect\TestGui\obj\Debug\TestGui.pdb
