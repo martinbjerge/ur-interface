@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -9,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
+using RobotServer.Types;
 
 namespace RobotServer
 {
@@ -42,8 +44,6 @@ namespace RobotServer
 
         // Consumers register to receive data.
         public event EventHandler<DataReceivedEventArgs> DataReceived;
-
-        
 
         private void OnDataReceived(object sender, DataReceivedEventArgs e)
         {
@@ -172,9 +172,10 @@ namespace RobotServer
         private void SetupRtdeInterface()
         {
 
-            _rtdeOutputConfiguration.Add(new KeyValuePair<string, string>("timestamp", null));  //Always get the robot timestamp
+            _rtdeOutputConfiguration.Add(new KeyValuePair<string, string>("timestam" +
+                                                                          "p", null));  //Always get the robot timestamp
             //FileStream fileStream = new FileStream(@"Resources\rtde_configuration.xml", FileMode.Open);
-            XmlReader xmlReader = XmlReader.Create(@"Resources\rtde_configuration.xml");
+            XmlReader xmlReader = XmlReader.Create(@"C:\SourceCode\ur-interface\URConnect\RobotServer\bin\Debug\Resources\rtde_configuration.xml");
             xmlReader.ReadToFollowing("receive");
             if (xmlReader.ReadToDescendant("field"))
             {
@@ -318,62 +319,78 @@ namespace RobotServer
             {
                 if (keyValuePair.Value == "DOUBLE")
                 {
-                    byte[] bytes = new byte[8];
-                    Array.Copy(payloadArray, payloadArrayIndex, bytes, 0, 8);
-                    bytes = CheckEndian(bytes);
-                    payloadArrayIndex = payloadArrayIndex + 8;
-                    UpdateModel(keyValuePair.Key, BitConverter.ToDouble(bytes, 0));
+                    UpdateModel(keyValuePair.Key, GetDoubleFromPayloadArray(payloadArray, ref payloadArrayIndex));
                 }
                 else if (keyValuePair.Value == "UINT64")
                 {
-                    byte[] bytes = new byte[8];
-                    Array.Copy(payloadArray, payloadArrayIndex, bytes, 0, 8);
-                    bytes = CheckEndian(bytes);
-                    payloadArrayIndex = payloadArrayIndex + 8;
-                    UpdateModel(keyValuePair.Key, (byte)BitConverter.ToUInt64(bytes, 0));
+                    //byte[] bytes = new byte[8];
+                    //Array.Copy(payloadArray, payloadArrayIndex, bytes, 0, 8);
+                    //bytes = CheckEndian(bytes);
+                    //payloadArrayIndex = payloadArrayIndex + 8;
+                    //UpdateModel(keyValuePair.Key, (byte)BitConverter.ToUInt64(bytes, 0));
+                    UpdateModel(keyValuePair.Key, GetUint64FromPayloadArray(payloadArray, ref payloadArrayIndex));
                 }
                 else if (keyValuePair.Value == "VECTOR6D")
                 {
-                    byte[] bytes = new byte[8];
-                    Array.Copy(payloadArray, payloadArrayIndex, bytes, 0, 8);
-                    bytes = CheckEndian(bytes);
-                    payloadArrayIndex = payloadArrayIndex + 8;
-                    var x = BitConverter.ToDouble(bytes,0);
-                    Array.Copy(payloadArray, payloadArrayIndex, bytes, 0, 8);
-                    bytes = CheckEndian(bytes);
-                    payloadArrayIndex = payloadArrayIndex + 8;
-                    var y = BitConverter.ToDouble(bytes, 0);
-                    Array.Copy(payloadArray, payloadArrayIndex, bytes, 0, 8);
-                    bytes = CheckEndian(bytes);
-                    payloadArrayIndex = payloadArrayIndex + 8;
-                    var z = BitConverter.ToDouble(bytes, 0);
-                    Array.Copy(payloadArray, payloadArrayIndex, bytes, 0, 8);
-                    bytes = CheckEndian(bytes);
-                    payloadArrayIndex = payloadArrayIndex + 8;
-                    var rx = BitConverter.ToDouble(bytes, 0);
-                    Array.Copy(payloadArray, payloadArrayIndex, bytes, 0, 8);
-                    bytes = CheckEndian(bytes);
-                    payloadArrayIndex = payloadArrayIndex + 8;
-                    var ry = BitConverter.ToDouble(bytes, 0);
-                    Array.Copy(payloadArray, payloadArrayIndex, bytes, 0, 8);
-                    bytes = CheckEndian(bytes);
-                    payloadArrayIndex = payloadArrayIndex + 8;
-                    var rz = BitConverter.ToDouble(bytes, 0);
-                    UpdateModel(keyValuePair.Key, new Vector6D(x,y,z,rx, ry, rz));
+                    UpdateModel(keyValuePair.Key, GetVector6DFromPayloadArray(payloadArray, ref payloadArrayIndex));
                 }
                 else if (keyValuePair.Value == "INT32")
                 {
-                    byte[] bytes = new byte[4];
-                    Array.Copy(payloadArray, payloadArrayIndex, bytes, 0, 4);
-                    bytes = CheckEndian(bytes);
-                    payloadArrayIndex = payloadArrayIndex + 4;
-                    UpdateModel(keyValuePair.Key, BitConverter.ToUInt32(bytes, 0));
+                    UpdateModel(keyValuePair.Key, GetInt32FromPayloadArray(payloadArray, ref payloadArrayIndex));
                 }
                 else
                 {
                     throw new NotImplementedException("Got a datatype in RTDE Data Package with a value of " + keyValuePair.Value + " that we did not expect");
                 }
             }
+        }
+
+
+        private Vector6D GetVector6DFromPayloadArray(byte[] payloadArray, ref int payloadArrayIndex)
+        {
+            var x = GetDoubleFromPayloadArray(payloadArray, ref payloadArrayIndex);
+            var y = GetDoubleFromPayloadArray(payloadArray, ref payloadArrayIndex);
+            var z = GetDoubleFromPayloadArray(payloadArray, ref payloadArrayIndex);
+            var rx = GetDoubleFromPayloadArray(payloadArray, ref payloadArrayIndex);
+            var ry = GetDoubleFromPayloadArray(payloadArray, ref payloadArrayIndex);
+            var rz = GetDoubleFromPayloadArray(payloadArray, ref payloadArrayIndex);
+            return new Vector6D(x, y, z, rx, ry, rz);
+        }
+
+        private double GetDoubleFromPayloadArray(byte[] payloadArray, ref int payloadArrayIndex)
+        {
+            byte[] bytes = new byte[8];
+            Array.Copy(payloadArray, payloadArrayIndex, bytes, 0, 8);
+            bytes = CheckEndian(bytes);
+            payloadArrayIndex = payloadArrayIndex + 8;
+            return BitConverter.ToDouble(bytes, 0);
+        }
+
+        private UInt32 GetUInt32FromPayloadArray(byte[] payloadArray, ref int payloadArrayIndex)
+        {
+            byte[] bytes = new byte[4];
+            Array.Copy(payloadArray, payloadArrayIndex, bytes, 0, 4);
+            bytes = CheckEndian(bytes);
+            payloadArrayIndex = payloadArrayIndex + 4;
+            return BitConverter.ToUInt32(bytes, 0);
+        }
+
+        private Int32 GetInt32FromPayloadArray(byte[] payloadArray, ref int payloadArrayIndex)
+        {
+            byte[] bytes = new byte[4];
+            Array.Copy(payloadArray, payloadArrayIndex, bytes, 0, 4);
+            bytes = CheckEndian(bytes);
+            payloadArrayIndex = payloadArrayIndex + 4;
+            return BitConverter.ToInt32(bytes, 0);
+        }
+
+        private UInt64 GetUint64FromPayloadArray(byte[] payloadArray, ref int payloadArrayIndex)
+        {
+            byte[] bytes = new byte[8];
+            Array.Copy(payloadArray, payloadArrayIndex, bytes, 0, 8);
+            bytes = CheckEndian(bytes);
+            payloadArrayIndex = payloadArrayIndex + 8;
+            return BitConverter.ToUInt64(bytes, 0);
         }
 
         private void UpdateModel(string key, object value)
@@ -383,24 +400,29 @@ namespace RobotServer
                 case "timestamp":
                     _robotModel.RobotTimestamp = (double)value;
                     break;
-
                 case "actual_digital_output_bits":
-                    _robotModel.ActualDigitalOutputBits = (byte)value;
-                    Debug.WriteLine("Digital output bits: " + _robotModel.ActualDigitalOutputBits);
+                    BitArray bitArray = new BitArray(new byte[] { (byte)(UInt64)value });
+                    _robotModel.DigitalOutputBit0 = bitArray[0];
+                    _robotModel.DigitalOutputBit1 = bitArray[1];
+                    _robotModel.DigitalOutputBit2 = bitArray[2];
+                    _robotModel.DigitalOutputBit3 = bitArray[3];
+                    _robotModel.DigitalOutputBit4 = bitArray[4];
+                    _robotModel.DigitalOutputBit5 = bitArray[5];
+                    _robotModel.DigitalOutputBit6 = bitArray[6];
+                    _robotModel.DigitalOutputBit7 = bitArray[7];
                     break;
                 case "actual_TCP_pose":
                     _robotModel.ActualTCPPose = (Vector6D) value;
                     break;
                 case "robot_mode":
-                    _robotModel.RobotMode = (RobotMode)value;
+                    _robotModel.RobotMode = (RobotMode)(int)value;
                     break;
                 case "safety_mode":
-                    _robotModel.SafetyMode = (SafetyMode) value;
+                    _robotModel.SafetyMode = (SafetyMode)(int)value;
                     break;
                 default:
                     throw new NotImplementedException("Did not find any handling for " + key);
             }
-            
         }
 
 

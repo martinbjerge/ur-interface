@@ -5,11 +5,20 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace RobotServer
+namespace RobotServer.Types
 {
     public class Vector6D
     {
-        public double X { get; set; }
+        private double _x;
+
+        /// <summary>
+        /// X component
+        /// </summary>
+        public double X
+        {
+            get { return _x; }
+            set { _x = value; }
+        }
 
         public double Y { get; set; }
 
@@ -21,9 +30,10 @@ namespace RobotServer
 
         public double RZ { get; set; }
 
+        
+
         /// <summary>
         /// Vector in 6 dimentions describing a Universal Robotics Robot value
-        /// Always measured from the base of robot
         /// </summary>
         /// <param name="x">X component in mm</param>
         /// <param name="y">Y component in mm</param>
@@ -38,7 +48,8 @@ namespace RobotServer
             Z = z;
             RX = rx;
             RY = ry;
-            RZ = rz;
+            RZ = rz; 
         }
+        
     }
 }

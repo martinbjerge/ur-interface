@@ -9,7 +9,7 @@ namespace RobotServer
 {
     class RealTimeClient
     {
-        public RealTimeClient(IPAddress ipAddress, string password)
+        public RealTimeClient(IPAddress ipAddress)
         {
             
         }

@@ -12,6 +12,7 @@ namespace RobotServer
         private RobotModel _robotModel;
         //private RealTimeClient _realTimeClient;
         private RTDE _rtde;
+        private RealTimeClient _realTimeClient;
 
         public RobotConnector(RobotModel robotModel)
         {
@@ -20,6 +21,7 @@ namespace RobotServer
 
             //_realTimeClient = new RealTimeClient(_robotModel.IpAddress, _robotModel.Password);
             _rtde = new RTDE(_robotModel);
+            _realTimeClient = new RealTimeClient(_robotModel.IpAddress);
         }
     }
 }
