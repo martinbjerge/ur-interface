@@ -9,22 +9,14 @@ namespace RobotServer
 {
     public class RobotController
     {
-        private static RobotModel _robotModel;
+        public RobotModel RobotModel;
         private RobotConnector _robotConnector;
 
         public RobotController()
         {
-            _robotModel = new RobotModel();
-            _robotConnector = new RobotConnector(_robotModel);
-            Debug.WriteLine("I'm back!");
+            RobotModel = new RobotModel();
+            _robotConnector = new RobotConnector(RobotModel);
+  
         }
-
-        public string GetActualDigitalOutputBits()
-        {
-            return _robotModel.DigitalOutputBit0.ToString();
-            //return _robotModel.RobotTimestamp.ToString();
-        }
-
-
     }
 }

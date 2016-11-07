@@ -148,13 +148,13 @@ def ExampleFT_sensor():
 def ExampleCSharpDll():
     print("Staring DLL")
     robot = RobotController()
-    
-    output_bits = 0
+    print("DLL is started")    
+    output_bit0 = False
     while True:
-        new_value = robot.GetActualDigitalOutputBits()
-        if(new_value != output_bits):
-            output_bits = new_value
-            print("Actual Output Bits from C#:  " + str(output_bits))  
+        new_value = robot.RobotModel.DigitalOutputBit0
+        if(new_value != output_bit0):
+            output_bit0 = new_value
+            print("Output Bit 0 from C#:  " + str(output_bit0))
 
 
 if __name__ == '__main__':
