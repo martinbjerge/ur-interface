@@ -29,12 +29,19 @@ __license__ = "MIT License"
 import URBasic
 import URplus
 import time
+import clr  #remember to pip install pythonnet as administrator for clr access
+sys.path.append(r"C:\SourceCode\ur-interface\URConnect\RobotServer\bin\Debug")
+clr.AddReference("RobotServer")
+from RobotServer import RobotController
+
 
 #IP = '192.168.56.101'  #URSim - Running in Oracle VM VirtualBox  
 #IP = '192.168.0.2'
 IP = '192.168.25.128'   #URSim - Running in VMware player
 acc = 0.9
 vel = 0.9
+
+
 
 def ExampleDataLogging():
     logger = URBasic.dataLogging.DataLogging()
@@ -138,7 +145,16 @@ def ExampleFT_sensor():
     rob.ft_demon.close_ft() 
     rob.close_urScriptExt()
     
+def ExampleCSharpDll():
+    print("Staring DLL")
+    robot = RobotController()
     
+    output_bits = 0
+    while True:
+        new_value = robot.GetActualDigitalOutputBits()
+        if(new_value != output_bits):
+            output_bits = new_value
+            print("Actual Output Bits from C#:  " + str(output_bits))  
 
 
 if __name__ == '__main__':
@@ -147,6 +163,6 @@ if __name__ == '__main__':
     #ExampleRTC()
     #ExampleDbs()
     #ExampleurScript()
-    ExampleurScriptExt()
+    #ExampleurScriptExt()
     #ExampleFT_sensor()
-    
+    ExampleCSharpDll()

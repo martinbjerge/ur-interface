@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RobotServer.Types
+namespace RobotServer
 {
     public class RobotController
     {

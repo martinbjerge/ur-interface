@@ -48,13 +48,8 @@ namespace RobotServer.Types
             Z = z;
             RX = rx;
             RY = ry;
-            RZ = rz;
-
-           
-
-            
+            RZ = rz; 
         }
-
         
     }
 }

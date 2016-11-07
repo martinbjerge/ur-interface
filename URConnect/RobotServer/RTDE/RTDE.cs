@@ -10,8 +10,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
+using RobotServer.Types;
 
-namespace RobotServer.Types
+namespace RobotServer
 {
     enum UR_RTDE_Command:byte
     {

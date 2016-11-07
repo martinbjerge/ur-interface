@@ -5,7 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RobotServer.Types
+namespace RobotServer
 {
     class RobotConnector
     {

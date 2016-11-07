@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RobotServer.Types.Types.Types
+namespace RobotServer.Types
 {
     class Vector3D
     {
