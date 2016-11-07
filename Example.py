@@ -159,10 +159,10 @@ def ExampleCSharpDll():
 
 if __name__ == '__main__':
     #ExampleDataLogging()   
-    #ExampleRTDE()
+    ExampleRTDE()
     #ExampleRTC()
     #ExampleDbs()
     #ExampleurScript()
     #ExampleurScriptExt()
     #ExampleFT_sensor()
-    ExampleCSharpDll()
+    #ExampleCSharpDll()
