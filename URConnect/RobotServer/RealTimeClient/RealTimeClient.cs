@@ -5,11 +5,11 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RobotServer
+namespace RobotServer.Types
 {
     class RealTimeClient
     {
-        public RealTimeClient(IPAddress ipAddress, string password)
+        public RealTimeClient(IPAddress ipAddress)
         {
             
         }

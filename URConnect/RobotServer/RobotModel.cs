@@ -6,7 +6,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RobotServer
+namespace RobotServer.Types
 {
     public enum ConnectionState : int
     {
@@ -53,13 +53,33 @@ namespace RobotServer
 
         public ConnectionState RTDEConnectionState { get; set; }
 
+
+        #region Digital Output Bits
         public bool DigitalOutputBit0 { get; set; }
 
-        public byte ActualDigitalOutputBits { get; set; }
+        public bool DigitalOutputBit1 { get; set; }
+
+        public bool DigitalOutputBit2 { get; set; }
+
+        public bool DigitalOutputBit3 { get; set; }
+
+        public bool DigitalOutputBit4 { get; set; }
+
+        public bool DigitalOutputBit5 { get; set; }
+
+        public bool DigitalOutputBit6 { get; set; }
+
+        public bool DigitalOutputBit7 { get; set; }
+        
+
+        #endregion
+
+        
 
         public int RTDEProtocolVersion { get; set; }
 
         public Vector6D ActualTCPPose { get; set; }
+
         public RobotMode RobotMode { get; set; }
 
         public SafetyMode SafetyMode { get; set; }

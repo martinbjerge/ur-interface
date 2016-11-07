@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RobotServer.Types
+namespace RobotServer.Types.Types.Types
 {
-    class PoseGenerator
+    class Vector3D
     {
     }
 }

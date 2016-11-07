@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RobotServer
+namespace RobotServer.Types
 {
     public class RobotController
     {
@@ -21,7 +21,7 @@ namespace RobotServer
 
         public string GetActualDigitalOutputBits()
         {
-            return _robotModel.ActualDigitalOutputBits.ToString();
+            return _robotModel.DigitalOutputBit0.ToString();
             //return _robotModel.RobotTimestamp.ToString();
         }
 

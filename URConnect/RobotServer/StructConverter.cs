@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RobotServer
+namespace RobotServer.Types
 {
     public class StructConverter
     {

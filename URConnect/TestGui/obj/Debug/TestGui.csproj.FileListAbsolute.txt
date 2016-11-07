@@ -15,6 +15,20 @@ c:\users\torbengoetzsche\documents\visual studio 2015\Projects\RopeRobotics\Test
 c:\users\torbengoetzsche\documents\visual studio 2015\Projects\RopeRobotics\TestGui\bin\Debug\RobotServer.dll
 c:\users\torbengoetzsche\documents\visual studio 2015\Projects\RopeRobotics\TestGui\bin\Debug\RobotServer.pdb
 c:\users\torbengoetzsche\documents\visual studio 2015\Projects\RopeRobotics\TestGui\bin\Debug\Resources\rtde_configuration.xml
+C:\SourceCode\ur-interface\URConnect\TestGui\bin\Debug\Resources\rtde_configuration.xml
 C:\SourceCode\ur-interface\URConnect\TestGui\bin\Debug\TestGui.exe.config
+C:\SourceCode\ur-interface\URConnect\TestGui\bin\Debug\TestGui.exe
+C:\SourceCode\ur-interface\URConnect\TestGui\bin\Debug\TestGui.pdb
+C:\SourceCode\ur-interface\URConnect\TestGui\bin\Debug\RobotServer.dll
+C:\SourceCode\ur-interface\URConnect\TestGui\bin\Debug\RobotServer.pdb
+C:\SourceCode\ur-interface\URConnect\TestGui\obj\Debug\TestGui.csprojResolveAssemblyReference.cache
+C:\SourceCode\ur-interface\URConnect\TestGui\obj\Debug\MainWindow.g.cs
+C:\SourceCode\ur-interface\URConnect\TestGui\obj\Debug\App.g.cs
+C:\SourceCode\ur-interface\URConnect\TestGui\obj\Debug\TestGui_MarkupCompile.cache
+C:\SourceCode\ur-interface\URConnect\TestGui\obj\Debug\TestGui_MarkupCompile.lref
+C:\SourceCode\ur-interface\URConnect\TestGui\obj\Debug\MainWindow.baml
+C:\SourceCode\ur-interface\URConnect\TestGui\obj\Debug\TestGui.g.resources
+C:\SourceCode\ur-interface\URConnect\TestGui\obj\Debug\TestGui.Properties.Resources.resources
+C:\SourceCode\ur-interface\URConnect\TestGui\obj\Debug\TestGui.csproj.GenerateResource.Cache
 C:\SourceCode\ur-interface\URConnect\TestGui\obj\Debug\TestGui.exe
 C:\SourceCode\ur-interface\URConnect\TestGui\obj\Debug\TestGui.pdb
