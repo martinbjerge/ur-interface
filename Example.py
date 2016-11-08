@@ -39,8 +39,8 @@ from RobotServer import RobotController
 
 #IP = '192.168.56.101'  #URSim - Running in Oracle VM VirtualBox  
 #IP = '192.168.0.2'
-#IP = '192.168.25.128'   #URSim - Running in VMware player
-IP = '172.16.92.131'
+IP = '192.168.25.128'   #URSim - Running in VMware player
+#IP = '172.16.92.131'
 acc = 0.9
 vel = 0.9
 
