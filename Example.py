@@ -31,6 +31,7 @@ import URplus
 import time
 import sys
 import clr  #remember to pip install pythonnet as administrator for clr access
+import sys
 sys.path.append(r"C:\SourceCode\ur-interface\URConnect\RobotServer\bin\Debug")
 clr.AddReference("RobotServer")
 from RobotServer import RobotController
@@ -38,7 +39,8 @@ from RobotServer import RobotController
 
 #IP = '192.168.56.101'  #URSim - Running in Oracle VM VirtualBox  
 #IP = '192.168.0.2'
-IP = '192.168.25.128'   #URSim - Running in VMware player
+#IP = '192.168.25.128'   #URSim - Running in VMware player
+IP = '172.16.92.131'
 acc = 0.9
 vel = 0.9
 
@@ -148,9 +150,10 @@ def ExampleFT_sensor():
     
 def ExampleCSharpDll():
     print("Staring DLL")
-    robot = RobotController()
+    robot = RobotController(IP)
     print("DLL is started")    
     output_bit0 = False
+    print("Output Bit 0 from C#:  " + str(output_bit0))
     while True:
         new_value = robot.RobotModel.DigitalOutputBit0
         if(new_value != output_bit0):
@@ -160,10 +163,10 @@ def ExampleCSharpDll():
 
 if __name__ == '__main__':
     #ExampleDataLogging()   
-    ExampleRTDE()
+    #ExampleRTDE()
     #ExampleRTC()
     #ExampleDbs()
     #ExampleurScript()
     #ExampleurScriptExt()
     #ExampleFT_sensor()
-    #ExampleCSharpDll()
+    ExampleCSharpDll()

@@ -57,7 +57,7 @@ namespace RobotServer
 
         #region Digital Output Bits
         public bool DigitalOutputBit0 { get; set; }
-
+            
         public bool DigitalOutputBit1 { get; set; }
 
         public bool DigitalOutputBit2 { get; set; }
