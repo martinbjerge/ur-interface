@@ -29,6 +29,7 @@ __license__ = "MIT License"
 import URBasic
 import URplus
 import time
+import sys
 import clr  #remember to pip install pythonnet as administrator for clr access
 sys.path.append(r"C:\SourceCode\ur-interface\URConnect\RobotServer\bin\Debug")
 clr.AddReference("RobotServer")
