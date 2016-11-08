@@ -377,6 +377,8 @@ end'''
         prg = '''def ur_freedrive_mode():
         while True:
             freedrive_mode()
+            sleep(10)
+            sync()
         end
         end'''
         self.send_program(prg.format(**locals()), wait)
