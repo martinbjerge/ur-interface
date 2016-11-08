@@ -375,12 +375,11 @@ end'''
         The robot will not be able to follow a trajectory (eg. a movej) in this mode.
         '''
         prg = '''def ur_freedrive_mode():
-        while True:
-            freedrive_mode()
-            sleep(10)
-            sync()
-        end
-        end'''
+    while(True):
+        freedrive_mode()
+        sleep(600)
+    end
+end'''
         self.send_program(prg.format(**locals()), wait)
 
     def end_freedrive_mode(self, wait=True):
