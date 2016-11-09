@@ -47,6 +47,8 @@
   <ItemGroup>
     <Compile Include="PoseGenerator.cs" />
     <Compile Include="RealTimeClient\RealTimeClient.cs" />
+    <Compile Include="RealTimeClient\RealTimeClientReceiver.cs" />
+    <Compile Include="RealTimeClient\RealTimeClientSender.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

@@ -59,7 +59,7 @@ namespace RobotServer
         public RTDE(RobotModel robotModel)
         {
             _robotModel = robotModel;
-            _client = new TcpClient(_robotModel.IpAddress.ToString(), port);          /////////////////////////////////////////////////////////////////////////////
+            _client = new TcpClient(_robotModel.IpAddress.ToString(), port);    
             _stream = _client.GetStream();
             _rtdeOutputConfiguration = new List<KeyValuePair<string, string>>();
 
@@ -69,11 +69,8 @@ namespace RobotServer
 
 
             GetControllerVersion();
-            Thread.Sleep(150);
             NegotiateProtocolVersion();
-            Thread.Sleep(150);
             SetupRtdeInterface();
-            Thread.Sleep(150);
             StartRTDEInterface();
 
 
@@ -598,14 +595,14 @@ namespace RobotServer
 
     sealed class RTDESender
     {
-        private byte[] _dataToSend = new byte[0];
+        private List<byte[]> _dataToSend = new List<byte[]>(); 
         private NetworkStream _stream;
         private Thread _thread;
         List<KeyValuePair<string, string>>_rtdeOutputConfiguration;
 
         internal void SendData(byte[] data)
         {
-            _dataToSend = data;
+            _dataToSend.Add(data);
         }
 
         internal RTDESender(NetworkStream stream, List<KeyValuePair<string, string>> rtdeOutputConfiguration )
@@ -620,14 +617,11 @@ namespace RobotServer
         {
             while (true)
             {
-                if (_dataToSend.Length > 0)
+                if (_dataToSend.Count > 0)
                 {
                     Thread.Sleep(130);              //From experience we know the Universal Robotics robot doesnt like to recieve quicker than 125 ms
-                    _stream.Write(_dataToSend, 0, _dataToSend.Length);
-                    //_stream.Flush();
-                    //string test = Encoding.ASCII.GetString(_dataToSend);
-                    //Debug.WriteLine("Send to Robot: " + test);
-                    _dataToSend = new byte[0];
+                    _stream.Write(_dataToSend[0], 0, _dataToSend[0].Length);
+                    _dataToSend.RemoveAt(0);
                 }
                 
             }
