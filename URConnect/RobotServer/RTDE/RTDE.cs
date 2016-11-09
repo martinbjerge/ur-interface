@@ -333,11 +333,26 @@ namespace RobotServer
                 {
                     UpdateModel(keyValuePair.Key, GetInt32FromPayloadArray(payloadArray, ref payloadArrayIndex));
                 }
+                else if (keyValuePair.Value == "VECTOR6INT32")
+                {
+                    UpdateModel(keyValuePair.Key, GetVector6DInt32FromPayloadArray(payloadArray, ref payloadArrayIndex));
+                }
                 else
                 {
                     throw new NotImplementedException("Got a datatype in RTDE Data Package with a value of " + keyValuePair.Value + " that we did not expect");
                 }
             }
+        }
+
+        private object GetVector6DInt32FromPayloadArray(byte[] payloadArray, ref int payloadArrayIndex)
+        {
+            var x = GetInt32FromPayloadArray(payloadArray, ref payloadArrayIndex);
+            var y = GetInt32FromPayloadArray(payloadArray, ref payloadArrayIndex);
+            var z = GetInt32FromPayloadArray(payloadArray, ref payloadArrayIndex);
+            var rx = GetInt32FromPayloadArray(payloadArray, ref payloadArrayIndex);
+            var ry = GetInt32FromPayloadArray(payloadArray, ref payloadArrayIndex);
+            var rz = GetInt32FromPayloadArray(payloadArray, ref payloadArrayIndex);
+            return new Vector6D(x, y, z, rx, ry, rz);
         }
 
 
@@ -395,6 +410,80 @@ namespace RobotServer
                 case "timestamp":
                     _robotModel.RobotTimestamp = (double)value;
                     break;
+                case "target_q":
+                    _robotModel.TargetQ = (Vector6D)value;
+                    break;
+                case "target_qd":
+                    _robotModel.TargetQD = (Vector6D)value;
+                    break;
+                case "target_qdd":
+                    _robotModel.TargetQDD = (Vector6D)value;
+                    break;
+                case "target_current":
+                    _robotModel.TargetCurrent = (Vector6D)value;
+                    break;
+                case "target_moment":
+                    _robotModel.TargetMoment = (Vector6D)value;
+                    break;
+                case "actual_q":
+                    _robotModel.ActualQ = (Vector6D) value;
+                    break;
+                case "actual_qd":
+                    _robotModel.ActualQD = (Vector6D)value;
+                    break;
+                case "actual_current":
+                    _robotModel.ActualCurrent = (Vector6D)value;
+                    break;
+                case "joint_control_output":
+                    _robotModel.JointControlOutput = (Vector6D) value;
+                    break;
+                case "actual_TCP_pose":
+                    _robotModel.ActualTCPPose = (Vector6D)value;
+                    break;
+                case "actual_TCP_speed":
+                    _robotModel.ActualTCPSpeed = (Vector6D)value;
+                    break;
+                case "actual_TCP_force":
+                    _robotModel.ActualTCPForce = (Vector6D)value;
+                    break;
+                case "target_TCP_pose":
+                    _robotModel.TargetTCPPose = (Vector6D) value;
+                    break;
+                case "target_TCP_speed":
+                    _robotModel.TargetTCPSpeed = (Vector6D)value;
+                    break;
+                case "actual_digital_input_bits":
+                    BitArray inputBits = new BitArray(new byte[] { (byte)(UInt64)value });
+                    _robotModel.DigitalInputBit0 = inputBits[0];
+                    _robotModel.DigitalInputBit1 = inputBits[1];
+                    _robotModel.DigitalInputBit2 = inputBits[2];
+                    _robotModel.DigitalInputBit3 = inputBits[3];
+                    _robotModel.DigitalInputBit4 = inputBits[4];
+                    _robotModel.DigitalInputBit5 = inputBits[5];
+                    _robotModel.DigitalInputBit6 = inputBits[6];
+                    _robotModel.DigitalInputBit7 = inputBits[7];
+                    break;
+                case "joint_temperatures":
+                    _robotModel.JointTemperatures = (Vector6D)value;
+                    break;
+                case "actual_execution_time":
+                    _robotModel.ActualExecutionTime = (double)value;
+                    break;
+                case "robot_mode":
+                    _robotModel.RobotMode = (RobotMode)(int)value;
+                    break;
+                case "joint_mode":
+                    _robotModel.JointMode = (Vector6D)value;                //ToDo - split modes for each joint
+                    break;
+                case "safety_mode":
+                    _robotModel.SafetyMode = (SafetyMode)(int)value;
+                    break;
+
+
+
+
+
+
                 case "actual_digital_output_bits":
                     BitArray bitArray = new BitArray(new byte[] { (byte)(UInt64)value });
                     _robotModel.DigitalOutputBit0 = bitArray[0];
@@ -406,15 +495,10 @@ namespace RobotServer
                     _robotModel.DigitalOutputBit6 = bitArray[6];
                     _robotModel.DigitalOutputBit7 = bitArray[7];
                     break;
-                case "actual_TCP_pose":
-                    _robotModel.ActualTCPPose = (Vector6D) value;
-                    break;
-                case "robot_mode":
-                    _robotModel.RobotMode = (RobotMode)(int)value;
-                    break;
-                case "safety_mode":
-                    _robotModel.SafetyMode = (SafetyMode)(int)value;
-                    break;
+               
+               
+
+               
                 default:
                     throw new NotImplementedException("Did not find any handling for " + key);
             }
