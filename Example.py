@@ -34,7 +34,7 @@ import clr  #remember to pip install pythonnet as administrator for clr access
 import sys
 sys.path.append(r"C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\bin\Debug")
 clr.AddReference("UniversalRobotsConnect")
-from UniversalRobotsConnect import RobotController
+from UniversalRobotsConnect import RobotConnector
 
 
 #IP = '192.168.56.101'  #URSim - Running in Oracle VM VirtualBox  
@@ -151,12 +151,12 @@ def ExampleFT_sensor():
     
 def ExampleCSharpDll():
     print("Staring DLL")
-    robot = RobotController(IP)
+    robotConnector = RobotConnector(IP)
     print("DLL is started")    
     output_bit0 = False
     print("Output Bit 0 from C#:  " + str(output_bit0))
     while True:
-        new_value = robot.RobotModel.DigitalOutputBit0
+        new_value = robotConnector.RobotModel.DigitalOutputBit0
         if(new_value != output_bit0):
             output_bit0 = new_value
             print("Output Bit 0 from C#:  " + str(output_bit0))

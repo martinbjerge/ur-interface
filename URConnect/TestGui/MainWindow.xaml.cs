@@ -22,11 +22,11 @@ namespace TestGui
     /// </summary>
     public partial class MainWindow : Window
     {
-        private RobotController _robotController;
+        private RobotConnector _robotConnector;
         public MainWindow()
         {
             InitializeComponent();
-            _robotController = new RobotController("192.168.178.128");
+            _robotConnector = new RobotConnector("192.168.178.128");
 
         }
     }

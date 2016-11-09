@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
+using log4net;
 
 
 namespace UniversalRobotsConnect
@@ -26,9 +27,9 @@ namespace UniversalRobotsConnect
         RTDE_CONTROL_PACKAGE_PAUSE = 80
     }
 
-    class RTDE
+    public class RTDE
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(typeof(RTDE));
+        private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private const int port = 30004;
 

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using log4net;
 using UniversalRobotsConnect.Types;
 
 [assembly: log4net.Config.XmlConfigurator(Watch = true)]
@@ -68,7 +69,7 @@ namespace UniversalRobotsConnect
 
     public class RobotModel
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(typeof(RobotModel));
+        private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private bool _digitalOutputBit0;
         private bool _digitalOutputBit1;
         private bool _digitalOutputBit2;

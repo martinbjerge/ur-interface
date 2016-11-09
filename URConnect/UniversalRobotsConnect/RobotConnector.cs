@@ -1,43 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using log4net;
+using log4net.Config;
 
 namespace UniversalRobotsConnect
 {
-    class RobotConnector
+    public class RobotConnector
     {
         public RobotModel RobotModel;
-        //private RealTimeClient _realTimeClient;
-        private RTDE _rtde;
-        private RealTimeClient _realTimeClient;
+        public RTDE RTDE;
+        public RealTimeClient RealTimeClient;
 
-        
-        public RobotConnector(RobotModel robotModel)
+        private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
+        public RobotConnector(string ipAddress)
         {
-            RobotModel = robotModel;
+            FileInfo logFileInfo = new FileInfo(@"C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\bin\Debug\Resources\logConfig.xml");
+            XmlConfigurator.Configure(logFileInfo);
 
-            _rtde = new RTDE(RobotModel);
-            _realTimeClient = new RealTimeClient(RobotModel);
+            log.Debug("Started Logging");
+            log.Debug("Started Logging");
 
-            while (true)
-            {
-                //Thread.Sleep(1000);
-                // Fra RTC test i python "def myprg():\n write_output_boolean_register(0, True)\n set_digital_out(0, True)\n set_digital_out(1, True)\n\n write_output_boolean_register(1, True)\nend \n\n"
-                
-                //string testprogramString = "def myprg():\nset_digital_out(0,False)\nset_digital_out(1,False)\nend\n";
+            RobotModel = new RobotModel();
+            log.Debug("Started Robot Model");
+            RobotModel.IpAddress = IPAddress.Parse(ipAddress);
 
-                //byte[] testprogramBytes = Encoding.UTF8.GetBytes(testprogramString);
-                //_realTimeClient.Send(testprogramBytes);
-                //Thread.Sleep(1000);
-                //testprogramString = "def myprg():\nset_digital_out(0, True)\nset_digital_out(1, True)\nend\n";
-                ////testprogramString = "def myprg():\n write_output_boolean_register(0, True)\n set_digital_out(0, True)\n set_digital_out(1, True)\n\n write_output_boolean_register(1, True)\nend \n\n";
-                //testprogramBytes = Encoding.UTF8.GetBytes(testprogramString);
-                //_realTimeClient.Send(testprogramBytes);
-            }
+            RTDE = new RTDE(RobotModel);
+            RealTimeClient = new RealTimeClient(RobotModel);
+            
         }
     }
 }

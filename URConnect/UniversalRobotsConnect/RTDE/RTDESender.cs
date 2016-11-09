@@ -5,11 +5,14 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using log4net;
 
 namespace UniversalRobotsConnect
 {
     class RTDESender
     {
+        private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private List<byte[]> _dataToSend = new List<byte[]>();
         private NetworkStream _stream;
         private Thread _thread;

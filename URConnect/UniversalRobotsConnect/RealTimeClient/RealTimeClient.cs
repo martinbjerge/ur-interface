@@ -6,12 +6,13 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using log4net;
 
 namespace UniversalRobotsConnect
 {
-    class RealTimeClient
+    public class RealTimeClient
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(typeof(RealTimeClient));
+        private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private const int port = 30003;
         private TcpClient _client;

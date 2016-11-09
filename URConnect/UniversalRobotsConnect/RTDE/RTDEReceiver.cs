@@ -7,13 +7,14 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using log4net;
 using UniversalRobotsConnect.Types;
 
 namespace UniversalRobotsConnect
 {
     class RTDEReceiver
     {
-        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(typeof(RTDEReceiver));
+        private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         internal event EventHandler<DataReceivedEventArgs> DataReceived;
         private NetworkStream _stream;

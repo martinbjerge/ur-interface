@@ -10,11 +10,11 @@ C:\SourceCode\ur-interface\URConnect\RobotServer\obj\Debug\RobotServer.dll
 C:\SourceCode\ur-interface\URConnect\RobotServer\obj\Debug\RobotServer.pdb
 C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\bin\Debug\Resources\rtde_configuration.xml
 C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\bin\Debug\Resources\logConfig.xml
-C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\bin\Debug\log4net.dll
-C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\bin\Debug\log4net.xml
-C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\obj\Debug\UniversalRobotsConnect.csproj.GenerateResource.Cache
 C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\bin\Debug\UniversalRobotsConnect.dll
 C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\bin\Debug\UniversalRobotsConnect.pdb
+C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\bin\Debug\log4net.dll
+C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\bin\Debug\log4net.xml
 C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\obj\Debug\UniversalRobotsConnect.Resources.resources
+C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\obj\Debug\UniversalRobotsConnect.csproj.GenerateResource.Cache
 C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\obj\Debug\UniversalRobotsConnect.dll
 C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\obj\Debug\UniversalRobotsConnect.pdb
