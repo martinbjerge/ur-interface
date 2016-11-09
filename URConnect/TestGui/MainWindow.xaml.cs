@@ -12,8 +12,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using RobotServer;
-using RobotServer.Types;
+using UniversalRobotsConnect;
+
 
 namespace TestGui
 {
@@ -26,7 +26,7 @@ namespace TestGui
         public MainWindow()
         {
             InitializeComponent();
-            _robotController = new RobotController("172.16.92.131");
+            _robotController = new RobotController("192.168.178.128");
 
         }
     }

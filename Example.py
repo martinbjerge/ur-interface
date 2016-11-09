@@ -32,15 +32,16 @@ import time
 import sys
 import clr  #remember to pip install pythonnet as administrator for clr access
 import sys
-sys.path.append(r"C:\SourceCode\ur-interface\URConnect\RobotServer\bin\Debug")
-clr.AddReference("RobotServer")
-from RobotServer import RobotController
+sys.path.append(r"C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\bin\Debug")
+clr.AddReference("UniversalRobotsConnect")
+from UniversalRobotsConnect import RobotController
 
 
 #IP = '192.168.56.101'  #URSim - Running in Oracle VM VirtualBox  
 #IP = '192.168.0.2'
-IP = '192.168.25.128'   #URSim - Running in VMware player
+#IP = '192.168.25.128'   #URSim - Running in VMware player
 #IP = '172.16.92.131'
+IP = '192.168.178.128'  #VM ´Ware player
 acc = 0.9
 vel = 0.9
 
