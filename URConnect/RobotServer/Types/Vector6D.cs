@@ -9,17 +9,8 @@ namespace RobotServer.Types
 {
     public class Vector6D
     {
-        private double _x;
-
-        /// <summary>
-        /// X component
-        /// </summary>
-        public double X
-        {
-            get { return _x; }
-            set { _x = value; }
-        }
-
+        public double X { get; set; }
+      
         public double Y { get; set; }
 
         public double Z { get; set; }

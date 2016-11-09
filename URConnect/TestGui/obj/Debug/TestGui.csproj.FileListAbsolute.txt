@@ -32,3 +32,6 @@ C:\SourceCode\ur-interface\URConnect\TestGui\obj\Debug\TestGui.Properties.Resour
 C:\SourceCode\ur-interface\URConnect\TestGui\obj\Debug\TestGui.csproj.GenerateResource.Cache
 C:\SourceCode\ur-interface\URConnect\TestGui\obj\Debug\TestGui.exe
 C:\SourceCode\ur-interface\URConnect\TestGui\obj\Debug\TestGui.pdb
+C:\SourceCode\ur-interface\URConnect\TestGui\bin\Debug\log4net.dll
+C:\SourceCode\ur-interface\URConnect\TestGui\bin\Debug\log4net.xml
+C:\SourceCode\ur-interface\URConnect\TestGui\bin\Debug\Resources\logConfig.xml

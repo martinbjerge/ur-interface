@@ -26,7 +26,7 @@ namespace TestGui
         public MainWindow()
         {
             InitializeComponent();
-            _robotController = new RobotController("172.16.92.131");
+            _robotController = new RobotController("192.168.178.128");
 
         }
     }

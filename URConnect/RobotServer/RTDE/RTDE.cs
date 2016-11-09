@@ -28,18 +28,20 @@ namespace RobotServer
 
     class RTDE
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(typeof(RTDE));
+
         private const int port = 30004;
 
         private TcpClient _client;
         private NetworkStream _stream;
-        private Receiver _receiver;
-        private Sender _sender;
+        private RTDEReceiver _rtdeReceiver;
+        private RTDESender _rtdeSender;
         private RobotModel _robotModel;
         private List<KeyValuePair<string, string>> _rtdeOutputConfiguration;
 
         public void SendData(byte[] data)
         {
-            _sender.SendData(data);
+            _rtdeSender.SendData(data);
         }
 
         // Consumers register to receive data.
@@ -61,12 +63,11 @@ namespace RobotServer
             _stream = _client.GetStream();
             _rtdeOutputConfiguration = new List<KeyValuePair<string, string>>();
 
-            _receiver = new Receiver(_stream, _robotModel, _rtdeOutputConfiguration);
-            _sender = new Sender(_stream, _rtdeOutputConfiguration);
-            _receiver.DataReceived += OnDataReceived;
+            _rtdeReceiver = new RTDEReceiver(_stream, _robotModel, _rtdeOutputConfiguration);
+            _rtdeSender = new RTDESender(_stream, _rtdeOutputConfiguration);
+            _rtdeReceiver.DataReceived += OnDataReceived;
 
 
-            //StartListening();
             GetControllerVersion();
             Thread.Sleep(150);
             NegotiateProtocolVersion();
@@ -74,10 +75,7 @@ namespace RobotServer
             SetupRtdeInterface();
             Thread.Sleep(150);
             StartRTDEInterface();
-            Thread.Sleep(10000);
-            PauseRTDEInterface();
-            Thread.Sleep(2000);
-            StartRTDEInterface();
+
 
         }
 
@@ -85,10 +83,11 @@ namespace RobotServer
 
         private void GetControllerVersion()
         {
+            log.Debug("Get Controller Version from Robot");
             byte [] myBytes = new byte[0];
             byte[] testBytes = CreatePackage((byte)UR_RTDE_Command.RTDE_GET_URCONTROL_VERSION , myBytes);
 
-            _sender.SendData(testBytes);
+            _rtdeSender.SendData(testBytes);
         }
 
         
@@ -158,20 +157,19 @@ namespace RobotServer
 
         private void NegotiateProtocolVersion() //Version 1
         {
-            //byte[] testBytes = new byte[] { 0, 5, 86, 0, 1};
-
+            log.Debug("Negotiate Protocol Version with Robot");
             byte[] payload = GetByteArray((UInt16) 1);
 
             byte[] package = CreatePackage(86, payload);
 
             //string encodedText = "\x00\x05V\x00\x01";
             //byte[] byteArray = Encoding.ASCII.GetBytes(encodedText);
-            _sender.SendData(package);
+            _rtdeSender.SendData(package);
         }
 
         private void SetupRtdeInterface()
         {
-
+            log.Debug("Setting up RTDE Interface");
             _rtdeOutputConfiguration.Add(new KeyValuePair<string, string>("timestam" +
                                                                           "p", null));  //Always get the robot timestamp
             //FileStream fileStream = new FileStream(@"Resources\rtde_configuration.xml", FileMode.Open);
@@ -206,28 +204,30 @@ namespace RobotServer
 
             //byte[] payload = GetByteArray("timestamp,actual_digital_output_bits");
             byte[] package = CreatePackage(79, payload); 
-            _sender.SendData(package);
+            _rtdeSender.SendData(package);
         }
 
         private void StartRTDEInterface()
         {
+            log.Debug("Starting RTDE Interface");
             byte[] myBytes = new byte[0];
             byte[] package = CreatePackage((byte) UR_RTDE_Command.RTDE_CONTROL_PACKAGE_START, myBytes);
-            _sender.SendData(package);
+            _rtdeSender.SendData(package);
         }
 
         private void PauseRTDEInterface()
         {
+            log.Debug("Pausing RTDE Interface");
             byte[] myBytes = new byte[0];
             byte[] package = CreatePackage((byte)UR_RTDE_Command.RTDE_CONTROL_PACKAGE_PAUSE, myBytes);
-            _sender.SendData(package);
+            _rtdeSender.SendData(package);
         }
 
     }
 
 
 
-    sealed class Receiver
+    sealed class RTDEReceiver
     {
         internal event EventHandler<DataReceivedEventArgs> DataReceived;
         private NetworkStream _stream;
@@ -235,7 +235,7 @@ namespace RobotServer
         private RobotModel _robotModel;
         private List<KeyValuePair<string, string>> _rtdeOutputConfiguration;
 
-        internal Receiver(NetworkStream stream, RobotModel robotModel, List<KeyValuePair<string,string>> rtdeOutputConfiguration)
+        internal RTDEReceiver(NetworkStream stream, RobotModel robotModel, List<KeyValuePair<string,string>> rtdeOutputConfiguration)
         {
             _robotModel = robotModel;
             _stream = stream;
@@ -253,7 +253,7 @@ namespace RobotServer
                 {
                     if (_stream.CanRead)
                     {
-                        byte[] myReadBuffer = new byte[1024];
+                        byte[] myReadBuffer = new byte[32000];
                         StringBuilder myCompleteMessage = new StringBuilder();
                         int numberOfBytesRead = 0;
 
@@ -323,11 +323,6 @@ namespace RobotServer
                 }
                 else if (keyValuePair.Value == "UINT64")
                 {
-                    //byte[] bytes = new byte[8];
-                    //Array.Copy(payloadArray, payloadArrayIndex, bytes, 0, 8);
-                    //bytes = CheckEndian(bytes);
-                    //payloadArrayIndex = payloadArrayIndex + 8;
-                    //UpdateModel(keyValuePair.Key, (byte)BitConverter.ToUInt64(bytes, 0));
                     UpdateModel(keyValuePair.Key, GetUint64FromPayloadArray(payloadArray, ref payloadArrayIndex));
                 }
                 else if (keyValuePair.Value == "VECTOR6D")
@@ -517,7 +512,7 @@ namespace RobotServer
         }
     }
 
-    sealed class Sender
+    sealed class RTDESender
     {
         private byte[] _dataToSend = new byte[0];
         private NetworkStream _stream;
@@ -529,7 +524,7 @@ namespace RobotServer
             _dataToSend = data;
         }
 
-        internal Sender(NetworkStream stream, List<KeyValuePair<string, string>> rtdeOutputConfiguration )
+        internal RTDESender(NetworkStream stream, List<KeyValuePair<string, string>> rtdeOutputConfiguration )
         {
             _stream = stream;
             _rtdeOutputConfiguration = rtdeOutputConfiguration;
@@ -543,7 +538,7 @@ namespace RobotServer
             {
                 if (_dataToSend.Length > 0)
                 {
-                    Thread.Sleep(10);
+                    Thread.Sleep(130);              //From experience we know the Universal Robotics robot doesnt like to recieve quicker than 125 ms
                     _stream.Write(_dataToSend, 0, _dataToSend.Length);
                     //_stream.Flush();
                     //string test = Encoding.ASCII.GetString(_dataToSend);

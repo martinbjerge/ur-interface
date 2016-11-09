@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace RobotServer.Types {
+namespace RobotServer {
     using System;
     
     
@@ -61,20 +61,40 @@ namespace RobotServer.Types {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;log4net&gt;
+        ///    &lt;!-- A1 is set to be a ConsoleAppender --&gt;
+        ///    &lt;appender name=&quot;A1&quot; type=&quot;log4net.Appender.ConsoleAppender&quot;&gt;
+        ///
+        ///        &lt;!-- A1 uses PatternLayout --&gt;
+        ///        &lt;layout type=&quot;log4net.Layout.PatternLayout&quot;&gt;
+        ///            &lt;conversionPattern value=&quot;%-4timestamp [%thread] %-5level %logger %ndc - %message%newline&quot; /&gt;
+        ///        &lt;/layout&gt;
+        ///    &lt;/appender&gt;
+        ///    
+        ///    &lt;!-- Set root logger level to DEBUG and its only appender to A1 --&gt;
+        ///    &lt;root&gt;
+        ///        &lt;level value=&quot;DEBUG&quot; /&gt;
+        ///        &lt;appender-ref re [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string logConfig {
+            get {
+                return ResourceManager.GetString("logConfig", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot;?&gt;
         ///&lt;rtde_config&gt;
         ///  &lt;receive key=&quot;out&quot;&gt;
-        ///    &lt;field name=&quot;timestamp&quot; type=&quot;DOUBLE&quot;/&gt;
-        ///    &lt;!-- This tag may not be removed!!! --&gt;
-        ///    &lt;field name=&quot;actual_digital_output_bits&quot; type=&quot;UINT64&quot;/&gt;
+        ///    &lt;!--&lt;field name=&quot;output_bit_registers0_to_31&quot; type=&quot;UINT32&quot;/&gt;
+        ///    &lt;field name=&quot;output_int_register_0&quot; type=&quot;INT32&quot;/&gt;
+        ///    &lt;field name=&quot;output_int_register_1&quot; type=&quot;INT32&quot;/&gt;
+        ///    &lt;field name=&quot;output_double_register_0&quot; type=&quot;DOUBLE&quot;/&gt;
+        ///    &lt;field name=&quot;output_double_register_1&quot; type=&quot;DOUBLE&quot;/&gt;--&gt;
         ///
-        ///    &lt;field name=&quot;actual_q&quot; type=&quot;VECTOR6D&quot;/&gt;
-        ///    &lt;field name=&quot;actual_qd&quot; type=&quot;VECTOR6D&quot;/&gt;
-        ///    &lt;field name=&quot;actual_TCP_pose&quot; type=&quot;VECTOR6D&quot;/&gt;
-        ///    &lt;field name=&quot;actual_TCP_force&quot; type=&quot;VECTOR6D&quot;/&gt;
-        ///    &lt;field name=&quot;actual_digital_input_bits&quot; type=&quot;UINT64&quot;/&gt;
-        ///    &lt;field name=&quot;robot_mode&quot; type=&quot;INT32&quot;/&gt;
-        ///     [rest of string was truncated]&quot;;.
+        ///    &lt;!--&lt;field name=&quot;target_q&quot; type=&quot;VECTOR6D&quot;/&gt;--&gt;
+        ///    &lt;!--&lt;field name=&quot;target_qd&quot; type=&quot;VECTOR6D&quot;/&gt;--&gt;
+        ///        &lt;!--&lt;field name=&quot;target_qdd&quot; typ [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string rtde_configuration {
             get {
