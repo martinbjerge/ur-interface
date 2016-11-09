@@ -123,7 +123,7 @@ namespace RobotServer
                 if (value != _digitalInputBit0)
                 {
                     _digitalInputBit0 = value;
-                    log.Info("DigitalInputBit0, " + _digitalInputBit0);
+                    log.Info($"{RobotTimestamp} ,DigitalInputBit0, {_digitalInputBit0}");
                 }
             }
         }
@@ -136,7 +136,7 @@ namespace RobotServer
                 if (value != _digitalInputBit1)
                 {
                     _digitalInputBit1 = value;
-                    log.Info("DigitalInputBit1, " + _digitalInputBit1);
+                    log.Info($"{RobotTimestamp} ,DigitalInputBit1, {_digitalInputBit1}");
                 }
             }
         }
@@ -149,7 +149,7 @@ namespace RobotServer
                 if (value != _digitalInputBit2)
                 {
                     _digitalInputBit2 = value;
-                    log.Info("DigitalInputBit2, " + _digitalInputBit2);
+                    log.Info($"{RobotTimestamp} ,DigitalInputBit2, {_digitalInputBit2}");
                 }
             }
         }
@@ -162,7 +162,7 @@ namespace RobotServer
                 if (value != _digitalInputBit3)
                 {
                     _digitalInputBit3 = value;
-                    log.Info("DigitalInputBit3, " + _digitalInputBit3);
+                    log.Info($"{RobotTimestamp} ,DigitalInputBit3, {_digitalInputBit3}");
                 }
             }
         }
@@ -175,7 +175,7 @@ namespace RobotServer
                 if (value != _digitalInputBit4)
                 {
                     _digitalInputBit4 = value;
-                    log.Info("DigitalInputBit4, " + _digitalInputBit4);
+                    log.Info($"{RobotTimestamp} ,DigitalInputBit4, {_digitalInputBit4}");
                 }
             }
         }
@@ -188,7 +188,7 @@ namespace RobotServer
                 if (value != _digitalInputBit5)
                 {
                     _digitalInputBit5 = value;
-                    log.Info("DigitalInputBit5, " + _digitalInputBit5);
+                    log.Info($"{RobotTimestamp} ,DigitalInputBit5, {_digitalInputBit5}");
                 }
             }
         }
@@ -201,7 +201,7 @@ namespace RobotServer
                 if (value != _digitalInputBit6)
                 {
                     _digitalInputBit6 = value;
-                    log.Info("DigitalInputBit6, " + _digitalInputBit6);
+                    log.Info($"{RobotTimestamp} ,DigitalInputBit6, {_digitalInputBit6}");
                 }
             }
         }
@@ -214,7 +214,7 @@ namespace RobotServer
                 if (value != _digitalInputBit7)
                 {
                     _digitalInputBit7 = value;
-                    log.Info("DigitalInputBit7, " + _digitalInputBit7);
+                    log.Info($"{RobotTimestamp} ,DigitalInputBit7, {_digitalInputBit7}");
                 }
             }
         }
@@ -236,7 +236,7 @@ namespace RobotServer
                 if (value != _digitalOutputBit0)
                 {
                     _digitalOutputBit0 = value;
-                    log.Info("DigitalOutputBit0, "+ _digitalOutputBit0);
+                    log.Info($"{RobotTimestamp} ,DigitalOutputBit0, {_digitalOutputBit0}");
                 }
             }
         }
@@ -249,7 +249,7 @@ namespace RobotServer
                 if (value != _digitalOutputBit1)
                 {
                     _digitalOutputBit1 = value;
-                    log.Info("DigitalOutputBit1, " + _digitalOutputBit1);
+                    log.Info($"{RobotTimestamp} ,DigitalOutputBit1, {_digitalOutputBit1}");
                 }
             }
         }
@@ -262,7 +262,7 @@ namespace RobotServer
                 if (value != _digitalOutputBit2)
                 {
                     _digitalOutputBit2 = value;
-                    log.Info("DigitalOutputBit2, " + _digitalOutputBit2);
+                    log.Info($"{RobotTimestamp} ,DigitalOutputBit2, {_digitalOutputBit2}");
                 }
             }
         }
@@ -275,7 +275,7 @@ namespace RobotServer
                 if (value != _digitalOutputBit3)
                 {
                     _digitalOutputBit3 = value;
-                    log.Info("DigitalOutputBit3, " + _digitalOutputBit3);
+                    log.Info($"{RobotTimestamp} ,DigitalOutputBit3, {_digitalOutputBit3}");
                 }
             }
         }
@@ -288,7 +288,7 @@ namespace RobotServer
                 if (value != _digitalOutputBit4)
                 {
                     _digitalOutputBit4 = value;
-                    log.Info("DigitalOutputBit4, " + _digitalOutputBit4);
+                    log.Info($"{RobotTimestamp} ,DigitalOutputBit4, {_digitalOutputBit4}");
                 }
             }
         }
@@ -301,7 +301,7 @@ namespace RobotServer
                 if (value != _digitalOutputBit5)
                 {
                     _digitalOutputBit5 = value;
-                    log.Info("DigitalOutputBit5, " + _digitalOutputBit5);
+                    log.Info($"{RobotTimestamp} ,DigitalOutputBit5, {_digitalOutputBit5}");
                 }
             }
         }
@@ -314,7 +314,7 @@ namespace RobotServer
                 if (value != _digitalOutputBit6)
                 {
                     _digitalOutputBit6 = value;
-                    log.Info("DigitalOutputBit6, " + _digitalOutputBit6);
+                    log.Info($"{RobotTimestamp} ,DigitalOutputBit6, {_digitalOutputBit6}");
                 }
             }
         }
@@ -327,7 +327,7 @@ namespace RobotServer
                 if (value != _digitalOutputBit7)
                 {
                     _digitalOutputBit7 = value;
-                    log.Info("DigitalOutputBit7, " + _digitalOutputBit7);
+                    log.Info($"{RobotTimestamp} ,DigitalOutputBit7, {_digitalOutputBit7}");
                 }
             }
         }

@@ -226,6 +226,8 @@ namespace RobotServer
 
     sealed class RTDEReceiver
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(typeof(RTDEReceiver));
+
         internal event EventHandler<DataReceivedEventArgs> DataReceived;
         private NetworkStream _stream;
         private Thread _thread;
@@ -250,7 +252,7 @@ namespace RobotServer
                 {
                     if (_stream.CanRead)
                     {
-                        byte[] myReadBuffer = new byte[32000];
+                        byte[] myReadBuffer = new byte[64000];
                         StringBuilder myCompleteMessage = new StringBuilder();
                         int numberOfBytesRead = 0;
 
@@ -281,31 +283,38 @@ namespace RobotServer
             Array.Copy(recievedPackage, sizeArray, 2);
             sizeArray = CheckEndian(sizeArray);
             ushort size = BitConverter.ToUInt16(sizeArray, 0);
-            byte[] payloadArray = new byte[size - 3];
-            Array.Copy(recievedPackage, 3, payloadArray, 0, size - 3);
-
-            switch (type)
+            if (size > 3)
             {
-                case (byte)UR_RTDE_Command.RTDE_REQUEST_PROTOCOL_VERSION:
-                    _robotModel.RTDEProtocolVersion = DecodeProtocolVersion(payloadArray);
-                    break;
-                case (byte)UR_RTDE_Command.RTDE_GET_URCONTROL_VERSION:
-                    DecodeUniversalRobotsControllerVersion(payloadArray);
-                    break;
-                case (byte)UR_RTDE_Command.RTDE_CONTROL_PACKAGE_SETUP_OUTPUTS:
-                    DecodeRTDESetupPackage(payloadArray);
-                    break;
-                case (byte)UR_RTDE_Command.RTDE_DATA_PACKAGE:
-                    DecodeRTDEDataPackage(payloadArray);
-                    break;
-                case (byte)UR_RTDE_Command.RTDE_CONTROL_PACKAGE_START:
-                    _robotModel.RTDEConnectionState = DecodeRTDEControlPackageStart(payloadArray);
-                    break;
-                case (byte)UR_RTDE_Command.RTDE_CONTROL_PACKAGE_PAUSE:
-                    _robotModel.RTDEConnectionState = DecodeRTDEControlPacagePause(payloadArray);
-                    break;
-                default:
-                    throw new NotImplementedException("Package type not implemented");
+                byte[] payloadArray = new byte[size - 3];
+                Array.Copy(recievedPackage, 3, payloadArray, 0, size - 3);
+
+                switch (type)
+                {
+                    case (byte) UR_RTDE_Command.RTDE_REQUEST_PROTOCOL_VERSION:
+                        _robotModel.RTDEProtocolVersion = DecodeProtocolVersion(payloadArray);
+                        break;
+                    case (byte) UR_RTDE_Command.RTDE_GET_URCONTROL_VERSION:
+                        DecodeUniversalRobotsControllerVersion(payloadArray);
+                        break;
+                    case (byte) UR_RTDE_Command.RTDE_CONTROL_PACKAGE_SETUP_OUTPUTS:
+                        DecodeRTDESetupPackage(payloadArray);
+                        break;
+                    case (byte) UR_RTDE_Command.RTDE_DATA_PACKAGE:
+                        DecodeRTDEDataPackage(payloadArray);
+                        break;
+                    case (byte) UR_RTDE_Command.RTDE_CONTROL_PACKAGE_START:
+                        _robotModel.RTDEConnectionState = DecodeRTDEControlPackageStart(payloadArray);
+                        break;
+                    case (byte) UR_RTDE_Command.RTDE_CONTROL_PACKAGE_PAUSE:
+                        _robotModel.RTDEConnectionState = DecodeRTDEControlPacagePause(payloadArray);
+                        break;
+                    default:
+                        throw new NotImplementedException("Package type not implemented");
+                }
+            }
+            else
+            {
+                log.Error("Got a packet too small");
             }
         }
 
