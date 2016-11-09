@@ -88,7 +88,7 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         Constructor see class description for more info.
         '''
         logger = URBasic.dataLogging.DataLogging()
-        name = logger.AddEventLogging(__name__)        
+        name = logger.AddEventLogging(__name__,log2Consol=False)        
         self._logger = logger.__dict__[name]
         self.__host = host
         self.__reconnectTimeout = 60 #Seconds (while in run)

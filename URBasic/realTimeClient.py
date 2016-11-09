@@ -82,7 +82,7 @@ class RT_CLient(URBasic.rtde.RTDE, metaclass=Singleton):
         '''
         super().__init__(host, rtde_conf_filename) 
         logger = URBasic.dataLogging.DataLogging()
-        name = logger.AddEventLogging(__name__)        
+        name = logger.AddEventLogging(__name__, log2Consol=False)        
         self.__logger = logger.__dict__[name]
         self.__host = host
         self.__conn_state = ConnectionState.DISCONNECTED

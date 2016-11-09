@@ -64,7 +64,7 @@ class DataLogging(metaclass=Singleton):
         if not os.path.exists(self.directory):
             os.makedirs(self.directory)        
     
-    def AddEventLogging(self, name='root', log2file=True, log2Consol=True):
+    def AddEventLogging(self, name='root', log2file=True, log2Consol=True, level = logging.INFO):
         '''
         Add a new event logger, the event logger can log data to a file and also output the log to the console.
         
@@ -82,7 +82,7 @@ class DataLogging(metaclass=Singleton):
             self.__dict__[name].addHandler(self.fileLogHandler)
         if log2Consol:
             self.__dict__[name].addHandler(self.streamLogHandler)
-        self.__dict__[name].setLevel(logging.INFO)
+        self.__dict__[name].setLevel(level)
         return name
 
     def AddDataLogging(self,name='root'):
