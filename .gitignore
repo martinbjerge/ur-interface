@@ -9,3 +9,5 @@ URConnect/RobotServer/obj/
 URConnect/TestGui/obj/Debug/
 URConnect/RobotServer/bin/Debug/RobotServer.pdb
 *.suo
+*.pdb
+URConnect/UniversalRobotsConnect/obj/Debug/
