@@ -687,11 +687,20 @@ end
         '''
         self.print_pose(self.get_actual_tcp_pose())
 
-    def print_pose(self, pose):
+    def print_actual_joint_positions(self):
+        '''
+        print the actual TCP pose 
+        '''
+        self.print_pose(q=self.get_actual_joint_positions())
+
+    def print_pose(self, pose=None, q=None):
         '''
         print a pose 
         '''
-        print('Robot Pose: [{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*pose))
+        if q is None:
+            print('Robot Pose: [{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*pose))
+        else:
+            print('Robot joint positions: [{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*q))
 
 class HardwareProfile():
     '''
