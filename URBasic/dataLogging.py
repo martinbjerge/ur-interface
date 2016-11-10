@@ -46,6 +46,7 @@ class DataLogging(metaclass=Singleton):
         '''
         Constructor that setup a path where log files will be stored.
         '''
+        self.directory = None
         self.GetLogPath(path=path)
         self.fileLogHandler = logging.FileHandler(self.directory + '\\UrEvent.log', mode='w')
         self.fileLogHandler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
@@ -54,15 +55,18 @@ class DataLogging(metaclass=Singleton):
         self.fileDataLogHandler = logging.FileHandler(self.directory + '\\UrDataLog.csv', mode='w')
         self.writeDataLogHeadder = True
 
-    def GetLogPath(self,path):
+    def GetLogPath(self,path='.\\log'):
         '''
         Setup a path where log files will be stored
         Path format .\[path]\YY-mm-dd\HH-MM-SS\
         '''
         #Log path C:\SourceCode\bladecrawler\bladecrawler\log
-        self.directory =  time.strftime(path + "\\%Y-%m-%d\\%H-%M-%S", time.localtime())
-        if not os.path.exists(self.directory):
-            os.makedirs(self.directory)        
+        if self.directory is None:
+            self.directory =  time.strftime(path + "\\%Y-%m-%d\\%H-%M-%S", time.localtime())
+            if not os.path.exists(self.directory):
+                os.makedirs(self.directory)
+                
+        return self.directory        
     
     def AddEventLogging(self, name='root', log2file=True, log2Consol=True, level = logging.INFO):
         '''
