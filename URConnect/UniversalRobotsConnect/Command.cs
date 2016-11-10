@@ -13,9 +13,13 @@ namespace UniversalRobotsConnect
         // Constructor
         public Command(/*Receiver receiver*/)
         {
-            //this.receiver = receiver;
+            IsCompleted = false;
         }
 
         public abstract void Execute();
+
+        public abstract bool IsCompleted { get; set; }
+
+       
     }
 }

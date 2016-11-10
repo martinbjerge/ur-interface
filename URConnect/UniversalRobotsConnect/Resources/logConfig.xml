@@ -1,10 +1,11 @@
 <log4net>
-  <!-- A1 is set to be a ConsoleAppender -->
   <appender name="ConsoleAppender" type="log4net.Appender.ConsoleAppender">
-
-    <!-- A1 uses PatternLayout -->
+    <filter type="log4net.Filter.LoggerMatchFilter">
+      <loggerToMatch value="UniversalRobotsConnect.RobotModel" />
+      <acceptOnMatch value="false" />
+    </filter>
     <layout type="log4net.Layout.PatternLayout">
-      <conversionPattern value="%-4timestamp [%thread] %-5level %logger %ndc - %message%newline" />
+      <conversionPattern value="%-4timestamp [%thread] %-5level %logger - %message%newline" />
     </layout>
   </appender>
 
@@ -17,7 +18,7 @@
     <appendToFile value="true" />
     <maximumFileSize value="1000KB" />
     <layout type="log4net.Layout.PatternLayout">
-      <conversionPattern value="%date{ABSOLUTE} [%thread] %-5level %logger %ndc - %message%newline" />
+      <conversionPattern value="%date{ABSOLUTE} [%thread] %-5level %logger - %message%newline" />
     </layout>
   </appender>
   <appender name="dataFileLog" type="log4net.Appender.RollingFileAppender">

@@ -42,7 +42,7 @@ namespace UniversalRobotsConnect
                 {
                     if (_stream.CanRead)
                     {
-                        byte[] myReadBuffer = new byte[64000];
+                        byte[] myReadBuffer = new byte[100000];
                         StringBuilder myCompleteMessage = new StringBuilder();
                         int numberOfBytesRead = 0;
 
@@ -102,12 +102,13 @@ namespace UniversalRobotsConnect
                         _robotModel.RTDEConnectionState = DecodeRTDEControlPacagePause(payloadArray);
                         break;
                     default:
-                        throw new NotImplementedException("Package type not implemented " + (UR_RTDE_Command)type);
+                        break;
+                        //throw new NotImplementedException("Package type not implemented " + (UR_RTDE_Command)type);   TODO fixme - vi kan sommetider få en pakke 37 .. hvad så end det er .. skal fixes 
                 }
             }
             else
             {
-                log.Error("Got a packet too small");
+                //log.Error("Got a packet too small");  todo fixme - sørg for at få checket hvorfor den engang imellem sender en pakke der er for lille .. 
             }
         }
 
@@ -410,15 +411,14 @@ namespace UniversalRobotsConnect
         {
             var str = Encoding.Default.GetString(payloadArray);
             string[] values = str.Split(',');
-            List<KeyValuePair<string, string>> updatedKeyValueList = new List<KeyValuePair<string, string>>();
-            int index = 0;
-            foreach (KeyValuePair<string, string> keyValuePair in rtdeConfiguration)
+           
+            for (int i = 0; i < rtdeConfiguration.Count; i++)
             {
-                var newKeyValuePair = new KeyValuePair<string, string>(keyValuePair.Key, values[index]);
-                updatedKeyValueList.Add(newKeyValuePair);
-                index++;
+                if (rtdeConfiguration[i].Value != values[i])
+                {
+                    rtdeConfiguration[i] = new KeyValuePair<string, string>(rtdeConfiguration[i].Key, values[i]);
+                }
             }
-            rtdeConfiguration = updatedKeyValueList;        //dangerous reference override
         }
 
         
