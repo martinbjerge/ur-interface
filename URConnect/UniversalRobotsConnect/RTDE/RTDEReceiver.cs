@@ -21,12 +21,14 @@ namespace UniversalRobotsConnect
         private Thread _thread;
         private RobotModel _robotModel;
         private List<KeyValuePair<string, string>> _rtdeOutputConfiguration;
+        private List<KeyValuePair<string, string>> _rtdeInputConfiguration;
 
-        internal RTDEReceiver(NetworkStream stream, RobotModel robotModel, List<KeyValuePair<string, string>> rtdeOutputConfiguration)
+        internal RTDEReceiver(NetworkStream stream, RobotModel robotModel, List<KeyValuePair<string, string>> rtdeOutputConfiguration, List<KeyValuePair<string, string>> rtdeInputConfiguration)
         {
             _robotModel = robotModel;
             _stream = stream;
             _rtdeOutputConfiguration = rtdeOutputConfiguration;
+            _rtdeInputConfiguration = rtdeInputConfiguration;
             _thread = new Thread(Run);
             _thread.Start();
         }
@@ -85,7 +87,10 @@ namespace UniversalRobotsConnect
                         DecodeUniversalRobotsControllerVersion(payloadArray);
                         break;
                     case (byte)UR_RTDE_Command.RTDE_CONTROL_PACKAGE_SETUP_OUTPUTS:
-                        DecodeRTDESetupPackage(payloadArray);
+                        DecodeRTDESetupPackage(payloadArray, _rtdeOutputConfiguration);
+                        break;
+                    case (byte)UR_RTDE_Command.RTDE_CONTROL_PACKAGE_SETUP_INPUTS:
+                        DecodeRTDESetupPackage(payloadArray, _rtdeInputConfiguration);
                         break;
                     case (byte)UR_RTDE_Command.RTDE_DATA_PACKAGE:
                         DecodeRTDEDataPackage(payloadArray);
@@ -97,7 +102,7 @@ namespace UniversalRobotsConnect
                         _robotModel.RTDEConnectionState = DecodeRTDEControlPacagePause(payloadArray);
                         break;
                     default:
-                        throw new NotImplementedException("Package type not implemented");
+                        throw new NotImplementedException("Package type not implemented " + (UR_RTDE_Command)type);
                 }
             }
             else
@@ -105,6 +110,8 @@ namespace UniversalRobotsConnect
                 log.Error("Got a packet too small");
             }
         }
+
+        
 
         private void DecodeRTDEDataPackage(byte[] payloadArray)
         {
@@ -131,11 +138,32 @@ namespace UniversalRobotsConnect
                 {
                     UpdateModel(keyValuePair.Key, GetVector6DInt32FromPayloadArray(payloadArray, ref payloadArrayIndex));
                 }
+                else if (keyValuePair.Value == "VECTOR3D")
+                {
+                    UpdateModel(keyValuePair.Key, GetVector3DFromPayloadArray(payloadArray, ref payloadArrayIndex));
+                }
+                else if (keyValuePair.Value == "UINT32")
+                {
+                    UpdateModel(keyValuePair.Key, GetUInt32FromPayloadArray(payloadArray, ref payloadArrayIndex));
+                }
                 else
                 {
                     throw new NotImplementedException("Got a datatype in RTDE Data Package with a value of " + keyValuePair.Value + " that we did not expect");
                 }
             }
+            if (payloadArrayIndex != payloadArray.Length)
+            {
+                log.Error("Did not decode all the data");
+                throw new ArgumentOutOfRangeException("Did not decode all the data");
+            }
+        }
+
+        private object GetVector3DFromPayloadArray(byte[] payloadArray, ref int payloadArrayIndex)
+        {
+            var x = GetDoubleFromPayloadArray(payloadArray, ref payloadArrayIndex);
+            var y = GetDoubleFromPayloadArray(payloadArray, ref payloadArrayIndex);
+            var z = GetDoubleFromPayloadArray(payloadArray, ref payloadArrayIndex);
+            return new Vector3D(x, y, z);
         }
 
         private object GetVector6DInt32FromPayloadArray(byte[] payloadArray, ref int payloadArrayIndex)
@@ -272,12 +300,30 @@ namespace UniversalRobotsConnect
                 case "safety_mode":
                     _robotModel.SafetyMode = (SafetyMode)(int)value;
                     break;
-
-
-
-
-
-
+                case "actual_tool_accelerometer":
+                    _robotModel.ActualToolAccelerometer = (Vector3D)value;
+                    break;
+                case "speed_scaling":
+                    _robotModel.SpeedScaling = (double)value;
+                    break;
+                case "target_speed_fraction":
+                    _robotModel.TargetSpeedFraction = (double)value;
+                    break;
+                case "actual_momentum":
+                    _robotModel.ActualMomentum = (double)value;
+                    break;
+                case "actual_main_voltage":
+                    _robotModel.ActualMainVoltage = (double)value;
+                    break;
+                case "actual_robot_voltage":
+                    _robotModel.ActualRobotVoltage = (double)value;
+                    break;
+                case "actual_robot_current":
+                    _robotModel.ActualRobotCurrent = (double)value;
+                    break;
+                case "actual_joint_voltage":
+                    _robotModel.ActualJointVoltage = (Vector6D)value;
+                    break;
                 case "actual_digital_output_bits":
                     BitArray bitArray = new BitArray(new byte[] { (byte)(UInt64)value });
                     _robotModel.DigitalOutputBit0 = bitArray[0];
@@ -289,8 +335,43 @@ namespace UniversalRobotsConnect
                     _robotModel.DigitalOutputBit6 = bitArray[6];
                     _robotModel.DigitalOutputBit7 = bitArray[7];
                     break;
+                case "runtime_state":
+                    _robotModel.RuntimeState = (uint) value;
+                    break;
 
 
+                case "standard_analog_input0":
+                    _robotModel.StandardAnalogInput0 = (double)value;
+                    break;
+                case "standard_analog_input1":
+                    _robotModel.StandardAnalogInput1 = (double)value;
+                    break;
+                case "standard_analog_output0":
+                    _robotModel.StandardAnalogOutput0 = (double)value;
+                    break;
+                case "standard_analog_output1":
+                    _robotModel.StandardAnalogOutput = (double)value;
+                    break;
+
+
+                case "io_current":
+                    _robotModel.IOCurrent = (double)value;
+                    break;
+
+
+
+                case "tool_analog_input0":
+                    _robotModel.ToolAnalogInput0 = (double)value;
+                    break;
+                case "tool_analog_input1":
+                    _robotModel.ToolAnalogInput1 = (double)value;
+                    break;
+                case "tool_output_voltage":
+                    _robotModel.ToolOutputVoltage = (int)value;
+                    break;
+                case "tool_output_current":
+                    _robotModel.ToolOutputCurrent = (double)value;
+                    break;
 
 
                 default:
@@ -325,20 +406,22 @@ namespace UniversalRobotsConnect
 
         }
 
-        private void DecodeRTDESetupPackage(byte[] payloadArray)
+        private void DecodeRTDESetupPackage(byte[] payloadArray, List<KeyValuePair<string,string>> rtdeConfiguration )
         {
             var str = Encoding.Default.GetString(payloadArray);
             string[] values = str.Split(',');
             List<KeyValuePair<string, string>> updatedKeyValueList = new List<KeyValuePair<string, string>>();
             int index = 0;
-            foreach (KeyValuePair<string, string> keyValuePair in _rtdeOutputConfiguration)
+            foreach (KeyValuePair<string, string> keyValuePair in rtdeConfiguration)
             {
                 var newKeyValuePair = new KeyValuePair<string, string>(keyValuePair.Key, values[index]);
                 updatedKeyValueList.Add(newKeyValuePair);
                 index++;
             }
-            _rtdeOutputConfiguration = updatedKeyValueList;
+            rtdeConfiguration = updatedKeyValueList;        //dangerous reference override
         }
+
+        
 
         private void DecodeUniversalRobotsControllerVersion(byte[] payload)
         {

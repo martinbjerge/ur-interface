@@ -12,9 +12,6 @@ using UniversalRobotsConnect.Types;
 
 namespace UniversalRobotsConnect
 {
-    
-
-
     public enum ConnectionState : int
     {
         Error = 0,
@@ -499,7 +496,30 @@ namespace UniversalRobotsConnect
         public Vector6D TargetTCPSpeed { get; set; }
         public Vector6D JointTemperatures { get; set; }
         public double ActualExecutionTime { get; set; }
-        public Vector6D JointMode { get; set; }     //Must use jointmode enum
+        public Vector6D JointMode { get; set; }     //must use jointmode enum
+        public Vector3D ActualToolAccelerometer { get; set; }
+        public double SpeedScaling { get; set; }
+        public double TargetSpeedFraction { get; set; }
+        public double ActualMomentum { get; set; }
+        public double ActualMainVoltage { get; set; }
+        public double ActualRobotVoltage { get; set; }
+        public double ActualRobotCurrent { get; set; }
+        public Vector6D ActualJointVoltage { get; set; }
+        public uint RuntimeState { get; set; }  //probably an enum .. must fix
+        public double IOCurrent { get; set; }
+        public double ToolAnalogInput0 { get; set; }
+        public double ToolAnalogInput1 { get; set; }
+        public double ToolOutputCurrent { get; set; }
+        public int ToolOutputVoltage { get; set; }
+        public double StandardAnalogInput0 { get; set; }
+        public double StandardAnalogInput1 { get; set; }
+        public double StandardAnalogOutput0 { get; set; }
+        public double StandardAnalogOutput { get; set; }
+
+
+
+
+
 
 
         private bool Vector6DEquals(Vector6D firstVector6D, Vector6D secondVector6D, double precision)

@@ -39,6 +39,7 @@ namespace UniversalRobotsConnect
         private RTDESender _rtdeSender;
         private RobotModel _robotModel;
         private List<KeyValuePair<string, string>> _rtdeOutputConfiguration;
+        private List<KeyValuePair<string, string>> _rtdeInputConfiguration;
 
         public void SendData(byte[] data)
         {
@@ -63,8 +64,9 @@ namespace UniversalRobotsConnect
             _client = new TcpClient(_robotModel.IpAddress.ToString(), port);    
             _stream = _client.GetStream();
             _rtdeOutputConfiguration = new List<KeyValuePair<string, string>>();
+            _rtdeInputConfiguration = new List<KeyValuePair<string, string>>();
 
-            _rtdeReceiver = new RTDEReceiver(_stream, _robotModel, _rtdeOutputConfiguration);
+            _rtdeReceiver = new RTDEReceiver(_stream, _robotModel, _rtdeOutputConfiguration, _rtdeInputConfiguration);
             _rtdeSender = new RTDESender(_stream, _rtdeOutputConfiguration);
             _rtdeReceiver.DataReceived += OnDataReceived;
 
@@ -168,40 +170,55 @@ namespace UniversalRobotsConnect
         private void SetupRtdeInterface()
         {
             log.Debug("Setting up RTDE Interface");
-            _rtdeOutputConfiguration.Add(new KeyValuePair<string, string>("timestamp", null));  //Always get the robot timestamp
-            //FileStream fileStream = new FileStream(@"Resources\rtde_configuration.xml", FileMode.Open);
+
+            GetRTDEConfigFromFile("receive", _rtdeOutputConfiguration);
+            _rtdeOutputConfiguration.Insert(0, new KeyValuePair<string, string>("timestamp", null));  //Always get the robot timestamp
+            
+            byte[] outputPayload = GetByteArray(GetRTDEPayloadString(_rtdeOutputConfiguration));
+            byte[] outputPackage = CreatePackage((byte) UR_RTDE_Command.RTDE_CONTROL_PACKAGE_SETUP_OUTPUTS, outputPayload); 
+            _rtdeSender.SendData(outputPackage);
+
+            GetRTDEConfigFromFile("send", _rtdeInputConfiguration);
+            if (_rtdeInputConfiguration.Count > 0)
+            {
+                byte[] inputPayload = GetByteArray(GetRTDEPayloadString(_rtdeInputConfiguration));
+                byte[] inputPackage = CreatePackage((byte) UR_RTDE_Command.RTDE_CONTROL_PACKAGE_SETUP_INPUTS, inputPayload);
+                _rtdeSender.SendData(inputPackage);
+            }
+
+        }
+
+        private string GetRTDEPayloadString(List<KeyValuePair<string, string>> rtdeConfiguration)
+        {
+            StringBuilder payloadStringBuilder = new StringBuilder();
+            int index = 1;
+            foreach (KeyValuePair<string, string> keyValuePair in rtdeConfiguration)
+            {
+                payloadStringBuilder.Append(keyValuePair.Key);
+                if (index < rtdeConfiguration.Count)
+                {
+                    payloadStringBuilder.Append(",");
+                }
+                index++;
+            }
+            return payloadStringBuilder.ToString();
+        }
+
+        private void GetRTDEConfigFromFile(string xmlKey, List<KeyValuePair<string, string>> rtdeConfiguration)
+        {
+            //List<KeyValuePair<string,string>> values = new List<KeyValuePair<string, string>>();
             XmlReader xmlReader = XmlReader.Create(@"C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\bin\Debug\Resources\rtde_configuration.xml");
-            xmlReader.ReadToFollowing("receive");
+            xmlReader.ReadToFollowing(xmlKey);
             if (xmlReader.ReadToDescendant("field"))
             {
                 do
                 {
                     var name = xmlReader.GetAttribute("name");
                     var value = xmlReader.GetAttribute("type");
-                    _rtdeOutputConfiguration.Add(new KeyValuePair<string, string>(name, value));
+                    rtdeConfiguration.Add(new KeyValuePair<string, string>(name, value));
                 } while (xmlReader.ReadToNextSibling("field"));
-                    
             }
-           
-            //_rtdeOutputConfiguration.Add(new KeyValuePair<string, string>("actual_digital_output_bits", null));
-
-            StringBuilder stringBuilder = new StringBuilder();
-            int index = 1;
-            foreach (KeyValuePair<string, string> keyValuePair in _rtdeOutputConfiguration)
-            {
-                stringBuilder.Append(keyValuePair.Key);
-                if (index <_rtdeOutputConfiguration.Count)
-                {
-                    stringBuilder.Append(",");
-                }
-                index++;
-            }
-
-            byte[] payload = GetByteArray(stringBuilder.ToString());
-
-            //byte[] payload = GetByteArray("timestamp,actual_digital_output_bits");
-            byte[] package = CreatePackage(79, payload); 
-            _rtdeSender.SendData(package);
+            //return rtdeConfiguration;
         }
 
         private void StartRTDEInterface()

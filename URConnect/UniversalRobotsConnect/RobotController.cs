@@ -13,23 +13,23 @@ namespace UniversalRobotsConnect
 {
     class RobotController
     {
-        //public readonly RobotModel RobotModel;
-        //private RobotConnector _robotConnector;
-        private static readonly ILog log = LogManager.GetLogger(typeof(RobotController));
+        ////public readonly RobotModel RobotModel;
+        ////private RobotConnector _robotConnector;
+        //private static readonly ILog log = LogManager.GetLogger(typeof(RobotController));
 
-        private RobotController(string ipAddress)
-        {
-            ////BasicConfigurator.Configure();
-            //FileInfo logFileInfo = new FileInfo(@"C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\bin\Debug\Resources\logConfig.xml");
-            //XmlConfigurator.Configure(logFileInfo);
+        //private RobotController(string ipAddress)
+        //{
+        //    ////BasicConfigurator.Configure();
+        //    //FileInfo logFileInfo = new FileInfo(@"C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\bin\Debug\Resources\logConfig.xml");
+        //    //XmlConfigurator.Configure(logFileInfo);
             
-            //log.Debug("Started Logging");
+        //    //log.Debug("Started Logging");
 
-            //RobotModel = new RobotModel();
-            //log.Debug("Started Robot Model");
-            //RobotModel.IpAddress = IPAddress.Parse(ipAddress);
-            ////_robotConnector = new RobotConnector(RobotModel);
+        //    //RobotModel = new RobotModel();
+        //    //log.Debug("Started Robot Model");
+        //    //RobotModel.IpAddress = IPAddress.Parse(ipAddress);
+        //    ////_robotConnector = new RobotConnector(RobotModel);
   
-        }
+        //}
     }
 }

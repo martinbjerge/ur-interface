@@ -58,6 +58,7 @@
     <Compile Include="RobotController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RobotModel.cs" />
+    <Compile Include="Command.cs" />
     <Compile Include="RTDE\RTDEReceiver.cs" />
     <Compile Include="RTDE\RTDE.cs" />
     <Compile Include="RTDE\RTDESender.cs" />

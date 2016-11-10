@@ -23,10 +23,14 @@ namespace TestGui
     public partial class MainWindow : Window
     {
         private RobotConnector _robotConnector;
+        private RobotModel _myRobotModel;
         public MainWindow()
         {
             InitializeComponent();
             _robotConnector = new RobotConnector("192.168.178.128");
+            _myRobotModel = _robotConnector.RobotModel;
+            
+            
 
         }
     }
