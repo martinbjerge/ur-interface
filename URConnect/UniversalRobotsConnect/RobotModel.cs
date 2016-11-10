@@ -96,6 +96,7 @@ namespace UniversalRobotsConnect
         private bool _digitalInputBit5;
         private bool _digitalInputBit6;
         private bool _digitalInputBit7;
+        private Vector6D _targetTCPPose;
 
         public string Password { get; set; }
 
@@ -492,7 +493,19 @@ namespace UniversalRobotsConnect
         public Vector6D JointControlOutput { get; set; }
         public Vector6D ActualTCPSpeed { get; set; }
         public Vector6D ActualTCPForce { get; set; }
-        public Vector6D TargetTCPPose { get; set; }
+
+        public Vector6D TargetTCPPose
+        {
+            get
+            {
+                return _targetTCPPose;
+            }
+            set
+            {
+                _targetTCPPose = value;
+                //log.Info($"{RobotTimestamp}, TargetTCPPose,{_targetTCPPose.X}, {_targetTCPPose.Y}, {_targetTCPPose.Z}, {_targetTCPPose.RX}, {_targetTCPPose.RY}, {_targetTCPPose.RZ}");   //LOGSPAM
+            }
+        }
         public Vector6D TargetTCPSpeed { get; set; }
         public Vector6D JointTemperatures { get; set; }
         public double ActualExecutionTime { get; set; }

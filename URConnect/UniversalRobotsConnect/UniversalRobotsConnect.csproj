@@ -45,6 +45,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChangeToolCommand.cs" />
+    <Compile Include="MoveToHomePositionCommand.cs" />
+    <Compile Include="MoveToWorkAreaCommand.cs" />
     <Compile Include="PoseGenerator.cs" />
     <Compile Include="RealTimeClient\RealTimeClient.cs" />
     <Compile Include="RealTimeClient\RealTimeClientReceiver.cs" />
@@ -62,6 +65,8 @@
     <Compile Include="RTDE\RTDEReceiver.cs" />
     <Compile Include="RTDE\RTDE.cs" />
     <Compile Include="RTDE\RTDESender.cs" />
+    <Compile Include="SandCommand.cs" />
+    <Compile Include="SoakCommand.cs" />
     <Compile Include="StructConverter.cs" />
     <Compile Include="Types\Vector3D.cs" />
     <Compile Include="Types\Vector6D.cs" />

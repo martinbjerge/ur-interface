@@ -182,10 +182,9 @@ namespace UniversalRobotsConnect
             if (_rtdeInputConfiguration.Count > 0)
             {
                 byte[] inputPayload = GetByteArray(GetRTDEPayloadString(_rtdeInputConfiguration));
-                byte[] inputPackage = CreatePackage((byte) UR_RTDE_Command.RTDE_CONTROL_PACKAGE_SETUP_INPUTS, inputPayload);
+                byte[] inputPackage = CreatePackage((byte)UR_RTDE_Command.RTDE_CONTROL_PACKAGE_SETUP_INPUTS, inputPayload);
                 _rtdeSender.SendData(inputPackage);
             }
-
         }
 
         private string GetRTDEPayloadString(List<KeyValuePair<string, string>> rtdeConfiguration)

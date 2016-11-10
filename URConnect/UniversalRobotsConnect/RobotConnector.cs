@@ -25,7 +25,7 @@ namespace UniversalRobotsConnect
             XmlConfigurator.Configure(logFileInfo);
 
             log.Debug("Started Logging");
-            log.Debug("Started Logging");
+            
 
             RobotModel = new RobotModel();
             log.Debug("Started Robot Model");
