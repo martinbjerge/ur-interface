@@ -94,7 +94,7 @@ end
         movestr = self._move(movetype='j', pose=pose, a=a, v=v, t=t, r=r, wait=wait, q=q)
         return self.send_program(prg.format(**locals()), wait)
         
-    def movel(self, pose, a=1.2, v =0.25, t =0, r =0, wait=True, q=None):
+    def movel(self, pose=None, a=1.2, v =0.25, t =0, r =0, wait=True, q=None):
         '''
         Move to position (linear in tool-space)
         See movej.
