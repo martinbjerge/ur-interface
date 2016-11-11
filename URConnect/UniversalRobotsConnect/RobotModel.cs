@@ -47,6 +47,13 @@ namespace UniversalRobotsConnect
         FAULT = 9
     }
 
+    public enum RuntimeState : uint
+    {
+        UnInitialized = 0,
+        Idle = 1,
+        Running = 2
+    }
+
     public enum JointMode : int
     {
         ShuttingDown = 236,
@@ -97,6 +104,7 @@ namespace UniversalRobotsConnect
         private bool _digitalInputBit6;
         private bool _digitalInputBit7;
         private Vector6D _targetTCPPose;
+        private RuntimeState _runtimeState;
 
         public string Password { get; set; }
 
@@ -518,7 +526,19 @@ namespace UniversalRobotsConnect
         public double ActualRobotVoltage { get; set; }
         public double ActualRobotCurrent { get; set; }
         public Vector6D ActualJointVoltage { get; set; }
-        public uint RuntimeState { get; set; }  //probably an enum .. must fix
+
+        public RuntimeState RuntimeState
+        {
+            get { return _runtimeState; }
+            set
+            {
+                if (_runtimeState != value)
+                {
+                    _runtimeState = value;
+                    log.Info($"{RobotTimestamp}, RuntimeState, {_runtimeState}");
+                }
+            }
+        }  //probably an enum .. must fix
         public double IOCurrent { get; set; }
         public double ToolAnalogInput0 { get; set; }
         public double ToolAnalogInput1 { get; set; }

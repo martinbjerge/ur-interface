@@ -18,3 +18,4 @@ C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\obj\Debug\UniversalR
 C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\obj\Debug\UniversalRobotsConnect.csproj.GenerateResource.Cache
 C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\obj\Debug\UniversalRobotsConnect.dll
 C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\obj\Debug\UniversalRobotsConnect.pdb
+C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\obj\Debug\UniversalRobotsConnect.csprojResolveAssemblyReference.cache
