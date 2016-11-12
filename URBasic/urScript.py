@@ -997,7 +997,33 @@ end'''
         return None
     
 ############    Module urmath    #################        
+    def pose_add(self,p_1, p_2):
+        '''
+        Pose addition
+        
+        Both arguments contain three position parameters (x, y, z) jointly called
+        P, and three rotation parameters (R x, R y, R z) jointly called R. This
+        function calculates the result x 3 as the addition of the given poses as
+        follows:
+        p 3.P = p 1.P + p 2.P
+        p 3.R = p 1.R * p 2.R
+        
+        Parameters
+        p 1: tool pose 1(pose)
+        p 2: tool pose 2 (pose)
 
+        Return Value
+        Sum of position parts and product of rotation parts (pose)
+        '''
+        Trans_1 = URBasic.kinematic.Pose2Tran_Mat(p_1)
+        Trans_2 = URBasic.kinematic.Pose2Tran_Mat(p_2)
+        Trans_3 = Trans_1@Trans_2
+        p_3 = URBasic.kinematic.Tran_Mat2Pose(Trans_3)
+        return p_3
+        
+        
+        
+        
 
 ############    Module interfaces  #################
         
