@@ -368,7 +368,7 @@ end'''
         prg = 'stopl({a}, {arot})'
         return self.send_program(prg.format(**locals()), wait)
 
-    def freedrive_mode(self, wait=True):
+    def freedrive_mode(self, wait=False):
         '''
         Set robot in freedrive mode. In this mode the robot can be moved around by hand in the 
         same way as by pressing the ”freedrive” button.

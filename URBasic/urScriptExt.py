@@ -664,15 +664,8 @@ end
         
         """
         prg =  '''def move_force():
-    thread Force_thread():
-        while (True):
-            force_mode(p{task_frame}, {selection_vector}, {wrench}, {f_type}, {limits})
-            sync()
-        end
-    end
-    global thread_handler = run Force_thread()
+    force_mode(p{task_frame}, {selection_vector}, {wrench}, {f_type}, {limits})
 {movestr}
-    kill thread_handler
     end_force_mode()
 end
 '''
