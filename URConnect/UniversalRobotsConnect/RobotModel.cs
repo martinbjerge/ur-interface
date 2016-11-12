@@ -36,17 +36,20 @@ namespace UniversalRobotsConnect
 
     public enum SafetyMode : uint
     {
-        NORMAL = 1,
-        REDUCED = 2,
-        PROTECTIVE_STOP = 3,
-        RECOVERY = 4,
-        SAFEGUARD_STOP = 5,
-        SYSTEM_EMERGENCY_STOP = 6,
-        ROBOT_EMERGENCY_STOP = 7,
-        VIOLATION = 8,
-        FAULT = 9
+        Normal = 1,
+        Reduced = 2,
+        ProtectiveStop = 3,
+        Recovery = 4,
+        SafeguardStop = 5,
+        SystemEmergencyStop = 6,
+        RobotEmergencyStop = 7,
+        Violation = 8,
+        Fault = 9
     }
-
+    
+    /// <summary>
+    /// The State of a program running on the Robot - UnInitialized until the first program is send to robot, then alternating between Idle and Running depending.
+    /// </summary>
     public enum RuntimeState : uint
     {
         UnInitialized = 0,
@@ -527,6 +530,9 @@ namespace UniversalRobotsConnect
         public double ActualRobotCurrent { get; set; }
         public Vector6D ActualJointVoltage { get; set; }
 
+        /// <summary>
+        /// Running state of a RealTimeClient program send to the Robot
+        /// </summary>
         public RuntimeState RuntimeState
         {
             get { return _runtimeState; }
