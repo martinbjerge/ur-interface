@@ -40,7 +40,7 @@ namespace UniversalRobotsConnect
                 command.Execute();
                 while (!command.IsCompleted)
                 {
-                    Thread.Sleep(1000);
+                    
                 }
             }
             log.Debug("NOW THE WHOLE PROGRAM IS DONE");

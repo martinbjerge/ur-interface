@@ -25,8 +25,12 @@ namespace UniversalRobotsConnect
             string move = "def move_j():\nmovej([1.5,0.0,-3.14,-0.5,0.0,0.0],a=1.2,v=0.9,r=0)\nend\n";
             byte[] commandBytes = Encoding.UTF8.GetBytes(move);
             _robotConnector.RealTimeClient.Send(commandBytes);
+            log.Debug("Moving to storage position");
+            while (_robotConnector.RobotModel.RuntimeState != RuntimeState.Idle)
+            {
+                
+            }
             log.Debug("WE ARE DONE .. GOING HOME");
-            Thread.Sleep(10000);
             IsCompleted = true;
         }
 

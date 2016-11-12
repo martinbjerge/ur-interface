@@ -337,7 +337,7 @@ namespace UniversalRobotsConnect
                     _robotModel.DigitalOutputBit7 = bitArray[7];
                     break;
                 case "runtime_state":
-                    _robotModel.RuntimeState = (uint) value;
+                    _robotModel.RuntimeState = (RuntimeState)(uint) value;
                     break;
 
 
