@@ -365,7 +365,7 @@ end'''
         a:    tool accleration [m/sˆ2]
         aRot: tool acceleration [rad/sˆ2] (optional), if not deﬁned a, position acceleration, is used
         '''
-        prg = 'stopl({a}, {arot})'
+        prg = 'stopl({a}, {aRot})'
         return self.send_program(prg.format(**locals()), wait)
 
     def freedrive_mode(self, wait=False):

@@ -598,7 +598,7 @@ end
                          v=0.25, 
                          t=0,
                          r=0.0, 
-                         movetype='p',
+                         movetype='l',
                          task_frame=[0.0, 0.0, 0.0,  0.0, 0.0, 0.0], 
                          selection_vector=[0, 0, 0,  0, 0, 0], 
                          wrench=[0.0, 0.0, 0.0,  0.0, 0.0, 0.0], 
@@ -663,14 +663,51 @@ end
         Status (bool): Status, True if signal set successfully.
         
         """
+        prefix="p"
+        t_val=''
+        if pose is None:
+            prefix=""
+            pose=q
+        pose = np.array(pose)
+        if movetype == 'j' or movetype == 'l':
+            tval='t={t},'.format(**locals())
+                            
+        movestr = ''
+        if np.size(pose.shape)==2:
+            for idx in range(np.size(pose, 0)):
+                posex = np.round(pose[idx], 4)
+                posex = posex.tolist()
+                if (np.size(pose, 0)-1)==idx:
+                    r=0
+                movestr +=  '    force_mode({prefix}{posex}, {selection_vector}, {wrench}, {f_type}, {limits})\n'.format(**locals())
+                movestr +=  '    move{movetype}({prefix}{posex}, a={a}, v={v}, {t_val} r={r})\n'.format(**locals())
+                
+            movestr +=  '    stopl({a}, {a})\n'.format(**locals())
+        else:
+            posex = np.round(pose, 4)
+            posex = posex.tolist()
+            movestr +=  '    force_mode({prefix}{posex}, {selection_vector}, {wrench}, {f_type}, {limits})\n'.format(**locals())
+            movestr +=  '    move{movetype}({prefix}{posex}, a={a}, v={v}, {t_val} r={r})\n'.format(**locals())
+
+        
+        prg_new =  '''def move_force():
+{movestr}
+    end_force_mode()
+end
+'''
+        
+        
+        
+        
+        
         prg =  '''def move_force():
     force_mode(p{task_frame}, {selection_vector}, {wrench}, {f_type}, {limits})
 {movestr}
     end_force_mode()
 end
 '''
-        
         movestr = self._move(movetype, pose, a, v, t, r, wait, q)
+        
         self.send_program(prg.format(**locals()),wait)
 
 
