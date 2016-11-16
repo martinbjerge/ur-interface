@@ -97,11 +97,15 @@ class UrScript(object):
 end
 '''
         movestr = self._move(movetype='j', pose=pose, a=a, v=v, t=t, r=r, wait=wait, q=q)
-        self.__ur.RealTimeClient.Send(prg.format(**locals()))
-        while(self.__ur.RobotModel.RuntimeState < 2):
-            pass
         
-        ##return self.send_program(prg.format(**locals()), wait)
+        programString = prg.format(**locals())
+        
+        self.__ur.RealTimeClient.Send(programString)
+        if(wait):
+            while(self.__ur.RobotModel.RuntimeState != 1):
+                #print("RuntimeState: " + str(self.__ur.RobotModel.RuntimeState))
+                pass
+        
         
     def movel(self, pose=None, a=1.2, v =0.25, t =0, r =0, wait=True, q=None):
         '''
@@ -122,7 +126,16 @@ end
 end
 '''
         movestr = self._move(movetype='l', pose=pose, a=a, v=v, t=t, r=r, wait=wait, q=q)
-        return self.send_program(prg.format(**locals()), wait)
+        
+        programString = prg.format(**locals())
+        
+        self.__ur.RealTimeClient.Send(programString)
+        if(wait):
+            while(self.__ur.RobotModel.RuntimeState != 1):
+                pass
+        
+        
+        #return self.send_program(prg.format(**locals()), wait)
 
     def movep(self, pose=None, a=1.2, v =0.25, r =0, wait=True, q=None):
         '''
@@ -172,6 +185,9 @@ end
 end
 '''
         movestr = self._move(movetype='p', pose=pose_to, a=a, v=v, t=0, r=r, wait=wait, q=q_to,pose_via=pose_via, q_via=q_via)
+        
+        
+        
         return self.send_program(prg.format(**locals()), wait)
  
     def _move(self, movetype, pose=None, a=1.2, v=0.25, t=0, r=0, wait=True, q=None, pose_via=None, q_via=None):

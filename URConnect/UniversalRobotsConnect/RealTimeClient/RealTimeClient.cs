@@ -37,7 +37,12 @@ namespace UniversalRobotsConnect
         {
 
             _realtimeClientSender.SendData(payload);
-            Thread.Sleep(150);      //Waiting a bit to return to allow for RuntimeState to be right
+            Thread.Sleep(150);      //Waiting to return to allow for RuntimeState to be right
+        }
+
+        public void Send(string payload)
+        {
+            Send(Encoding.UTF8.GetBytes(payload));
         }
 
     }

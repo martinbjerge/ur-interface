@@ -21,6 +21,7 @@ namespace UniversalRobotsConnect
 
         public RobotConnector(string ipAddress)
         {
+            Console.WriteLine("Hello");
             FileInfo logFileInfo = new FileInfo(@"C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\bin\Debug\Resources\logConfig.xml");
             XmlConfigurator.Configure(logFileInfo);
 
