@@ -26,10 +26,14 @@ __copyright__ = "Copyright 2016, Rope Robotics ApS, Denmark"
 __license__ = "MIT License"
 
 import URBasic.dataLogging
-import URBasic.realTimeClient
 import numpy as np
+import sys
+import clr
+sys.path.append(r"C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\bin\Debug")
+clr.AddReference("UniversalRobotsConnect")
+from UniversalRobotsConnect import RobotConnector
 
-class UrScript(URBasic.realTimeClient.RT_CLient):
+class UrScript(object):
     '''
     Interface to remote access UR script commands.
     For more details see the script manual at this site:
@@ -58,10 +62,11 @@ class UrScript(URBasic.realTimeClient.RT_CLient):
         '''
         Constructor see class description for more info.
         '''
-        super().__init__(host, rtde_conf_filename)
         logger = URBasic.dataLogging.DataLogging()        
         name = logger.AddEventLogging(__name__)        
         self.__logger = logger.__dict__[name]
+        self.__ur = RobotConnector(host)
+        
         self.__logger.info('Init done')
 
 #############   Module motion   ###############
@@ -92,7 +97,11 @@ class UrScript(URBasic.realTimeClient.RT_CLient):
 end
 '''
         movestr = self._move(movetype='j', pose=pose, a=a, v=v, t=t, r=r, wait=wait, q=q)
-        return self.send_program(prg.format(**locals()), wait)
+        self.__ur.RealTimeClient.Send(prg.format(**locals()))
+        while(self.__ur.RobotModel.RuntimeState < 2):
+            pass
+        
+        ##return self.send_program(prg.format(**locals()), wait)
         
     def movel(self, pose=None, a=1.2, v =0.25, t =0, r =0, wait=True, q=None):
         '''
