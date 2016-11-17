@@ -496,4 +496,24 @@ def Forward_kin(joint):
     #convert transfer matrix to pos
     axis_ang = Tran_Mat2Pose(fk)  
     return axis_ang    
+
+
+def Vektor_from_Base_to_TCP(vectorBase,axisangle):
+    """
+    Function to calculate the rotation of a vector with an axis angle. This function can be used to transform a vector from the base coordinate system to the tcp coordinate system. 
+    (To go from tcp to Base use -1*le as input)
+    
+    Parameters:
+    vectorBase (np.array, 3*1): the vector to be rotated
+    axisangle (np.array, 3*1): the axis angle between the base and the tcp
+    """
+    # calculating the rotation angle by finding the length of the axis angle
+    angle=axisangle[0]*axisangle[0]+axisangle[1]*axisangle[1]+axisangle[2]*axisangle[2]
+    angle=np.sqrt(angle)
+    # Defining the unit rotation angle
+    eRot=axisangle/angle
+    # calculation of the tcp vector using Rodrigues' rotation formula
+    vectorTCP= np.cos(angle)*vectorBase+np.sin(angle)*np.cross(eRot,vectorBase)+(1-np.cos(angle))*np.dot(eRot,vectorBase)*eRot
+    return vectorTCP
+    
     
