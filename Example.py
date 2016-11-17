@@ -22,6 +22,7 @@ in advertising or otherwise to promote the sale, use or other dealings in this S
 without prior written authorization from "Rope Robotics ApS".
 
 '''
+
 __author__ = "Martin Huus Bjerge"
 __copyright__ = "Copyright 2016, Rope Robotics ApS, Denmark"
 __license__ = "MIT License"
@@ -29,7 +30,6 @@ __license__ = "MIT License"
 import URBasic
 import URplus
 import time
-import sys
 import clr  #remember to pip install pythonnet as administrator for clr access
 import sys
 sys.path.append(r"C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\bin\Debug")
@@ -41,7 +41,7 @@ from UniversalRobotsConnect import RobotConnector
 #IP = '192.168.0.2'
 #IP = '192.168.25.128'   #URSim - Running in VMware player
 #IP = '172.16.92.131'
-IP = '192.168.178.128'  #VM ´Ware player
+IP = '172.16.74.129'  #VM ´Ware player
 acc = 0.9
 vel = 0.9
 
@@ -162,12 +162,25 @@ def ExampleCSharpDll():
             print("Output Bit 0 from C#:  " + str(output_bit0))
 
 
+def ExampleCSharpDllURScript():
+    ur = URBasic.urScript.UrScript(IP)
+    print("Starting first movej")
+    ur.movej(q=[0.,-1.5,0., -1.5,0,0], a=1.2, v=vel, t =0, r =0, wait=True)
+    print("first movej done - starting second movej")
+    ur.movej(pose=[0.5,0.4,0.4, 0,3.14,0], a=1.2, v=vel, t =0, r =0, wait=True)
+    print("second movej done - starting movel")
+    ur.movel(pose=[-0.5,0.4,0.4, 0,3.14,0], a=1.2, v=vel, t =0, r =0, wait=True)
+    print("WE ARE DONE")
+    
+
 if __name__ == '__main__':
     #ExampleDataLogging()   
     #ExampleRTDE()
     #ExampleRTC()
     #ExampleDbs()
-    ExampleurScript()
+    #ExampleurScript()
     #ExampleurScriptExt()
     #ExampleFT_sensor()
     #ExampleCSharpDll()
+    ExampleCSharpDllURScript()
+    

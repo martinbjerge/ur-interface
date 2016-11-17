@@ -20,7 +20,7 @@ namespace UniversalRobotsConnect
         public RobotController()
         {
 
-            _robotConnector = new RobotConnector("192.168.178.128");
+            _robotConnector = new RobotConnector("172.16.74.129");
 
             List<Command> commands = new List<Command>();
 
