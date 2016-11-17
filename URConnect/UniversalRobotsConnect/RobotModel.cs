@@ -108,6 +108,10 @@ namespace UniversalRobotsConnect
         private bool _digitalInputBit7;
         private Vector6D _targetTCPPose;
         private RuntimeState _runtimeState;
+        //private bool _robotStatusPowerOn;
+        private SafetyStatus _safetyStatus = new SafetyStatus();
+        private RobotStatus _robotStatus = new RobotStatus();
+        private double _robotTimeStamp;
 
         public string Password { get; set; }
 
@@ -115,7 +119,16 @@ namespace UniversalRobotsConnect
 
         public double RobotTimestamp
         {
-            get; set;
+            get { return _robotTimeStamp; }
+            set
+            {
+                //double delta = value - _robotTimeStamp;
+                //if (delta > 0.0081)
+                //{
+                //    log.Error($"Time since last RTDE timestamp: {delta}");
+                //}
+                _robotTimeStamp = value;
+            }
         }
 
         public ConnectionState RTDEConnectionState { get; set; }
@@ -555,10 +568,19 @@ namespace UniversalRobotsConnect
         public double StandardAnalogOutput0 { get; set; }
         public double StandardAnalogOutput { get; set; }
 
+        public RobotStatus RobotStatus
+        {
+            get { return _robotStatus; }
+            set { _robotStatus = value; }
+        }
 
+        public SafetyStatus SafetyStatus
+        {
+            get { return _safetyStatus; }
+            set { _safetyStatus = value; }
+        }
 
-
-
+        public double TCPForceScalar { get; set; }
 
 
         private bool Vector6DEquals(Vector6D firstVector6D, Vector6D secondVector6D, double precision)

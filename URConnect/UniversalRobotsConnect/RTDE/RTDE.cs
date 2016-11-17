@@ -43,7 +43,18 @@ namespace UniversalRobotsConnect
 
         public void SendData(byte[] data)
         {
-            _rtdeSender.SendData(data);
+            byte[] myBytes = new byte[] { 1, 0, 1, 0 };
+
+            myBytes = CheckEndian(myBytes);
+            byte[] testBytes = CreatePackage((byte)UR_RTDE_Command.RTDE_DATA_PACKAGE, myBytes);
+            
+            log.Debug($"Send RTDE to robot");
+            _rtdeSender.SendData(testBytes);
+        }
+
+        public void SendData(string payload)
+        {
+            SendData(Encoding.UTF8.GetBytes(payload));
         }
 
         // Consumers register to receive data.

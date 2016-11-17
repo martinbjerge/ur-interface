@@ -30,6 +30,12 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>KeyFile.pfx</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
@@ -68,6 +74,8 @@
     <Compile Include="SandCommand.cs" />
     <Compile Include="SoakCommand.cs" />
     <Compile Include="StructConverter.cs" />
+    <Compile Include="Types\RobotStatus.cs" />
+    <Compile Include="Types\SafetyStatus.cs" />
     <Compile Include="Types\Vector3D.cs" />
     <Compile Include="Types\Vector6D.cs" />
   </ItemGroup>
@@ -78,6 +86,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="KeyFile.pfx" />
     <None Include="packages.config" />
     <None Include="Resources\rtde_configuration.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -37,8 +37,8 @@
     <field name="actual_joint_voltage" type="VECTOR6D"/>
     <field name="actual_digital_output_bits" type="UINT64"/>
     <field name="runtime_state" type="UINT32"/>
-    <!--<field name="robot_status_bits" type="UINT32"/>-->
-        <!--<field name="safety_status_bits" type="UINT32"/>-->
+    <field name="robot_status_bits" type="UINT32"/>
+    <field name="safety_status_bits" type="UINT32"/>
         <!--<field name="analog_io_types" type="UINT32"/>-->
     <field name="standard_analog_input0" type="DOUBLE"/>
     <field name="standard_analog_input1" type="DOUBLE"/>
@@ -55,7 +55,7 @@
     <field name="tool_analog_input1" type="DOUBLE"/>
     <field name="tool_output_voltage" type="INT32"/>
     <field name="tool_output_current" type="DOUBLE"/>
-        <!--<field name="tcp_force_scalar" type="DOUBLE"/>-->
+    <field name="tcp_force_scalar" type="DOUBLE"/>
 
     <!--<field name="output_bit_registers0_to_31" type="UINT32"/>
         <field name="output_bit_registers32_to_63" type="UINT32"/>

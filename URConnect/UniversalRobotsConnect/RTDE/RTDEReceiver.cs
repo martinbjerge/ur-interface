@@ -231,6 +231,12 @@ namespace UniversalRobotsConnect
             switch (key)
             {
                 case "timestamp":
+                    double timestamp = (double) value;
+                    double delta = timestamp - _robotModel.RobotTimestamp;
+                    if (delta > 0.0081)
+                    {
+                        //log.Error($"{delta*1000} Milliseconds since last RTDE");
+                    }
                     _robotModel.RobotTimestamp = (double)value;
                     break;
                 case "target_q":
@@ -339,6 +345,29 @@ namespace UniversalRobotsConnect
                 case "runtime_state":
                     _robotModel.RuntimeState = (RuntimeState)(uint) value;
                     break;
+                case "robot_status_bits":
+                    BitArray statusBitArray = new BitArray(new byte[] { (byte)(UInt32)value });
+                    _robotModel.RobotStatus.PowerOn = statusBitArray[0];
+                    _robotModel.RobotStatus.ProgramRunning = statusBitArray[1];
+                    _robotModel.RobotStatus.TeachButtonPressed = statusBitArray[2];
+                    _robotModel.RobotStatus.PowerButtonPressed = statusBitArray[3];
+                    break;
+                case "safety_status_bits":
+                    byte[] bytearray = BitConverter.GetBytes((UInt32)value);
+                    BitArray safetystatusBitArray1 = new BitArray(new byte[] { (byte) bytearray[0] });
+                    _robotModel.SafetyStatus.NormalMode = safetystatusBitArray1[0];
+                    _robotModel.SafetyStatus.ReducedMode = safetystatusBitArray1[1];
+                    _robotModel.SafetyStatus.ProtectiveStopped = safetystatusBitArray1[2];
+                    _robotModel.SafetyStatus.RecoveryMode = safetystatusBitArray1[3];
+                    _robotModel.SafetyStatus.SafeguardStopped = safetystatusBitArray1[4];
+                    _robotModel.SafetyStatus.SystemEmergencyStopped = safetystatusBitArray1[5];
+                    _robotModel.SafetyStatus.RobotEmergencyStopped = safetystatusBitArray1[6];
+                    _robotModel.SafetyStatus.EmergencyStopped = safetystatusBitArray1[7];
+                    BitArray safetystatusBitArray2 = new BitArray(new byte[] { (byte)bytearray[1] });
+                    _robotModel.SafetyStatus.Violation = safetystatusBitArray2[0];
+                    _robotModel.SafetyStatus.Fault = safetystatusBitArray2[1];
+                    _robotModel.SafetyStatus.StoppedDueToSafety = safetystatusBitArray2[2];
+                    break;
 
 
                 case "standard_analog_input0":
@@ -373,6 +402,12 @@ namespace UniversalRobotsConnect
                 case "tool_output_current":
                     _robotModel.ToolOutputCurrent = (double)value;
                     break;
+                case "tcp_force_scalar":
+                    _robotModel.TCPForceScalar = (double)value;
+                    break;
+
+
+
 
 
                 default:

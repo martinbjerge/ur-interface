@@ -35,7 +35,7 @@ namespace UniversalRobotsConnect
 
         public void Send(byte[] payload)
         {
-
+            log.Debug($"Send program to robot {Encoding.UTF8.GetString(payload)}");
             _realtimeClientSender.SendData(payload);
             Thread.Sleep(150);      //Waiting to return to allow for RuntimeState to be right
         }

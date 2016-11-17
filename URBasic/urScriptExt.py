@@ -77,17 +77,20 @@ class UrScriptExt(URBasic.urScript.UrScript):
         
     def close_urScriptExt(self):
         self.print_actual_tcp_pose()
-        self.close_rtc()
+        #self.close_rtc()
         self.dbh_demon.close_dbs()
         
     def send_program(self, prg='', wait=True, timeout=300.):
         self.__force_remote_set=False
-        status =  URBasic.urScript.UrScript.send_program(self, prg=prg, wait=wait, timeout=timeout)
+        #status =  URBasic.urScript.UrScript.send_program(self, prg=prg, wait=wait, timeout=timeout)
+        self.ur.RealTimeClient.Send(prg)
         if not prg == 'def resetRegister():\n  write_output_boolean_register(0, False)\n  write_output_boolean_register(1, False)\nend':
-            if self.get_safety_status()['StoppedDueToSafety']:
+            #if self.get_safety_status()['StoppedDueToSafety']:
+            if self.ur.RobotModel.SafetyStatus.StoppedDueToSafety:
                 return False
             else:
-                return status
+                return True
+                #return status
         
         return True
     
@@ -102,7 +105,7 @@ class UrScriptExt(URBasic.urScript.UrScript):
         
         '''
         
-        if not self.get_robot_status()['PowerOn']:
+        if not self.ur.RobotModel.RobotStatus.PowerOn:
             #while not self.set_gravity([0,-9.82,0]): pass
             self.dbh_demon.ur_power_on()
             self.dbh_demon.wait_dbs()
@@ -110,7 +113,7 @@ class UrScriptExt(URBasic.urScript.UrScript):
             self.dbh_demon.ur_brake_release()
             self.dbh_demon.wait_dbs()
             time.sleep(2)
-        if self.get_safety_status()['StoppedDueToSafety']:
+        if self.ur.RobotModel.SafetyStatus.StoppedDueToSafety:         #self.get_safety_status()['StoppedDueToSafety']:
             self.dbh_demon.ur_unlock_protective_stop()
             self.dbh_demon.wait_dbs()
             self.dbh_demon.ur_close_safety_popup()
@@ -119,7 +122,8 @@ class UrScriptExt(URBasic.urScript.UrScript):
             self.dbh_demon.wait_dbs()
             time.sleep(2)
             
-        return self.get_robot_status()['PowerOn'] & (not self.get_safety_status()['StoppedDueToSafety'])
+        #return self.get_robot_status()['PowerOn'] & (not self.get_safety_status()['StoppedDueToSafety'])
+        return self.ur.RobotModel.RobotStatus.PowerOn & (not self.ur.RobotModel.SafetyStatus.StoppedDueToSafety)
             
     def get_in(self, port, wait=True):
         '''
@@ -153,7 +157,8 @@ class UrScriptExt(URBasic.urScript.UrScript):
         
         check_rtde_outputs = False        
         if 'BCO' == port[:3]:
-            check_rtde_outputs = self.has_set_rtde_data_attr('configurable_digital_output') and self.has_set_rtde_data_attr('configurable_digital_output_mask')
+            #check_rtde_outputs = self.has_set_rtde_data_attr('configurable_digital_output') and self.has_set_rtde_data_attr('configurable_digital_output_mask')
+            check_rtde_outputs = True    #Dem har vi altid med 
         elif 'BDO' == port[:3]:
             check_rtde_outputs = self.has_set_rtde_data_attr('standard_digital_output') and self.has_set_rtde_data_attr('standard_digital_output_mask')
         elif 'BAO' == port[:3]:
@@ -167,125 +172,137 @@ class UrScriptExt(URBasic.urScript.UrScript):
         
         if check_rtde_outputs:
             if 'BCO' == port[:3]:
-                self.set_rtde_data('configurable_digital_output_mask', np.power(2,int(port[4:])))
+                #self.set_rtde_data('configurable_digital_output_mask', np.power(2,int(port[4:])))
                 if value:
+                    #self.ur.RTDE.SendData("Tænd")
                     self.set_rtde_data('configurable_digital_output', np.power(2,int(port[4:])))
-                else:        
+                else:
+                    #self.ur.RTDE.SendData("Sluk")        
                     self.set_rtde_data('configurable_digital_output', 0)
             elif 'BDO' == port[:3]:
-                self.set_rtde_data('standard_digital_output_mask', np.power(2,int(port[4:])))
+                #self.set_rtde_data('standard_digital_output_mask', np.power(2,int(port[4:])))
                 if value:
-                    self.set_rtde_data('standard_digital_output', np.power(2,int(port[4:])))
+                    self.ur.RTDE.SendData()
+                    #self.set_rtde_data('standard_digital_output', np.power(2,int(port[4:])))
                 else:        
-                    self.set_rtde_data('standard_digital_output', 0)
+                    self.ur.RTDE.SendData()
+                    #self.set_rtde_data('standard_digital_output', 0)
             elif 'BAO' == port[:3]:
                 pass
             elif 'TDO' == port[:3]:
                 pass
 
-            if self.send_rtde_data():
-                return True
+            #if self.send_rtde_data():
+            #    return True
+            return True #Vi har sendt det .. vi checker ikke
         else:
             return False
 
     
-    def get_safety_status(self):
-        '''
-        Return the safety state of the UR robot as a dict.
+    #def get_safety_status(self):
+    #    '''
+    #    Return the safety state of the UR robot as a dict.
         
-        Bits 0-10: 
-        0:  Is normal mode
-        1:  Is reduced mode
-        2:  Is protective stopped
-        3:  Is recovery mode
-        4:  Is safeguard stopped
-        5:  Is system emergency stopped
-        6:  Is robot emergency stopped
-        8:  Is emergency stopped
-        9:  Is violation
-        10: Is fault
-        11: Is stopped due to safety
+    #    Bits 0-10: 
+    #    0:  Is normal mode
+    #    1:  Is reduced mode
+    #    2:  Is protective stopped
+    #    3:  Is recovery mode
+    #    4:  Is safeguard stopped
+    #    5:  Is system emergency stopped
+    #    6:  Is robot emergency stopped
+    #    8:  Is emergency stopped
+    #    9:  Is violation
+    #    10: Is fault
+    #    11: Is stopped due to safety
               
-        Return Value:
-        safety state (Dictionary): Dictionary of safety states and the actual status.
-        '''
+    #    Return Value:
+    #    safety state (Dictionary): Dictionary of safety states and the actual status.
+    #    '''
         
-        SafetyState = { 'NormalMode'             : False, 
-                        'ReducedMode'            : False, 
-                        'ProtectiveStopped'      : False, 
-                        'RecoveryMode'           : False, 
-                        'SafeguardStopped'       : False, 
-                        'SystemEmergencyStopped' : False, 
-                        'RobotEmergencyStopped'  : False,
-                        'EmergencyStopped'       : False,
-                        'Violation'              : False,
-                        'Fault'                  : False,
-                        'StoppedDueToSafety'     : False}
+    #    SafetyState = { 'NormalMode'             : False, 
+    #                    'ReducedMode'            : False, 
+    #                    'ProtectiveStopped'      : False, 
+    #                    'RecoveryMode'           : False, 
+    #                    'SafeguardStopped'       : False, 
+    #                    'SystemEmergencyStopped' : False, 
+    #                    'RobotEmergencyStopped'  : False,
+    #                    'EmergencyStopped'       : False,
+    #                    'Violation'              : False,
+    #                    'Fault'                  : False,
+    #                    'StoppedDueToSafety'     : False}
          
-        statbit = self.get_rtde_data('safety_status_bits', wait=True)
-        if statbit is None:
-            return None 
+    #    statbit = self.get_rtde_data('safety_status_bits', wait=True)
+    #    if statbit is None:
+    #        return None 
         
-        if statbit & (1 << 0):
-            SafetyState['NormalMode'] = True
-        if statbit & (1 << 1):
-            SafetyState['ReducedMode'] = True
-        if statbit & (1 << 2):
-            SafetyState['ProtectiveStopped'] = True
-        if statbit & (1 << 3):
-            SafetyState['RecoveryMode'] = True
-        if statbit & (1 << 4):
-            SafetyState['SafeguardStopped'] = True
-        if statbit & (1 << 5):
-            SafetyState['SystemEmergencyStopped'] = True
-        if statbit & (1 << 6):
-            SafetyState['RobotEmergencyStopped'] = True
-        if statbit & (1 << 7):
-            SafetyState['EmergencyStopped'] = True
-        if statbit & (1 << 8):
-            SafetyState['Violation'] = True
-        if statbit & (1 << 9):
-            SafetyState['Fault'] = True
-        if statbit & (1 << 10):
-            SafetyState['StoppedDueToSafety'] = True
+    #    if statbit & (1 << 0):
+    #        SafetyState['NormalMode'] = True
+    #    if statbit & (1 << 1):
+    #        SafetyState['ReducedMode'] = True
+    #    if statbit & (1 << 2):
+    #        SafetyState['ProtectiveStopped'] = True
+    #    if statbit & (1 << 3):
+    #        SafetyState['RecoveryMode'] = True
+    #    if statbit & (1 << 4):
+    #        SafetyState['SafeguardStopped'] = True
+    #    if statbit & (1 << 5):
+    #        SafetyState['SystemEmergencyStopped'] = True
+    #    if statbit & (1 << 6):
+    #        SafetyState['RobotEmergencyStopped'] = True
+    #    if statbit & (1 << 7):
+    #        SafetyState['EmergencyStopped'] = True
+    #    if statbit & (1 << 8):
+    #       SafetyState['Violation'] = True
+    #    if statbit & (1 << 9):
+    #        SafetyState['Fault'] = True
+    #    if statbit & (1 << 10):
+ #           SafetyState['StoppedDueToSafety'] = True
 
-        return SafetyState
+#        return SafetyState
         
 
-    def get_robot_status(self):
-        '''
-        Return the robot state of the UR robot as a dict.
+    #def get_robot_status(self):
+    #    '''
+    #    Return the robot state of the UR robot as a dict.
         
-        Bits 0-3: 
-        0:  Is power on
-        1:  Is program running
-        2:  Is teach button pressed
-        3:  Is power button pressed
+    #    Bits 0-3: 
+    #    0:  Is power on
+    #    1:  Is program running
+    #    2:  Is teach button pressed
+    #    3:  Is power button pressed
         
-        Return Value:
-        Robot state (Dictionary): Dictionary of robot states and the actual status.
+    #    Return Value:
+    #    Robot state (Dictionary): Dictionary of robot states and the actual status.
 
-        '''
+    #    '''
         
-        RobotState = { 'PowerOn'            : False, 
-                        'ProgramRunning'     : False, 
-                        'TeachButtonPressed' : False, 
-                        'PowerButtonPressed' : False}
+    #    RobotState = { 'PowerOn'            : False, 
+    #                    'ProgramRunning'     : False, 
+    #                    'TeachButtonPressed' : False, 
+    #                    'PowerButtonPressed' : False}
          
-        statbit = self.get_rtde_data('robot_status_bits', wait=True)
-        if statbit is None:
-            return None 
+        #statbit = self.get_rtde_data('robot_status_bits', wait=True)
+        #if statbit is None:
+        #    return None 
         
-        if statbit & (1 << 0):
-            RobotState['PowerOn'] = True
-        if statbit & (1 << 1):
-            RobotState['ProgramRunning'] = True
-        if statbit & (1 << 2):
-            RobotState['TeachButtonPressed'] = True
-        if statbit & (1 << 3):
-            RobotState['PowerButtonPressed'] = True
+#        if statbit & (1 << 0):
+#            RobotState['PowerOn'] = True
+#        if statbit & (1 << 1):
+#            RobotState['ProgramRunning'] = True
+#        if statbit & (1 << 2):
+#            RobotState['TeachButtonPressed'] = True
+#        if statbit & (1 << 3):
+#            RobotState['PowerButtonPressed'] = True
+    #    test = self.ur.RobotModel.RobotStatusPowerOn
+        
+    #    RobotState['PowerOn'] = self.ur.RobotModel.RobotStatus.PowerOn
+    #    RobotState['ProgramRunning'] = self.ur.RobotModel.RobotStatus.ProgramRunning
+    #    RobotState['TeachButtonPressed'] = self.ur.RobotModel.RobotStatus.TeachButtonPressed
+    #    RobotState['PowerButtonPressed'] = self.ur.RobotModel.RobotStatus.PowerButtonPressed
 
-        return RobotState
+        
+    #    return RobotState
 
     def init_force_remote(self, task_frame=[0.0, 0.0, 0.0,  0.0, 0.0, 0.0], f_type=2):
         '''
@@ -727,8 +744,11 @@ end
         '''
         print a pose 
         '''
+        test = pose
+        
         if q is None:
-            print('Robot Pose: [{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*pose))
+            print('Robot Pose: ' + str(pose.X) + ', ' + str(pose.Y) + ', ' + str(pose.Z) + ', ' + str(pose.RX) + ', ' + str(pose.RY) + ', ' + str(pose.RZ))
+            #print('Robot Pose: [{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*pose))
         else:
             print('Robot joint positions: [{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*q))
 

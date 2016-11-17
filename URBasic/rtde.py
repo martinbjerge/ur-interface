@@ -441,7 +441,7 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         '''
         Set data to be send to the UR controller by the send/recive thread.
         Object is locked while updating to avoid sending half updated values,
-        hence send all values as to lists of equal lengths 
+        hence send all values as to (two???) lists of equal lengths 
         
         Input parameters:
         variable_name (List/str):  Variable name from the list of possible RTDE inputs

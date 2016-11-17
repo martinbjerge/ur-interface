@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,28 +23,31 @@ namespace UniversalRobotsConnect
 
             _robotConnector = new RobotConnector("172.16.74.129");
 
-            List<Command> commands = new List<Command>();
+            _robotConnector.RTDE.SendData("255");
 
-            commands.Add(new ChangeToolCommand(_robotConnector, "Get", "Soaker"));    
-            commands.Add(new MoveToWorkAreaCommand(_robotConnector));
-            commands.Add(new SoakCommand(/*HIGH LEVEL 3D SURFACE*/));
-            commands.Add(new ChangeToolCommand(_robotConnector, "Put", "Soaker"));   
-            commands.Add(new ChangeToolCommand(_robotConnector, "Get", "Sander"));    
-            commands.Add(new MoveToWorkAreaCommand(_robotConnector));
-            commands.Add(new SandCommand(/*HIGH LEVEL 3D SURFACE*/));
-            commands.Add(new ChangeToolCommand(_robotConnector, "Put", "Sander"));   
-            commands.Add(new MoveToHomePositionCommand(_robotConnector));
+        //    List<Command> commands = new List<Command>();
+
+        //    commands.Add(new ChangeToolCommand(_robotConnector, "Get", "Soaker"));    
+        //    commands.Add(new MoveToWorkAreaCommand(_robotConnector));
+        //    commands.Add(new SoakCommand(/*_robotConnector, soaktool, ekstern operator ja nej*/));
+            
+        //    commands.Add(new ChangeToolCommand(_robotConnector, "Put", "Soaker"));   
+        //    commands.Add(new ChangeToolCommand(_robotConnector, "Get", "Sander"));    
+        //    commands.Add(new MoveToWorkAreaCommand(_robotConnector));
+        //    commands.Add(new SandCommand(/*HIGH LEVEL 3D SURFACE*/));
+        //    commands.Add(new ChangeToolCommand(_robotConnector, "Put", "Sander"));   
+        //    commands.Add(new MoveToHomePositionCommand(_robotConnector));
 
 
-            foreach (Command command in commands)
-            {
-                command.Execute();
-                while (!command.IsCompleted)
-                {
+        //    foreach (Command command in commands)
+        //    {
+        //        command.Execute();
+        //        while (!command.IsCompleted)
+        //        {
                     
-                }
-            }
-            log.Debug("NOW THE WHOLE PROGRAM IS DONE");
+        //        }
+        //    }
+        //    log.Debug("NOW THE WHOLE PROGRAM IS DONE");
         }
         
     }

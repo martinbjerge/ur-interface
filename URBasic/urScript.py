@@ -27,13 +27,18 @@ __license__ = "MIT License"
 
 import URBasic.dataLogging
 import numpy as np
+import time
 import sys
 import clr
 sys.path.append(r"C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\bin\Debug")
 clr.AddReference("UniversalRobotsConnect")
 from UniversalRobotsConnect import RobotConnector
+from UniversalRobotsConnect.Types import RobotStatus
+from UniversalRobotsConnect.Types import SafetyStatus
 
 class UrScript(object):
+#class UrScript(URBasic.realTimeClient.RT_CLient):
+
     '''
     Interface to remote access UR script commands.
     For more details see the script manual at this site:
@@ -65,7 +70,8 @@ class UrScript(object):
         logger = URBasic.dataLogging.DataLogging()        
         name = logger.AddEventLogging(__name__)        
         self.__logger = logger.__dict__[name]
-        self.__ur = RobotConnector(host)
+        self.ur = RobotConnector(host)
+        time.sleep(5)
         
         self.__logger.info('Init done')
 
@@ -100,10 +106,10 @@ end
         
         programString = prg.format(**locals())
         
-        self.__ur.RealTimeClient.Send(programString)
+        self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.__ur.RobotModel.RuntimeState != 1):
-                #print("RuntimeState: " + str(self.__ur.RobotModel.RuntimeState))
+            while(self.ur.RobotModel.RuntimeState != 1):
+                #print("RuntimeState: " + str(self.ur.RobotModel.RuntimeState))
                 pass
         
         
@@ -129,9 +135,9 @@ end
         
         programString = prg.format(**locals())
         
-        self.__ur.RealTimeClient.Send(programString)
+        self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.__ur.RobotModel.RuntimeState != 1):
+            while(self.ur.RobotModel.RuntimeState != 1):
                 pass
         
         
@@ -158,7 +164,14 @@ end
 end
 '''
         movestr = self._move(movetype='p', pose=pose, a=a, v=v, t=0, r=r, wait=wait, q=q)
-        return self.send_program(prg.format(**locals()), wait)
+        programString = prg.format(**locals())
+        
+        self.ur.RealTimeClient.Send(programString)
+        if(wait):
+            while(self.ur.RobotModel.RuntimeState != 1):
+                pass
+        
+        #return self.send_program(prg.format(**locals()), wait)
         
     def movec(self, pose_via=None, pose_to=None, a=1.2, v =0.25, r =0, wait=True, q_via=None, q_to=None):
         '''
@@ -186,9 +199,14 @@ end
 '''
         movestr = self._move(movetype='p', pose=pose_to, a=a, v=v, t=0, r=r, wait=wait, q=q_to,pose_via=pose_via, q_via=q_via)
         
+        programString = prg.format(**locals())
         
+        self.ur.RealTimeClient.Send(programString)
+        if(wait):
+            while(self.ur.RobotModel.RuntimeState != 1):
+                pass
         
-        return self.send_program(prg.format(**locals()), wait)
+        #return self.send_program(prg.format(**locals()), wait)
  
     def _move(self, movetype, pose=None, a=1.2, v=0.25, t=0, r=0, wait=True, q=None, pose_via=None, q_via=None):
         '''
@@ -299,7 +317,14 @@ end
             sync()
         end
 end'''
-        return self.send_program(prg.format(**locals()), wait, timeout)
+        
+        programString = prg.format(**locals())
+        
+        self.ur.RealTimeClient.Send(programString)
+        if(wait):
+            while(self.ur.RobotModel.RuntimeState != 1):
+                pass
+        #return self.send_program(prg.format(**locals()), wait, timeout)
  
     def end_force_mode(self, wait=True):
         '''
@@ -307,7 +332,13 @@ end'''
         This is also done when a program stops.
         '''
         prg = 'end_force_mode()'        
-        return self.send_program(prg.format(**locals()), wait)
+        programString = prg.format(**locals())
+        
+        self.ur.RealTimeClient.Send(programString)
+        if(wait):
+            while(self.ur.RobotModel.RuntimeState != 1):
+                pass
+        #return self.send_program(prg.format(**locals()), wait)
         
     def servoc(self, pose, a=1.2, v =0.25, r =0, wait=True):
         '''
@@ -321,7 +352,14 @@ end'''
         r:    blend radius (of target pose) [m]
         '''
         prg = 'servoc(p{pose}, {a}, {v}, {r})'
-        return self.send_program(prg.format(**locals()), wait)
+        
+        programString = prg.format(**locals())
+        
+        self.ur.RealTimeClient.Send(programString)
+        if(wait):
+            while(self.ur.RobotModel.RuntimeState != 1):
+                pass
+        #return self.send_program(prg.format(**locals()), wait)
 
     def servoj(self, q, t =0.008, lookahead_time=0.1, gain=100, wait=True):
         '''
@@ -339,7 +377,13 @@ end'''
         gain:           proportional gain for following target position, range [100,2000]
         '''
         prg = 'servoj({q}, 0.5, 0.5, {t}, {lookahead_time}, {gain})'
-        return self.send_program(prg.format(**locals()), wait)
+        programString = prg.format(**locals())
+        
+        self.ur.RealTimeClient.Send(programString)
+        if(wait):
+            while(self.ur.RobotModel.RuntimeState != 1):
+                pass
+        #return self.send_program(prg.format(**locals()), wait)
         
     def speedj(self, qd, a, t , wait=True):
         '''
@@ -354,7 +398,13 @@ end'''
         t:  time [s] before the function returns (optional)
         '''
         prg = 'speedj({qd}, {a}, {t})'
-        return self.send_program(prg.format(**locals()), wait)
+        programString = prg.format(**locals())
+        
+        self.ur.RealTimeClient.Send(programString)
+        if(wait):
+            while(self.ur.RobotModel.RuntimeState != 1):
+                pass
+        #return self.send_program(prg.format(**locals()), wait)
 
     def stopj(self, a, wait=True):
         '''
@@ -364,7 +414,13 @@ end'''
         a: joint acceleration [rad/sˆ2] (of leading axis)
         '''
         prg = 'stopj({a})'
-        return self.send_program(prg.format(**locals()), wait)        
+        programString = prg.format(**locals())
+        
+        self.ur.RealTimeClient.Send(programString)
+        if(wait):
+            while(self.ur.RobotModel.RuntimeState != 1):
+                pass
+        #return self.send_program(prg.format(**locals()), wait)        
         
     def speedl(self, xd, a, t, aRot='a', wait=True):
         '''
@@ -380,7 +436,13 @@ end'''
         aRot: tool acceleration [rad/sˆ2] (optional), if not deﬁned a, position acceleration, is used
         '''
         prg = 'speedl({xd}, {a}, {t}, {aRot})'
-        return self.send_program(prg.format(**locals()), wait)
+        programString = prg.format(**locals())
+        
+        self.ur.RealTimeClient.Send(programString)
+        if(wait):
+            while(self.ur.RobotModel.RuntimeState != 1):
+                pass
+        #return self.send_program(prg.format(**locals()), wait)
 
     def stopl(self, a, aRot ='a', wait=True):
         '''
@@ -391,7 +453,13 @@ end'''
         aRot: tool acceleration [rad/sˆ2] (optional), if not deﬁned a, position acceleration, is used
         '''
         prg = 'stopl({a}, {aRot})'
-        return self.send_program(prg.format(**locals()), wait)
+        programString = prg.format(**locals())
+        
+        self.ur.RealTimeClient.Send(programString)
+        if(wait):
+            while(self.ur.RobotModel.RuntimeState != 1):
+                pass
+        #return self.send_program(prg.format(**locals()), wait)
 
     def freedrive_mode(self, wait=False):
         '''
@@ -405,14 +473,26 @@ end'''
         sleep(600)
     end
 end'''
-        self.send_program(prg.format(**locals()), wait)
+        programString = prg.format(**locals())
+        
+        self.ur.RealTimeClient.Send(programString)
+        if(wait):
+            while(self.ur.RobotModel.RuntimeState != 1):
+                pass
+        #self.send_program(prg.format(**locals()), wait)
 
     def end_freedrive_mode(self, wait=True):
         '''
         Set robot back in normal position control mode after freedrive mode.
         '''
         prg = 'end_freedrive_mode()'        
-        return self.send_program(prg.format(**locals()), wait)
+        programString = prg.format(**locals())
+        
+        self.ur.RealTimeClient.Send(programString)
+        if(wait):
+            while(self.ur.RobotModel.RuntimeState != 1):
+                pass
+        #return self.send_program(prg.format(**locals()), wait)
         
     def teach_mode(self, wait=True):
         '''
@@ -425,14 +505,26 @@ end'''
             teach_mode()
         end
         end'''
-        self.send_program(prg.format(**locals()), wait)
+        programString = prg.format(**locals())
+        
+        self.ur.RealTimeClient.Send(programString)
+        if(wait):
+            while(self.ur.RobotModel.RuntimeState != 1):
+                pass
+        #self.send_program(prg.format(**locals()), wait)
 
     def end_teach_mode(self, wait=True):
         '''
         Set robot back in normal position control mode after freedrive mode.
         '''
         prg = 'end_teach_mode()'        
-        return self.send_program(prg.format(**locals()), wait)
+        programString = prg.format(**locals())
+        
+        self.ur.RealTimeClient.Send(programString)
+        if(wait):
+            while(self.ur.RobotModel.RuntimeState != 1):
+                pass
+        #return self.send_program(prg.format(**locals()), wait)
     
         
     def conveyor_pulse_decode(self, in_type, A, B, wait=True):
@@ -467,7 +559,13 @@ end'''
         '''
         
         prg = 'conveyor_pulse_decode({in_type}, {A}, {B})'        
-        return self.send_program(prg.format(**locals()), wait)
+        programString = prg.format(**locals())
+        
+        self.ur.RealTimeClient.Send(programString)
+        if(wait):
+            while(self.ur.RobotModel.RuntimeState != 1):
+                pass
+        #return self.send_program(prg.format(**locals()), wait)
         
     def set_conveyor_tick_count(self, tick_count, absolute_encoder_resolution=0, wait=True):
         '''
@@ -487,7 +585,13 @@ end'''
                                     4 is a 32 bit unsigned encoder, range [0 ; 4294967295]
         '''
         prg = 'set_conveyor_tick_count({tick_count}, {absolute_encoder_resolution})'
-        self.send_program(prg.format(**locals()), wait)
+        programString = prg.format(**locals())
+        
+        self.ur.RealTimeClient.Send(programString)
+        if(wait):
+            while(self.ur.RobotModel.RuntimeState != 1):
+                pass
+        #self.send_program(prg.format(**locals()), wait)
                 
     def get_conveyor_tick_count(self, wait=True, rtde_reg='output_double_register_0'):
         '''
@@ -502,10 +606,16 @@ end'''
             prg = '''def ur_get_conveyor_tick_count():
             write_output_float_register(0, get_conveyor_tick_count())
             end'''
-            if self.send_program(prg.format(**locals()), wait):
-                return self.get_data(rtde_reg, wait=True)
-            else:
-                return False
+            programString = prg.format(**locals())
+        
+            self.ur.RealTimeClient.Send(programString)
+            while(self.ur.RobotModel.RuntimeState != 1):
+                pass
+            return self.ur.RealTimeClient.Model.DigitalOutputDoubleRegister0
+            #if self.send_program(prg.format(**locals()), wait):
+            #    return self.get_data(rtde_reg, wait=True)
+            #else:
+            #    return False
         else:
             self.__logger.warning('RTDE register not configured, expecting: ' + rtde_reg)
             return False
@@ -519,7 +629,15 @@ end'''
         aRot: tool acceleration [rad/sˆ2] (optional), if not deﬁned a, position acceleration, is used
         '''
         prg = 'stop_conveyor_tracking({a}, {aRot})'
-        return self.send_program(prg.format(**locals()), wait)
+        
+        programString = prg.format(**locals())
+        
+        self.ur.RealTimeClient.Send(programString)
+        if(wait):
+            while(self.ur.RobotModel.RuntimeState != 1):
+                pass
+        
+        #return self.send_program(prg.format(**locals()), wait)
         
     def track_conveyor_circular(self, center, ticks_per_revolution, rotate_tool, wait=True):
         '''
@@ -539,7 +657,15 @@ end'''
                               speciﬁed by the trajectory (movel() etc.).
         '''
         prg = 'track_conveyor_circular({center}, {ticks_per_revolution}, {rotate_tool})'
-        return self.send_program(prg.format(**locals()), wait)
+        
+        programString = prg.format(**locals())
+        
+        self.ur.RealTimeClient.Send(programString)
+        if(wait):
+            while(self.ur.RobotModel.RuntimeState != 1):
+                pass
+        
+        #return self.send_program(prg.format(**locals()), wait)
 
 
     def track_conveyor_linear(self, direction, ticks_per_meter, wait=True):
@@ -557,7 +683,15 @@ end'''
         ticks per meter: How many tichs the encoder sees when the conveyor moves one meter
         '''
         prg = 'track_conveyor_linear({direction}, {ticks_per_meter})'
-        return self.send_program(prg.format(**locals()), wait)
+        
+        programString = prg.format(**locals())
+        
+        self.ur.RealTimeClient.Send(programString)
+        if(wait):
+            while(self.ur.RobotModel.RuntimeState != 1):
+                pass
+        
+        #return self.send_program(prg.format(**locals()), wait)
 
     def position_deviation_warning(self, enabled, threshold =0.8, wait=True):
         '''
@@ -568,7 +702,15 @@ end'''
                    position deviation that causes a protective stop (Float).
         '''
         prg = 'position_deviation_warning({enabled}, {threshold})'
-        return self.send_program(prg.format(**locals()), wait)
+        
+        programString = prg.format(**locals())
+        
+        self.ur.RealTimeClient.Send(programString)
+        if(wait):
+            while(self.ur.RobotModel.RuntimeState != 1):
+                pass
+        
+        #return self.send_program(prg.format(**locals()), wait)
         
     def reset_revolution_counter(self, qNear=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], wait=True):
         '''
@@ -583,7 +725,15 @@ end'''
                If not deﬁned, the joint’s actual number of revolutions are used.
         ''' 
         prg = 'reset_revolution_counter(qNear)'
-        return self.send_program(prg.format(**locals()), wait)
+        
+        programString = prg.format(**locals())
+        
+        self.ur.RealTimeClient.Send(programString)
+        if(wait):
+            while(self.ur.RobotModel.RuntimeState != 1):
+                pass
+        
+        #return self.send_program(prg.format(**locals()), wait)
         
     def set_pos(self, q, wait=True):
         '''
@@ -592,7 +742,15 @@ end'''
         q: joint positions
         '''
         prg = 'set_pos({q})'
-        return self.send_program(prg.format(**locals()), wait)
+        
+        programString = prg.format(**locals())
+        
+        self.ur.RealTimeClient.Send(programString)
+        if(wait):
+            while(self.ur.RobotModel.RuntimeState != 1):
+                pass
+        
+        #return self.send_program(prg.format(**locals()), wait)
 
 ####################   Module internals    ####################
     
@@ -649,7 +807,9 @@ end'''
         Return Value
         The current actual TCP vector : ([X, Y, Z, Rx, Ry, Rz])
         '''
-        return np.array(self.get_rtde_data('actual_TCP_pose', wait))
+        test = self.ur.RobotModel.ActualTCPPose
+        return test
+        #return np.array(self.get_rtde_data('actual_TCP_pose', wait))
         
     def get_actual_tcp_speed(self):
         '''
@@ -911,7 +1071,14 @@ end'''
         '''
     
         prg = 'set_gravity({d})'
-        return self.send_program(prg.format(**locals()), wait)
+        
+        programString = prg.format(**locals())
+        
+        self.ur.RealTimeClient.Send(programString)
+        if(wait):
+            while(self.ur.RobotModel.RuntimeState != 1):
+                pass
+        #return self.send_program(prg.format(**locals()), wait)
     
     def set_payload(self, m, CoG):
         '''
@@ -973,7 +1140,15 @@ end'''
         m: mass in kilograms
         '''
         prg = 'set_payload_mass({m})'
-        return self.send_program(prg.format(**locals()), wait)
+        
+        programString = prg.format(**locals())
+        
+        self.ur.RealTimeClient.Send(programString)
+        if(wait):
+            while(self.ur.RobotModel.RuntimeState != 1):
+                pass
+        
+        #return self.send_program(prg.format(**locals()), wait)
 
     def set_tcp(self, pose, wait=True):
         '''
@@ -989,7 +1164,14 @@ end'''
         if type(pose).__module__ == np.__name__:
             pose = pose.tolist()
         prg = 'set_tcp(p{pose})'
-        return self.send_program(prg.format(**locals()), wait)
+        
+        programString = prg.format(**locals())
+        
+        self.ur.RealTimeClient.Send(programString)
+        if(wait):
+            while(self.ur.RobotModel.RuntimeState != 1):
+                pass
+        #return self.send_program(prg.format(**locals()), wait)
     
     def sleep(self, t):
         '''
