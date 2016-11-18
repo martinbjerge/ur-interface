@@ -1322,9 +1322,11 @@ end'''
         '''
         
         if n == 0:
-            return self.get_rtde_data('standard_analog_input0', wait)
+            #return self.get_rtde_data('standard_analog_input0', wait)
+            return self.ur.RobotModel.StandardAnalogInput0
         elif n == 1:
-            return self.get_rtde_data('standard_analog_input1', wait)
+            #return self.get_rtde_data('standard_analog_input1', wait)
+            return self.ur.RobotModel.StandardAnalogInput1
         else:
             return None
     
@@ -1340,9 +1342,11 @@ end'''
         ﬂoat, The signal level [0;1]
         '''
         if n == 0:
-            return self.get_rtde_data('standard_analog_output0', wait)
+            #return self.get_rtde_data('standard_analog_output0', wait)  
+            return self.ur.RobotModel.StandardAnalogOutput0
         elif n == 1:
-            return self.get_rtde_data('standard_analog_output1', wait)
+            #return self.get_rtde_data('standard_analog_output1', wait)
+            return self.ur.RobotModel.StandardAnalogOutput1
         else:
             return None
         

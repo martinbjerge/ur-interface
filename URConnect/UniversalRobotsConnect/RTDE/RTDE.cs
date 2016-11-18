@@ -64,7 +64,7 @@ namespace UniversalRobotsConnect
             payload[0] = 1;
             payload[1] = 0;
             payload[2] = 0;
-            payload[3] = 255;
+            payload[3] = 255;   //Output mask
             payload[4] = digitalOutByte[0];          
 
             
