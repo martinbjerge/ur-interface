@@ -40,21 +40,43 @@ namespace UniversalRobotsConnect
         private RobotModel _robotModel;
         private List<KeyValuePair<string, string>> _rtdeOutputConfiguration;
         private List<KeyValuePair<string, string>> _rtdeInputConfiguration;
+        BitArray _configurableDigitalOutputBitArray = new BitArray(8);
 
         public void SendData(byte[] data)
         {
-            byte[] myBytes = new byte[] { 1, 0, 1, 0 };
-
-            myBytes = CheckEndian(myBytes);
-            byte[] testBytes = CreatePackage((byte)UR_RTDE_Command.RTDE_DATA_PACKAGE, myBytes);
-            
-            log.Debug($"Send RTDE to robot");
+            byte[] testBytes = CreatePackage((byte)UR_RTDE_Command.RTDE_DATA_PACKAGE, data);
             _rtdeSender.SendData(testBytes);
+
+            log.Debug($"Send RTDE to robot");
         }
 
         public void SendData(string payload)
         {
             SendData(Encoding.UTF8.GetBytes(payload));
+        }
+
+        public void SetConfigurableDigitalOutput(int bitNumber, bool value)
+        {
+            _configurableDigitalOutputBitArray[bitNumber] = value;
+            byte[] digitalOutByte =  BitArrayToByteArray(_configurableDigitalOutputBitArray);
+
+            byte[] payload = new byte[177];
+            payload[0] = 1;
+            payload[1] = 0;
+            payload[2] = 0;
+            payload[3] = 255;
+            payload[4] = digitalOutByte[0];          
+
+            
+            byte[] package = CreatePackage((byte)UR_RTDE_Command.RTDE_DATA_PACKAGE, payload);
+            _rtdeSender.SendData(package);
+        }
+
+        public static byte[] BitArrayToByteArray(BitArray bits)
+        {
+            byte[] ret = new byte[(bits.Length - 1) / 8 + 1];
+            bits.CopyTo(ret, 0);
+            return ret;
         }
 
         // Consumers register to receive data.

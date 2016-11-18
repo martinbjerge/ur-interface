@@ -174,18 +174,18 @@ class UrScriptExt(URBasic.urScript.UrScript):
             if 'BCO' == port[:3]:
                 #self.set_rtde_data('configurable_digital_output_mask', np.power(2,int(port[4:])))
                 if value:
-                    #self.ur.RTDE.SendData("Tænd")
-                    self.set_rtde_data('configurable_digital_output', np.power(2,int(port[4:])))
+                    #self.set_rtde_data('configurable_digital_output', np.power(2,int(port[4:])))
+                    self.ur.RTDE.SetConfigurableDigitalOutput(int(port[4:]), True)
                 else:
-                    #self.ur.RTDE.SendData("Sluk")        
-                    self.set_rtde_data('configurable_digital_output', 0)
+                    self.ur.RTDE.SetConfigurableDigitalOutput(int(port[4:]), False)        
+                    #self.set_rtde_data('configurable_digital_output', 0)
             elif 'BDO' == port[:3]:
                 #self.set_rtde_data('standard_digital_output_mask', np.power(2,int(port[4:])))
                 if value:
-                    self.ur.RTDE.SendData()
+                    self.ur.RTDE.SetConfigurableDigitalOutput(int(port[4:]), True)
                     #self.set_rtde_data('standard_digital_output', np.power(2,int(port[4:])))
                 else:        
-                    self.ur.RTDE.SendData()
+                    self.ur.RTDE.SetConfigurableDigitalOutput(int(port[4:]), False)
                     #self.set_rtde_data('standard_digital_output', 0)
             elif 'BAO' == port[:3]:
                 pass

@@ -37,11 +37,11 @@ namespace UniversalRobotsConnect
             {
                 if (_dataToSend.Count > 0)
                 {
-                    Thread.Sleep(130);              //From experience we know the Universal Robotics robot doesnt like to recieve quicker than 125 ms
+                    
                     _stream.Write(_dataToSend[0], 0, _dataToSend[0].Length);
                     _dataToSend.RemoveAt(0);
                 }
-
+                Thread.Sleep(100);              //From experience we know the Universal Robotics robot doesnt like to recieve quicker than 125 ms
             }
         }
     }

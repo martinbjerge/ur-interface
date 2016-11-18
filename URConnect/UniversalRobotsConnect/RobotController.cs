@@ -21,9 +21,9 @@ namespace UniversalRobotsConnect
         public RobotController()
         {
 
-            _robotConnector = new RobotConnector("172.16.74.129");
+            //_robotConnector = new RobotConnector("172.16.74.129");
 
-            _robotConnector.RTDE.SendData("255");
+            //_robotConnector.RTDE.SendData("255");
 
         //    List<Command> commands = new List<Command>();
 
