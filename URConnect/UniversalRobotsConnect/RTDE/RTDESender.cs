@@ -16,17 +16,17 @@ namespace UniversalRobotsConnect
         private List<byte[]> _dataToSend = new List<byte[]>();
         private NetworkStream _stream;
         private Thread _thread;
-        List<KeyValuePair<string, string>> _rtdeOutputConfiguration;
+        //List<KeyValuePair<string, string>> _rtdeOutputConfiguration;
 
         internal void SendData(byte[] data)
         {
             _dataToSend.Add(data);
         }
 
-        internal RTDESender(NetworkStream stream, List<KeyValuePair<string, string>> rtdeOutputConfiguration)
+        internal RTDESender(NetworkStream stream/*, List<KeyValuePair<string, string>> rtdeOutputConfiguration*/)
         {
             _stream = stream;
-            _rtdeOutputConfiguration = rtdeOutputConfiguration;
+            //_rtdeOutputConfiguration = rtdeOutputConfiguration;
             _thread = new Thread(Run);
             _thread.Start();
         }

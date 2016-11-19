@@ -15,7 +15,7 @@ namespace UniversalRobotsConnect
 {
     public class RobotController
     {
-        private RobotConnector _robotConnector;
+        //private RobotConnector _robotConnector;
         private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         public RobotController()

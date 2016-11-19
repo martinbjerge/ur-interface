@@ -40,7 +40,10 @@ namespace UniversalRobotsConnect
         private RobotModel _robotModel;
         private List<KeyValuePair<string, string>> _rtdeOutputConfiguration;
         private List<KeyValuePair<string, string>> _rtdeInputConfiguration;
-        BitArray _configurableDigitalOutputBitArray = new BitArray(8);
+        private BitArray _configurableDigitalOutputBitArray = new BitArray(8);
+        private BitArray _standardDigitalOutputBitArray = new BitArray(8);
+        private int[] _rtdeInputInts = new int[24];
+        private double[] _rtdeInputDoubles = new double[24];
 
         public void SendData(byte[] data)
         {
@@ -55,24 +58,216 @@ namespace UniversalRobotsConnect
             SendData(Encoding.UTF8.GetBytes(payload));
         }
 
+
         public void SetConfigurableDigitalOutput(int bitNumber, bool value)
         {
             _configurableDigitalOutputBitArray[bitNumber] = value;
-            byte[] digitalOutByte =  BitArrayToByteArray(_configurableDigitalOutputBitArray);
-
-            byte[] payload = new byte[177];
-            payload[0] = 1;
-            payload[1] = 0;
-            payload[2] = 0;
-            payload[3] = 255;   //Output mask
-            payload[4] = digitalOutByte[0];          
-
-            
-            byte[] package = CreatePackage((byte)UR_RTDE_Command.RTDE_DATA_PACKAGE, payload);
-            _rtdeSender.SendData(package);
+            SendRTDEDataPackage();
         }
 
-        public static byte[] BitArrayToByteArray(BitArray bits)
+        
+        public void SetStandardDigitalOutput(int bitNumber, bool value)
+        {
+            _standardDigitalOutputBitArray[bitNumber] = value;
+            SendRTDEDataPackage();
+        }
+
+        public void SetInputIntRegister(int intNumber, int value)
+        {
+            _rtdeInputInts[intNumber] = value;
+            SendRTDEDataPackage();
+        }
+
+        public void SetInputDoubleRegister(int doubleNumber, double value)
+        {
+            _rtdeInputDoubles[doubleNumber] = value;
+            SendRTDEDataPackage();
+        }
+
+        private void SendRTDEDataPackage()
+        {
+            List<byte> payloadByteList = new List<byte>();
+            payloadByteList.Add(1);
+
+            foreach (KeyValuePair<string, string> keyValuePair in _rtdeInputConfiguration)
+            {
+                #region Bigass Switch
+
+                switch (keyValuePair.Key)
+                {
+                    case "standard_digital_output_mask":
+                        payloadByteList.Add(255);
+                        break;
+                    case "standard_digital_output":
+                        payloadByteList.Add(BitArrayToByteArray(_standardDigitalOutputBitArray)[0]);
+                        break;
+                    case "configurable_digital_output_mask":
+                        payloadByteList.Add(255);
+                        break;
+                    case "configurable_digital_output":
+                        payloadByteList.Add(BitArrayToByteArray(_configurableDigitalOutputBitArray)[0]);
+                        break;
+                    case "input_int_register_0":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputInts[0]));
+                        break;
+                    case "input_int_register_1":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputInts[1]));
+                        break;
+                    case "input_int_register_2":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputInts[2]));
+                        break;
+                    case "input_int_register_3":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputInts[3]));
+                        break;
+                    case "input_int_register_4":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputInts[4]));
+                        break;
+                    case "input_int_register_5":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputInts[5]));
+                        break;
+                    case "input_int_register_6":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputInts[6]));
+                        break;
+                    case "input_int_register_7":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputInts[7]));
+                        break;
+                    case "input_int_register_8":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputInts[8]));
+                        break;
+                    case "input_int_register_9":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputInts[9]));
+                        break;
+                    case "input_int_register_10":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputInts[10]));
+                        break;
+                    case "input_int_register_11":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputInts[11]));
+                        break;
+                    case "input_int_register_12":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputInts[12]));
+                        break;
+                    case "input_int_register_13":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputInts[13]));
+                        break;
+                    case "input_int_register_14":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputInts[14]));
+                        break;
+                    case "input_int_register_15":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputInts[15]));
+                        break;
+                    case "input_int_register_16":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputInts[16]));
+                        break;
+                    case "input_int_register_17":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputInts[17]));
+                        break;
+                    case "input_int_register_18":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputInts[18]));
+                        break;
+                    case "input_int_register_19":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputInts[19]));
+                        break;
+                    case "input_int_register_20":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputInts[20]));
+                        break;
+                    case "input_int_register_21":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputInts[21]));
+                        break;
+                    case "input_int_register_22":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputInts[22]));
+                        break;
+                    case "input_int_register_23":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputInts[23]));
+                        break;
+                    case "input_double_register_0":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputDoubles[0]));
+                        break;
+                    case "input_double_register_1":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputDoubles[1]));
+                        break;
+                    case "input_double_register_2":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputDoubles[2]));
+                        break;
+                    case "input_double_register_3":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputDoubles[3]));
+                        break;
+                    case "input_double_register_4":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputDoubles[4]));
+                        break;
+                    case "input_double_register_5":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputDoubles[5]));
+                        break;
+                    case "input_double_register_6":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputDoubles[6]));
+                        break;
+                    case "input_double_register_7":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputDoubles[7]));
+                        break;
+                    case "input_double_register_8":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputDoubles[8]));
+                        break;
+                    case "input_double_register_9":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputDoubles[9]));
+                        break;
+                    case "input_double_register_10":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputDoubles[10]));
+                        break;
+                    case "input_double_register_11":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputDoubles[11]));
+                        break;
+                    case "input_double_register_12":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputDoubles[12]));
+                        break;
+                    case "input_double_register_13":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputDoubles[13]));
+                        break;
+                    case "input_double_register_14":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputDoubles[14]));
+                        break;
+                    case "input_double_register_15":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputDoubles[15]));
+                        break;
+                    case "input_double_register_16":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputDoubles[16]));
+                        break;
+                    case "input_double_register_17":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputDoubles[17]));
+                        break;
+                    case "input_double_register_18":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputDoubles[18]));
+                        break;
+                    case "input_double_register_19":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputDoubles[19]));
+                        break;
+                    case "input_double_register_20":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputDoubles[20]));
+                        break;
+                    case "input_double_register_21":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputDoubles[21]));
+                        break;
+                    case "input_double_register_22":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputDoubles[22]));
+                        break;
+                    case "input_double_register_23":
+                        payloadByteList.AddRange(BitConverter.GetBytes(_rtdeInputDoubles[23]));
+                        break;
+
+                    default:
+                        log.Error("Got a datatype not expected");
+                        throw new NotImplementedException("check your rtde config - we did not support that input datatype");
+
+
+                        
+                        
+                }
+                #endregion
+            }
+            byte[] myPackage = CreatePackage((byte)UR_RTDE_Command.RTDE_DATA_PACKAGE, payloadByteList.ToArray());
+            _rtdeSender.SendData(myPackage);
+        }
+
+
+        private static byte[] BitArrayToByteArray(BitArray bits)
         {
             byte[] ret = new byte[(bits.Length - 1) / 8 + 1];
             bits.CopyTo(ret, 0);
@@ -80,7 +275,7 @@ namespace UniversalRobotsConnect
         }
 
         // Consumers register to receive data.
-        public event EventHandler<DataReceivedEventArgs> DataReceived;
+        private event EventHandler<DataReceivedEventArgs> DataReceived;
 
         private void OnDataReceived(object sender, DataReceivedEventArgs e)
         {
@@ -100,7 +295,7 @@ namespace UniversalRobotsConnect
             _rtdeInputConfiguration = new List<KeyValuePair<string, string>>();
 
             _rtdeReceiver = new RTDEReceiver(_stream, _robotModel, _rtdeOutputConfiguration, _rtdeInputConfiguration);
-            _rtdeSender = new RTDESender(_stream, _rtdeOutputConfiguration);
+            _rtdeSender = new RTDESender(_stream/*, _rtdeOutputConfiguration*/);
             _rtdeReceiver.DataReceived += OnDataReceived;
 
 

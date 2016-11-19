@@ -25,15 +25,13 @@ namespace TestGui
     {
         private RobotConnector _robotConnector;
         private RobotModel _myRobotModel;
-        private RobotController _robotController;
+        //private RobotController _robotController;
 
         public MainWindow()
         {
             InitializeComponent();
             _robotConnector = new RobotConnector("172.16.74.129");
             _myRobotModel = _robotConnector.RobotModel;
-
-            //_robotController = new RobotController();
             
 
             _robotConnector.RTDE.SetConfigurableDigitalOutput(0, true);

@@ -12,6 +12,9 @@ using UniversalRobotsConnect.Types;
 
 namespace UniversalRobotsConnect
 {
+
+    #region enums
+
     public enum ConnectionState : int
     {
         Error = 0,
@@ -74,9 +77,15 @@ namespace UniversalRobotsConnect
         Idle = 255
     }
 
+    #endregion
+
     public class RobotModel
     {
+
         private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
+        #region BackingFields
+
         private bool _digitalOutputBit0;
         private bool _digitalOutputBit1;
         private bool _digitalOutputBit2;
@@ -112,6 +121,9 @@ namespace UniversalRobotsConnect
         private SafetyStatus _safetyStatus = new SafetyStatus();
         private RobotStatus _robotStatus = new RobotStatus();
         private double _robotTimeStamp;
+        
+
+        #endregion
 
         public string Password { get; set; }
 
@@ -133,9 +145,7 @@ namespace UniversalRobotsConnect
 
         public ConnectionState RTDEConnectionState { get; set; }
 
-
-
-
+        
         #region Digital Input Bits
 
         public bool DigitalInputBit0
@@ -245,10 +255,7 @@ namespace UniversalRobotsConnect
 
         #endregion
 
-
-
-
-
+        
         #region Digital Output Bits
 
         public bool DigitalOutputBit0
