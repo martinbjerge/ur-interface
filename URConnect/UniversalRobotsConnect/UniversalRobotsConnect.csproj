@@ -52,6 +52,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChangeToolCommand.cs" />
+    <Compile Include="Dashboard\DashboardClient.cs" />
+    <Compile Include="Dashboard\DashboardClientReceiver.cs" />
+    <Compile Include="Dashboard\DashboardClientSender.cs" />
+    <Compile Include="ForceTourqe\ForceTourqe.cs" />
+    <Compile Include="ForceTourqe\ForceTourqeReceiver.cs" />
+    <Compile Include="ForceTourqe\ForceTourqeSender.cs" />
+    <Compile Include="IOs\IOUnitBase.cs" />
+    <Compile Include="IOs\LaserRangeSensor.cs" />
     <Compile Include="MoveToHomePositionCommand.cs" />
     <Compile Include="MoveToWorkAreaCommand.cs" />
     <Compile Include="PoseGenerator.cs" />
@@ -68,6 +76,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RobotModel.cs" />
     <Compile Include="Command.cs" />
+    <Compile Include="RopeRoboticsRobotModel.cs" />
     <Compile Include="RTDE\RTDEReceiver.cs" />
     <Compile Include="RTDE\RTDE.cs" />
     <Compile Include="RTDE\RTDESender.cs" />
@@ -98,6 +107,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

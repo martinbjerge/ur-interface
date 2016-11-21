@@ -46,6 +46,9 @@ namespace UniversalRobotsConnect
                                 Encoding.ASCII.GetString(myReadBuffer, 0, numberOfBytesRead));
                         } while (_stream.DataAvailable);
 
+
+                        
+
                         //log.Debug("RealtimeClient Received: " + myCompleteMessage);
                     }
                     else
@@ -56,5 +59,6 @@ namespace UniversalRobotsConnect
                 }
             }
         }
+
     }
 }

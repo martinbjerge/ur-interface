@@ -121,7 +121,7 @@ namespace UniversalRobotsConnect
         private SafetyStatus _safetyStatus = new SafetyStatus();
         private RobotStatus _robotStatus = new RobotStatus();
         private double _robotTimeStamp;
-        
+        private Vector6D _forceTorque;
 
         #endregion
 
@@ -588,6 +588,19 @@ namespace UniversalRobotsConnect
         }
 
         public double TCPForceScalar { get; set; }
+
+        public Vector6D ForceTourqe
+        {
+            get { return _forceTorque; }
+            set
+            {
+                if (!Vector6DEquals(_forceTorque, value, _vector6DPrecision))
+                {
+                    _forceTorque = value;
+                    log.Info($"{RobotTimestamp}, ForceTorque,{_forceTorque.X}, {_forceTorque.Y}, {_forceTorque.Z}, {_forceTorque.RX}, {_forceTorque.RY}, {_forceTorque.RZ}");
+                }
+            }
+        }
 
 
         private bool Vector6DEquals(Vector6D firstVector6D, Vector6D secondVector6D, double precision)

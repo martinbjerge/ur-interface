@@ -30,42 +30,49 @@ namespace TestGui
         public MainWindow()
         {
             InitializeComponent();
-            _robotConnector = new RobotConnector("172.16.74.129");
+            //_robotConnector = new RobotConnector("172.16.74.129");
+            _robotConnector = new RobotConnector("192.168.0.3", true);
             _myRobotModel = _robotConnector.RobotModel;
             
+            _robotConnector.DashboardClient.PowerOff();
 
-            _robotConnector.RTDE.SetConfigurableDigitalOutput(0, true);
-            Thread.Sleep(1000);
-            _robotConnector.RTDE.SetConfigurableDigitalOutput(1, true);
-            Thread.Sleep(1000);
-            _robotConnector.RTDE.SetConfigurableDigitalOutput(2, true);
-            Thread.Sleep(1000);
-            _robotConnector.RTDE.SetConfigurableDigitalOutput(3, true);
-            Thread.Sleep(1000);
-            _robotConnector.RTDE.SetConfigurableDigitalOutput(4, true);
-            Thread.Sleep(1000);
-            _robotConnector.RTDE.SetConfigurableDigitalOutput(5, true);
-            Thread.Sleep(1000);
-            _robotConnector.RTDE.SetConfigurableDigitalOutput(6, true);
-            Thread.Sleep(1000);
-            _robotConnector.RTDE.SetConfigurableDigitalOutput(7, true);
-            Thread.Sleep(1000);
-            _robotConnector.RTDE.SetConfigurableDigitalOutput(0, false);
-            Thread.Sleep(1000);
-            _robotConnector.RTDE.SetConfigurableDigitalOutput(1, false);
-            Thread.Sleep(1000);
-            _robotConnector.RTDE.SetConfigurableDigitalOutput(2, false);
-            Thread.Sleep(1000);
-            _robotConnector.RTDE.SetConfigurableDigitalOutput(3, false);
-            Thread.Sleep(1000);
-            _robotConnector.RTDE.SetConfigurableDigitalOutput(4, false);
-            Thread.Sleep(1000);
-            _robotConnector.RTDE.SetConfigurableDigitalOutput(5, false);
-            Thread.Sleep(1000);
-            _robotConnector.RTDE.SetConfigurableDigitalOutput(6, false);
-            Thread.Sleep(1000);
-            _robotConnector.RTDE.SetConfigurableDigitalOutput(7, false);
-            Thread.Sleep(1000);
+            //_robotConnector.DashboardClient.PowerOn();
+
+
+            //_robotConnector.RTDE.SetConfigurableDigitalOutput(0, true);
+            //Thread.Sleep(1000);
+            //_robotConnector.RTDE.SetConfigurableDigitalOutput(1, true);
+            //Thread.Sleep(1000);
+            //_robotConnector.RTDE.SetConfigurableDigitalOutput(2, true);
+            //Thread.Sleep(1000);
+            //_robotConnector.RTDE.SetConfigurableDigitalOutput(3, true);
+            //Thread.Sleep(1000);
+            //_robotConnector.RTDE.SetConfigurableDigitalOutput(4, true);
+            //Thread.Sleep(1000);
+            //_robotConnector.RTDE.SetConfigurableDigitalOutput(5, true);
+            //Thread.Sleep(1000);
+            //_robotConnector.RTDE.SetConfigurableDigitalOutput(6, true);
+            //Thread.Sleep(1000);
+            //_robotConnector.RTDE.SetConfigurableDigitalOutput(7, true);
+            //Thread.Sleep(1000);
+            //_robotConnector.RTDE.SetConfigurableDigitalOutput(0, false);
+            //Thread.Sleep(1000);
+            //_robotConnector.RTDE.SetConfigurableDigitalOutput(1, false);
+            //Thread.Sleep(1000);
+            //_robotConnector.RTDE.SetConfigurableDigitalOutput(2, false);
+            //Thread.Sleep(1000);
+            //_robotConnector.RTDE.SetConfigurableDigitalOutput(3, false);
+            //Thread.Sleep(1000);
+            //_robotConnector.RTDE.SetConfigurableDigitalOutput(4, false);
+            //Thread.Sleep(1000);
+            //_robotConnector.RTDE.SetConfigurableDigitalOutput(5, false);
+            //Thread.Sleep(1000);
+            //_robotConnector.RTDE.SetConfigurableDigitalOutput(6, false);
+            //Thread.Sleep(1000);
+            //_robotConnector.RTDE.SetConfigurableDigitalOutput(7, false);
+            //Thread.Sleep(1000);
+
+            
 
             //byte[] myBytes = new byte[177];
             //myBytes[0] = 1;
