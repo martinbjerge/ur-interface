@@ -59,7 +59,7 @@
     <Compile Include="ForceTourqe\ForceTourqeReceiver.cs" />
     <Compile Include="ForceTourqe\ForceTourqeSender.cs" />
     <Compile Include="IOs\IOUnitBase.cs" />
-    <Compile Include="IOs\LaserRangeSensor.cs" />
+    <Compile Include="IOs\DistanceSensor.cs" />
     <Compile Include="MoveToHomePositionCommand.cs" />
     <Compile Include="MoveToWorkAreaCommand.cs" />
     <Compile Include="PoseGenerator.cs" />

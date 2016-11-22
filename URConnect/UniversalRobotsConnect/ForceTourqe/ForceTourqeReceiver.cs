@@ -58,7 +58,7 @@ namespace UniversalRobotsConnect
 
         private void DecodePacage(string forceTourqePacage)
         {
-            log.Debug("ForceTourqe Recieved: " + forceTourqePacage);
+            //log.Debug("ForceTourqe Recieved: " + forceTourqePacage);
             forceTourqePacage = forceTourqePacage.Remove(0, 1);
             forceTourqePacage = forceTourqePacage.Remove(forceTourqePacage.Length - 1, 1);
             string[] values = forceTourqePacage.Split(',');

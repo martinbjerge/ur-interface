@@ -373,6 +373,7 @@ namespace UniversalRobotsConnect
                 case "standard_analog_input0":
                     _robotModel.StandardAnalogInput0 = (double)value;
                     break;
+
                 case "standard_analog_input1":
                     _robotModel.StandardAnalogInput1 = (double)value;
                     break;

@@ -13,6 +13,11 @@ namespace UniversalRobotsConnect.IOs
             IOPort = ioPort;
         }
 
+        public IOUnitBase()
+        {
+            
+        }
+
         public string IOPort { get; set; }
     }
 }

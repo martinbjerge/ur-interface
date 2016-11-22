@@ -13,7 +13,7 @@ namespace UniversalRobotsConnect
 {
     public class RobotConnector
     {
-        public RopeRoboticsRobotModel RobotModel;
+        public RobotModel RobotModel;
         public RTDE RTDE;
         public RealTimeClient RealTimeClient;
         private ForceTourqe ForceTourqe;
@@ -21,15 +21,19 @@ namespace UniversalRobotsConnect
 
         private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        public RobotConnector(string ipAddress, bool hasForceTorque)
+        public RobotConnector(string ipAddress, bool hasForceTorque):this(new RobotModel(), ipAddress, hasForceTorque)
+        {
+            
+        }
+
+        public RobotConnector(RobotModel robotModel, string ipAddress, bool hasForceTorque)
         {
             FileInfo logFileInfo = new FileInfo(@"C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\bin\Debug\Resources\logConfig.xml");
             XmlConfigurator.Configure(logFileInfo);
 
             log.Debug("Started Logging");
 
-            RobotModel = new RopeRoboticsRobotModel();
-            log.Debug("Started Robot Model");
+            RobotModel = robotModel;
             RobotModel.IpAddress = IPAddress.Parse(ipAddress);
 
             RTDE = new RTDE(RobotModel);

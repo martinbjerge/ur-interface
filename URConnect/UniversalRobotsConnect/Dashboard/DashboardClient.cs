@@ -38,6 +38,11 @@ namespace UniversalRobotsConnect
             _dashboardClientSender.SendData(Encoding.UTF8.GetBytes("unlock protective stop\n"));
         }
 
+        public void CloseSafetyPopup()
+        {
+            _dashboardClientSender.SendData(Encoding.UTF8.GetBytes("close safety popup\n"));
+        }
+
         public void PowerOn()
         {
             _dashboardClientSender.SendData(Encoding.UTF8.GetBytes("power on\n"));

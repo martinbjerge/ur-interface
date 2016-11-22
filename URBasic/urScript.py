@@ -21,11 +21,14 @@ Except as contained in this notice, the name of "Rope Robotics ApS" shall not be
 in advertising or otherwise to promote the sale, use or other dealings in this Software 
 without prior written authorization from "Rope Robotics ApS".
 '''
+import URplus
 __author__ = "Martin Huus Bjerge"
 __copyright__ = "Copyright 2016, Rope Robotics ApS, Denmark"
 __license__ = "MIT License"
 
 import URBasic.dataLogging
+#import Locomotive.ropeRoboticsRobotModel
+#import Locomotive.distanceSensor
 import numpy as np
 import time
 import sys
@@ -37,8 +40,6 @@ from UniversalRobotsConnect.Types import RobotStatus
 from UniversalRobotsConnect.Types import SafetyStatus
 
 class UrScript(object):
-#class UrScript(URBasic.realTimeClient.RT_CLient):
-
     '''
     Interface to remote access UR script commands.
     For more details see the script manual at this site:
@@ -63,16 +64,15 @@ class UrScript(object):
     '''
 
 
-    def __init__(self, host='localhost', rtde_conf_filename='rtde_configuration.xml'):
+    def __init__(self, host, robotModel):
         '''
         Constructor see class description for more info.
         '''
         logger = URBasic.dataLogging.DataLogging()        
         name = logger.AddEventLogging(__name__)        
         self.__logger = logger.__dict__[name]
-        self.ur = RobotConnector(host)
+        self.ur = RobotConnector(self.__robotModel, host, False)
         time.sleep(5)
-        
         self.__logger.info('Init done')
 
 #############   Module motion   ###############

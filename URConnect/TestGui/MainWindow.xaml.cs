@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -13,7 +14,11 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Xml;
+using System.Xml.Serialization;
 using UniversalRobotsConnect;
+using UniversalRobotsConnect.IOs;
+using UniversalRobotsConnect.Types;
 
 
 namespace TestGui
@@ -30,78 +35,26 @@ namespace TestGui
         public MainWindow()
         {
             InitializeComponent();
-            //_robotConnector = new RobotConnector("172.16.74.129");
-            _robotConnector = new RobotConnector("192.168.0.3", true);
-            _myRobotModel = _robotConnector.RobotModel;
+            //_robotConnector = new RobotConnector("172.16.74.129", false);
+            //_robotConnector = new RobotConnector("192.168.0.3", true);
+            //_myRobotModel = _robotConnector.RobotModel;
             
-            _robotConnector.DashboardClient.PowerOff();
+            //_robotConnector.DashboardClient.PowerOff();
 
             //_robotConnector.DashboardClient.PowerOn();
 
+            DistanceSensor distanceSensor = new DistanceSensor("StandardAnalogInput0");
+            distanceSensor.TCP_Offset = new Vector6D(-0.012, 0.053, 0.051, 0, -0.018, 0.0);
+            distanceSensor.MaximumCurrent = 20;
+            distanceSensor.MinimumCurrent = 4;
+            distanceSensor.MaximumDistance = 0.5;
+            distanceSensor.MinimumDistance = 0.1;
 
-            //_robotConnector.RTDE.SetConfigurableDigitalOutput(0, true);
-            //Thread.Sleep(1000);
-            //_robotConnector.RTDE.SetConfigurableDigitalOutput(1, true);
-            //Thread.Sleep(1000);
-            //_robotConnector.RTDE.SetConfigurableDigitalOutput(2, true);
-            //Thread.Sleep(1000);
-            //_robotConnector.RTDE.SetConfigurableDigitalOutput(3, true);
-            //Thread.Sleep(1000);
-            //_robotConnector.RTDE.SetConfigurableDigitalOutput(4, true);
-            //Thread.Sleep(1000);
-            //_robotConnector.RTDE.SetConfigurableDigitalOutput(5, true);
-            //Thread.Sleep(1000);
-            //_robotConnector.RTDE.SetConfigurableDigitalOutput(6, true);
-            //Thread.Sleep(1000);
-            //_robotConnector.RTDE.SetConfigurableDigitalOutput(7, true);
-            //Thread.Sleep(1000);
-            //_robotConnector.RTDE.SetConfigurableDigitalOutput(0, false);
-            //Thread.Sleep(1000);
-            //_robotConnector.RTDE.SetConfigurableDigitalOutput(1, false);
-            //Thread.Sleep(1000);
-            //_robotConnector.RTDE.SetConfigurableDigitalOutput(2, false);
-            //Thread.Sleep(1000);
-            //_robotConnector.RTDE.SetConfigurableDigitalOutput(3, false);
-            //Thread.Sleep(1000);
-            //_robotConnector.RTDE.SetConfigurableDigitalOutput(4, false);
-            //Thread.Sleep(1000);
-            //_robotConnector.RTDE.SetConfigurableDigitalOutput(5, false);
-            //Thread.Sleep(1000);
-            //_robotConnector.RTDE.SetConfigurableDigitalOutput(6, false);
-            //Thread.Sleep(1000);
-            //_robotConnector.RTDE.SetConfigurableDigitalOutput(7, false);
-            //Thread.Sleep(1000);
+            Type[] types = new Type[] { typeof(Vector6D)};
 
-            
-
-            //byte[] myBytes = new byte[177];
-            //myBytes[0] = 1;
-            //myBytes[1] = 0;
-            //myBytes[2] = 0;
-            //myBytes[3] = 255;
-            //myBytes[4] = 1;
-            //_robotConnector.RTDE.SendData(myBytes);
-            //Thread.Sleep(1000);
-
-            //    myBytes[3] = 255;
-            //myBytes[4] = 2;
-            //_robotConnector.RTDE.SendData(myBytes);
-            //Thread.Sleep(1000);
-
-            //myBytes[3] = 255;
-            //myBytes[4] = 4;
-            //_robotConnector.RTDE.SendData(myBytes);
-            //Thread.Sleep(1000);
-
-            //myBytes[3] = 255;
-            //myBytes[4] = 8;
-            //_robotConnector.RTDE.SendData(myBytes);
-            //Thread.Sleep(1000);
-
-            //myBytes[3] = 255;
-            //myBytes[4] = 16;
-            //_robotConnector.RTDE.SendData(myBytes);
-            //Thread.Sleep(1000);
+            XmlTextWriter textWriter = new XmlTextWriter("test.xml", Encoding.UTF8);
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(DistanceSensor), types);
+            xmlSerializer.Serialize(textWriter, distanceSensor);
         }
     }
 }

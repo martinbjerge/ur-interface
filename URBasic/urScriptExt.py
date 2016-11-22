@@ -61,15 +61,15 @@ class UrScriptExt(URBasic.urScript.UrScript):
     '''
 
 
-    def __init__(self, host='localhost', rtde_conf_filename='rtde_configuration.xml', hw_Profile_filename='HwProfiles.xml', profile='UR5'):
+    def __init__(self, host, profile, robotModel, hw_Profile_filename='HwProfiles.xml'):
         '''
         Constructor see class description for more info.
         '''
-        super().__init__(host, rtde_conf_filename)        
+        super().__init__(host, robotModel)        
         logger = URBasic.dataLogging.DataLogging()
         name = logger.AddEventLogging(__name__)        
         self.__logger = logger.__dict__[name]
-        self.dbh_demon = URBasic.dashboard.DashBoard(host)
+        #self.dbh_demon = URBasic.dashboard.DashBoard(host)
         self.hwProfile = HardwareProfile(profile, hw_Profile_filename )
         self.__force_remote_set=False
         self.print_actual_tcp_pose()
@@ -78,7 +78,8 @@ class UrScriptExt(URBasic.urScript.UrScript):
     def close_urScriptExt(self):
         self.print_actual_tcp_pose()
         #self.close_rtc()
-        self.dbh_demon.close_dbs()
+        #self.ur.DashboardClient.Close()  #TODO FIXME Check om det er rigtigt
+        #self.dbh_demon.close_dbs()
         
     def send_program(self, prg='', wait=True, timeout=300.):
         self.__force_remote_set=False
@@ -107,19 +108,24 @@ class UrScriptExt(URBasic.urScript.UrScript):
         
         if not self.ur.RobotModel.RobotStatus.PowerOn:
             #while not self.set_gravity([0,-9.82,0]): pass
-            self.dbh_demon.ur_power_on()
-            self.dbh_demon.wait_dbs()
+            self.ur.DashboardClient.PowerOn()
+            ##self.dbh_demon.ur_power_on()
+            ##self.dbh_demon.wait_dbs()
             #while not self.set_gravity([0,-9.82,0]): pass
-            self.dbh_demon.ur_brake_release()
-            self.dbh_demon.wait_dbs()
+            self.ur.DashboardClient.BrakeRelease()
+            ##self.dbh_demon.ur_brake_release()
+            ##self.dbh_demon.wait_dbs()
             time.sleep(2)
         if self.ur.RobotModel.SafetyStatus.StoppedDueToSafety:         #self.get_safety_status()['StoppedDueToSafety']:
-            self.dbh_demon.ur_unlock_protective_stop()
-            self.dbh_demon.wait_dbs()
-            self.dbh_demon.ur_close_safety_popup()
-            self.dbh_demon.wait_dbs()
-            self.dbh_demon.ur_brake_release()
-            self.dbh_demon.wait_dbs()
+            self.ur.DashboardClient.UnlockProtectiveStop()
+            ##self.dbh_demon.ur_unlock_protective_stop()
+            ##self.dbh_demon.wait_dbs()
+            self.ur.DashboardClient.CloseSafetyPopup()
+            ##self.dbh_demon.ur_close_safety_popup()
+            ##self.dbh_demon.wait_dbs()
+            self.ur.DashboardClient.BrakeRelease()
+            #self.dbh_demon.ur_brake_release()
+            #self.dbh_demon.wait_dbs()
             time.sleep(2)
             
         #return self.get_robot_status()['PowerOn'] & (not self.get_safety_status()['StoppedDueToSafety'])

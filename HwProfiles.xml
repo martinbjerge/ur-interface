@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <Profiles>
        <UR5_Gate1_Prototye>
-        <BCI>
-        </BCI>
+        <!--<BCI>
+        </BCI>-->
         <BCO>
             <Signal id="0" use="EmergencyStop" safeState="NA"/>
             <Signal id="1" use="EmergencyStop" safeState="NA" />
@@ -27,20 +27,20 @@
             <Signal id="3" use="BaseBlow" safeState="NA" />
         </BDO>
     
-        <BAI>
+        <!--<BAI>
             <Signal id="0" use="ToolDistanceSensor" />
         </BAI>
     
         <BAO>
         </BAO>  
         <TDI>
-        </TDI>
+        </TDI>-->
         
     </UR5_Gate1_Prototye>
 	
 	<UR10_Gate1_Prototye>
-		<BCI>
-		</BCI>
+		<!--<BCI>
+		</BCI>-->
 		<BCO>
 			<Signal id="0" use="EmergencyStop"  safeState="NA"/>
 			<Signal id="1" use="EmergencyStop"  safeState="NA"/>
@@ -65,14 +65,14 @@
 			<Signal id="3" use="BaseBlow"  safeState="False"/>
 		</BDO>
 
-		<BAI>
+		<!--<BAI>
 			<Signal id="0" use="ToolDistanceSensor" />
 		</BAI>
 
 		<BAO>
 		</BAO>	
 		<TDI>
-		</TDI>
+		</TDI>-->
 		
 	</UR10_Gate1_Prototye>
 </Profiles>
