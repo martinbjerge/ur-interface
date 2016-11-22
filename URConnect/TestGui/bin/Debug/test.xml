@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DistanceSensor xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <IOPort>StandardAnalogInput0</IOPort>
+  <MinimumCurrent>4</MinimumCurrent>
+  <MaximumCurrent>20</MaximumCurrent>
+  <MinimumDistance>0.1</MinimumDistance>
+  <MaximumDistance>0.5</MaximumDistance>
+  <TCP_Offset>
+    <X>-0.012</X>
+    <Y>0.053</Y>
+    <Z>0.051</Z>
+    <RX>0</RX>
+    <RY>-0.018</RY>
+    <RZ>0</RZ>
+  </TCP_Offset>
+</DistanceSensor>

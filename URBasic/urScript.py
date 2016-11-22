@@ -40,8 +40,6 @@ from UniversalRobotsConnect import RobotConnector
 #from UniversalRobotsConnect.Types import SafetyStatus
 
 class UrScript(object):
-#class UrScript(URBasic.realTimeClient.RT_CLient):
-
     '''
     Interface to remote access UR script commands.
     For more details see the script manual at this site:
@@ -74,7 +72,6 @@ class UrScript(object):
         name = logger.AddEventLogging(__name__)        
         self.__logger = logger.__dict__[name]
         self.ur = RobotConnector(robotModel, host, hasForceTorque)
-        #time.sleep(5)   
         while(self.ur.RobotModel.ActualTCPPose == None):      ## check på om vi er startet
             pass
         self.__logger.info('Init done')
