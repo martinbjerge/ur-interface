@@ -35,11 +35,13 @@ import sys
 import clr
 sys.path.append(r"C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\bin\Debug")
 clr.AddReference("UniversalRobotsConnect")
-from UniversalRobotsConnect import RobotConnector
-from UniversalRobotsConnect.Types import RobotStatus
-from UniversalRobotsConnect.Types import SafetyStatus
+from UniversalRobotsConnect import RobotConnector 
+#from UniversalRobotsConnect.Types import RobotStatus
+#from UniversalRobotsConnect.Types import SafetyStatus
 
 class UrScript(object):
+#class UrScript(URBasic.realTimeClient.RT_CLient):
+
     '''
     Interface to remote access UR script commands.
     For more details see the script manual at this site:
@@ -64,15 +66,17 @@ class UrScript(object):
     '''
 
 
-    def __init__(self, host, robotModel):
+    def __init__(self, host, robotModel, hasForceTorque):
         '''
         Constructor see class description for more info.
         '''
         logger = URBasic.dataLogging.DataLogging()        
         name = logger.AddEventLogging(__name__)        
         self.__logger = logger.__dict__[name]
-        self.ur = RobotConnector(self.__robotModel, host, False)
-        time.sleep(5)
+        self.ur = RobotConnector(robotModel, host, hasForceTorque)
+        #time.sleep(5)   
+        while(self.ur.RobotModel.ActualTCPPose == None):      ## check på om vi er startet
+            pass
         self.__logger.info('Init done')
 
 #############   Module motion   ###############

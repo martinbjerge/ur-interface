@@ -61,11 +61,11 @@ class UrScriptExt(URBasic.urScript.UrScript):
     '''
 
 
-    def __init__(self, host, profile, robotModel, hw_Profile_filename='HwProfiles.xml'):
+    def __init__(self, host, profile, robotModel, hasForceTorque, hw_Profile_filename='HwProfiles.xml'):
         '''
         Constructor see class description for more info.
         '''
-        super().__init__(host, robotModel)        
+        super().__init__(host, robotModel, hasForceTorque)        
         logger = URBasic.dataLogging.DataLogging()
         name = logger.AddEventLogging(__name__)        
         self.__logger = logger.__dict__[name]
