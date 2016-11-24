@@ -32,7 +32,7 @@
     <field name="actual_digital_output_bits" type="UINT64"/>
     <field name="runtime_state" type="UINT32"/>
     <field name="robot_status_bits" type="UINT32"/>
-    <field name="safety_status_bits" type="UINT32"/>-
+    <field name="safety_status_bits" type="UINT32"/>
         <!--<field name="analog_io_types" type="UINT32"/>-->
     <field name="standard_analog_input0" type="DOUBLE"/>
     <field name="standard_analog_input1" type="DOUBLE"/>

@@ -61,16 +61,13 @@ class UrScriptExt(URBasic.urScript.UrScript):
     '''
 
 
-    def __init__(self, host, profile, robotModel, hasForceTorque, hw_Profile_filename='HwProfiles.xml'):
-        '''
-        Constructor see class description for more info.
-        '''
+    def __init__(self, host, profile, robotModel, hasForceTorque, hw_Profile_filename='C:\\SourceCode\\bladerobot\\Interface\\HwProfiles.xml'):
         super().__init__(host, robotModel, hasForceTorque)        
         logger = URBasic.dataLogging.DataLogging()
         name = logger.AddEventLogging(__name__)        
         self.__logger = logger.__dict__[name]
         #self.dbh_demon = URBasic.dashboard.DashBoard(host)
-        self.hwProfile = HardwareProfile(profile, hw_Profile_filename )
+        self.hwProfile = HardwareProfile(profile, hw_Profile_filename)
         self.__force_remote_set=False
         self.print_actual_tcp_pose()
         self.__logger.info('Init done')
@@ -764,7 +761,7 @@ class HardwareProfile():
     '''
 
 
-    def __init__(self, profile, hw_Profile_filename='HwProfiles.xml'):
+    def __init__(self, profile, hw_Profile_filename='C:\SourceCode\bladerobot\Interface\HwProfiles.xml'):
         '''
         Constructor
         '''
@@ -778,7 +775,7 @@ class HardwareProfile():
         
     def loadHwProfile(self, profile):
         if not os.path.isfile(self.__HwProfilesFile):        
-            self._logger.error("Configuration file don't exist : " + self.__HwProfilesFile)
+            self.__logger.error("Configuration file don't exist : " + self.__HwProfilesFile)
             return False
         
         tree = ET.parse(self.__HwProfilesFile)

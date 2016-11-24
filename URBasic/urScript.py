@@ -110,7 +110,6 @@ end
         self.ur.RealTimeClient.Send(programString)
         if(wait):
             while(self.ur.RobotModel.RuntimeState != 1):
-                #print("RuntimeState: " + str(self.ur.RobotModel.RuntimeState))
                 pass
         
         
@@ -142,7 +141,7 @@ end
                 pass
         
         
-        #return self.send_program(prg.format(**locals()), wait)
+        
 
     def movep(self, pose=None, a=1.2, v =0.25, r =0, wait=True, q=None):
         '''
@@ -172,7 +171,7 @@ end
             while(self.ur.RobotModel.RuntimeState != 1):
                 pass
         
-        #return self.send_program(prg.format(**locals()), wait)
+        
         
     def movec(self, pose_via=None, pose_to=None, a=1.2, v =0.25, r =0, wait=True, q_via=None, q_to=None):
         '''
@@ -207,7 +206,7 @@ end
             while(self.ur.RobotModel.RuntimeState != 1):
                 pass
         
-        #return self.send_program(prg.format(**locals()), wait)
+        
  
     def _move(self, movetype, pose=None, a=1.2, v=0.25, t=0, r=0, wait=True, q=None, pose_via=None, q_via=None):
         '''
@@ -325,7 +324,7 @@ end'''
         if(wait):
             while(self.ur.RobotModel.RuntimeState != 1):
                 pass
-        #return self.send_program(prg.format(**locals()), wait, timeout)
+        
  
     def end_force_mode(self, wait=True):
         '''
@@ -339,7 +338,7 @@ end'''
         if(wait):
             while(self.ur.RobotModel.RuntimeState != 1):
                 pass
-        #return self.send_program(prg.format(**locals()), wait)
+        
         
     def servoc(self, pose, a=1.2, v =0.25, r =0, wait=True):
         '''
@@ -360,7 +359,7 @@ end'''
         if(wait):
             while(self.ur.RobotModel.RuntimeState != 1):
                 pass
-        #return self.send_program(prg.format(**locals()), wait)
+        
 
     def servoj(self, q, t =0.008, lookahead_time=0.1, gain=100, wait=True):
         '''
@@ -384,8 +383,8 @@ end'''
         if(wait):
             while(self.ur.RobotModel.RuntimeState != 1):
                 pass
-        #return self.send_program(prg.format(**locals()), wait)
         
+
     def speedj(self, qd, a, t , wait=True):
         '''
         Joint speed
@@ -405,7 +404,7 @@ end'''
         if(wait):
             while(self.ur.RobotModel.RuntimeState != 1):
                 pass
-        #return self.send_program(prg.format(**locals()), wait)
+        
 
     def stopj(self, a, wait=True):
         '''
@@ -421,7 +420,7 @@ end'''
         if(wait):
             while(self.ur.RobotModel.RuntimeState != 1):
                 pass
-        #return self.send_program(prg.format(**locals()), wait)        
+                
         
     def speedl(self, xd, a, t, aRot='a', wait=True):
         '''
@@ -443,7 +442,7 @@ end'''
         if(wait):
             while(self.ur.RobotModel.RuntimeState != 1):
                 pass
-        #return self.send_program(prg.format(**locals()), wait)
+        
 
     def stopl(self, a, aRot ='a', wait=True):
         '''
@@ -460,7 +459,7 @@ end'''
         if(wait):
             while(self.ur.RobotModel.RuntimeState != 1):
                 pass
-        #return self.send_program(prg.format(**locals()), wait)
+        
 
     def freedrive_mode(self, wait=False):
         '''
@@ -480,8 +479,7 @@ end'''
         if(wait):
             while(self.ur.RobotModel.RuntimeState != 1):
                 pass
-        #self.send_program(prg.format(**locals()), wait)
-
+        
     def end_freedrive_mode(self, wait=True):
         '''
         Set robot back in normal position control mode after freedrive mode.
@@ -493,7 +491,7 @@ end'''
         if(wait):
             while(self.ur.RobotModel.RuntimeState != 1):
                 pass
-        #return self.send_program(prg.format(**locals()), wait)
+        
         
     def teach_mode(self, wait=True):
         '''
@@ -512,7 +510,7 @@ end'''
         if(wait):
             while(self.ur.RobotModel.RuntimeState != 1):
                 pass
-        #self.send_program(prg.format(**locals()), wait)
+        
 
     def end_teach_mode(self, wait=True):
         '''
@@ -525,7 +523,7 @@ end'''
         if(wait):
             while(self.ur.RobotModel.RuntimeState != 1):
                 pass
-        #return self.send_program(prg.format(**locals()), wait)
+        
     
         
     def conveyor_pulse_decode(self, in_type, A, B, wait=True):
@@ -566,7 +564,7 @@ end'''
         if(wait):
             while(self.ur.RobotModel.RuntimeState != 1):
                 pass
-        #return self.send_program(prg.format(**locals()), wait)
+        
         
     def set_conveyor_tick_count(self, tick_count, absolute_encoder_resolution=0, wait=True):
         '''
@@ -592,7 +590,7 @@ end'''
         if(wait):
             while(self.ur.RobotModel.RuntimeState != 1):
                 pass
-        #self.send_program(prg.format(**locals()), wait)
+        
                 
     def get_conveyor_tick_count(self, wait=True, rtde_reg='output_double_register_0'):
         '''
@@ -638,7 +636,7 @@ end'''
             while(self.ur.RobotModel.RuntimeState != 1):
                 pass
         
-        #return self.send_program(prg.format(**locals()), wait)
+        
         
     def track_conveyor_circular(self, center, ticks_per_revolution, rotate_tool, wait=True):
         '''
@@ -666,7 +664,7 @@ end'''
             while(self.ur.RobotModel.RuntimeState != 1):
                 pass
         
-        #return self.send_program(prg.format(**locals()), wait)
+        
 
 
     def track_conveyor_linear(self, direction, ticks_per_meter, wait=True):
@@ -692,7 +690,6 @@ end'''
             while(self.ur.RobotModel.RuntimeState != 1):
                 pass
         
-        #return self.send_program(prg.format(**locals()), wait)
 
     def position_deviation_warning(self, enabled, threshold =0.8, wait=True):
         '''
@@ -711,7 +708,6 @@ end'''
             while(self.ur.RobotModel.RuntimeState != 1):
                 pass
         
-        #return self.send_program(prg.format(**locals()), wait)
         
     def reset_revolution_counter(self, qNear=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], wait=True):
         '''
@@ -734,7 +730,6 @@ end'''
             while(self.ur.RobotModel.RuntimeState != 1):
                 pass
         
-        #return self.send_program(prg.format(**locals()), wait)
         
     def set_pos(self, q, wait=True):
         '''
@@ -751,7 +746,6 @@ end'''
             while(self.ur.RobotModel.RuntimeState != 1):
                 pass
         
-        #return self.send_program(prg.format(**locals()), wait)
 
 ####################   Module internals    ####################
     
@@ -764,6 +758,11 @@ end'''
         Return Value
         The force in Newtons (ﬂoat)
         '''
+        if(wait):
+            initialRobotTime = self.ur.RobotModel.RobotTimestamp
+            while(self.ur.RobotModel.RobotTimestamp == initialRobotTime):
+                pass
+
         return None
 
         
@@ -780,7 +779,13 @@ end'''
         The current actual joint angular position vector in rad : [Base,
         Shoulder, Elbow, Wrist1, Wrist2, Wrist3]
         '''
-        return np.array(self.get_rtde_data('actual_q', wait))
+        if(wait):
+            initialRobotTime = self.ur.RobotModel.RobotTimestamp
+            while(self.ur.RobotModel.RobotTimestamp == initialRobotTime):
+                pass
+        return self.ur.RobotModel.ActualQ 
+    
+
         
     def get_actual_joint_speeds(self, wait=True):
         '''
@@ -795,7 +800,12 @@ end'''
         The current actual joint angular velocity vector in rad/s:
         [Base, Shoulder, Elbow, Wrist1, Wrist2, Wrist3]
         '''
+        if(wait):
+            initialRobotTime = self.ur.RobotModel.RobotTimestamp
+            while(self.ur.RobotModel.RobotTimestamp == initialRobotTime):
+                pass
         return None
+
         
     def get_actual_tcp_pose(self, wait=True):
         '''
@@ -808,9 +818,13 @@ end'''
         Return Value
         The current actual TCP vector : ([X, Y, Z, Rx, Ry, Rz])
         '''
-        test = self.ur.RobotModel.ActualTCPPose
-        return test
-        #return np.array(self.get_rtde_data('actual_TCP_pose', wait))
+        if(wait):
+            initialRobotTime = self.ur.RobotModel.RobotTimestamp
+            while(self.ur.RobotModel.RobotTimestamp == initialRobotTime):
+                pass
+           
+        return self.ur.RobotModel.ActualTCPPose
+       
         
     def get_actual_tcp_speed(self):
         '''
@@ -823,7 +837,11 @@ end'''
         Return Value
         The current actual TCP velocity vector; ([X, Y, Z, Rx, Ry, Rz])
         '''
-        return None
+        if(wait):
+            initialRobotTime = self.ur.RobotModel.RobotTimestamp
+            while(self.ur.RobotModel.RobotTimestamp == initialRobotTime):
+                pass
+        return self.ur.RobotModel.ActualTCPSpeed
         
     def get_actual_tool_ﬂange_pose(self):
         '''
@@ -1079,8 +1097,8 @@ end'''
         if(wait):
             while(self.ur.RobotModel.RuntimeState != 1):
                 pass
-        #return self.send_program(prg.format(**locals()), wait)
     
+
     def set_payload(self, m, CoG):
         '''
         Set payload mass and center of gravity
@@ -1149,7 +1167,6 @@ end'''
             while(self.ur.RobotModel.RuntimeState != 1):
                 pass
         
-        #return self.send_program(prg.format(**locals()), wait)
 
     def set_tcp(self, pose, wait=True):
         '''
@@ -1172,8 +1189,8 @@ end'''
         if(wait):
             while(self.ur.RobotModel.RuntimeState != 1):
                 pass
-        #return self.send_program(prg.format(**locals()), wait)
     
+
     def sleep(self, t):
         '''
         Sleep for an amount of time
@@ -1323,10 +1340,16 @@ end'''
         '''
         
         if n == 0:
-            #return self.get_rtde_data('standard_analog_input0', wait)
+            if(wait):
+                initialRobotTime = self.ur.RobotModel.RobotTimestamp
+                while(self.ur.RobotModel.RobotTimestamp == initialRobotTime):
+                    pass
             return self.ur.RobotModel.StandardAnalogInput0
         elif n == 1:
-            #return self.get_rtde_data('standard_analog_input1', wait)
+            if(wait):
+                initialRobotTime = self.ur.RobotModel.RobotTimestamp
+                while(self.ur.RobotModel.RobotTimestamp == initialRobotTime):
+                    pass
             return self.ur.RobotModel.StandardAnalogInput1
         else:
             return None
@@ -1343,11 +1366,17 @@ end'''
         ﬂoat, The signal level [0;1]
         '''
         if n == 0:
-            #return self.get_rtde_data('standard_analog_output0', wait)  
+            if(wait):
+                initialRobotTime = self.ur.RobotModel.RobotTimestamp
+                while(self.ur.RobotModel.RobotTimestamp == initialRobotTime):
+                    pass
             return self.ur.RobotModel.StandardAnalogOutput0
         elif n == 1:
-            #return self.get_rtde_data('standard_analog_output1', wait)
-            return self.ur.RobotModel.StandardAnalogOutput1
+            if(wait):
+                initialRobotTime = self.ur.RobotModel.RobotTimestamp
+                while(self.ur.RobotModel.RobotTimestamp == initialRobotTime):
+                    pass
+                return self.ur.RobotModel.StandardAnalogOutput1
         else:
             return None
         

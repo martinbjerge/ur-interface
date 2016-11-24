@@ -134,6 +134,7 @@ namespace UniversalRobotsConnect
             get { return _robotTimeStamp; }
             set
             {
+                //log.Info($"{RobotTimestamp} , RobotTimestamp");
                 //double delta = value - _robotTimeStamp;
                 //if (delta > 0.0081)
                 //{

@@ -18,10 +18,12 @@ namespace UniversalRobotsConnect
 
         internal event EventHandler<DataReceivedEventArgs> DataReceived;
         private NetworkStream _stream;
-        private Thread _thread;
+        private Thread _receiverThread;
         private RobotModel _robotModel;
         private List<KeyValuePair<string, string>> _rtdeOutputConfiguration;
         private List<KeyValuePair<string, string>> _rtdeInputConfiguration;
+        private List<byte[]> _packageList = new List<byte[]>();
+        private Thread _packageDecoderThread;
 
         internal RTDEReceiver(NetworkStream stream, RobotModel robotModel, List<KeyValuePair<string, string>> rtdeOutputConfiguration, List<KeyValuePair<string, string>> rtdeInputConfiguration)
         {
@@ -29,8 +31,10 @@ namespace UniversalRobotsConnect
             _stream = stream;
             _rtdeOutputConfiguration = rtdeOutputConfiguration;
             _rtdeInputConfiguration = rtdeInputConfiguration;
-            _thread = new Thread(Run);
-            _thread.Start();
+            _packageDecoderThread = new Thread(PacageDecoder);
+            _packageDecoderThread.Start();
+            _receiverThread = new Thread(Run);
+            _receiverThread.Start();
         }
 
         private void Run()
@@ -42,20 +46,32 @@ namespace UniversalRobotsConnect
                 {
                     if (_stream.CanRead)
                     {
-                        byte[] myReadBuffer = new byte[100000];
-                        StringBuilder myCompleteMessage = new StringBuilder();
+                        byte[] myReadBuffer = new byte[65000];
+                        //StringBuilder myCompleteMessage = new StringBuilder();
                         int numberOfBytesRead = 0;
 
-                        // Incoming message may be larger than the buffer size.
                         do
                         {
                             numberOfBytesRead = _stream.Read(myReadBuffer, 0, myReadBuffer.Length);
-                            myCompleteMessage.AppendFormat("{0}", Encoding.ASCII.GetString(myReadBuffer, 0, numberOfBytesRead));
+                            //numberOfBytesRead = numberOfBytesRead + thisRead;
+                            //myCompleteMessage.AppendFormat("{0}", Encoding.UTF8.GetString(myReadBuffer, 0, numberOfBytesRead));
                         }
                         while (_stream.DataAvailable);
 
-                        DecodePacage(myReadBuffer);
-                        //MessageDecode(myReadBuffer);
+                        byte[] package =  new byte[numberOfBytesRead];
+                        Array.Copy(myReadBuffer, package, numberOfBytesRead);
+                        _packageList.Add(package);
+                        //myReadBuffer.CopyTo(package, 0);
+
+                        //_packageList.Add();
+                        //log.Debug($"Package length: {numberOfBytesRead}");
+
+                        //_packageList.Add(myCompleteMessage.ToString());
+                        //DecodePacage(myReadBuffer);
+                        //DecodePacage(Encoding.UTF8.GetBytes(myCompleteMessage.ToString()));
+
+
+                        //DecodePacage(package);
                     }
                     else
                     {
@@ -66,10 +82,26 @@ namespace UniversalRobotsConnect
             }
         }
 
+        private void PacageDecoder()
+        {
+            while (true)
+            {
+                if (_packageList.Count > 0)
+                {
+                    if (_packageList[0] != null)
+                    {
+                        DecodePacage(_packageList[0]);
+                        _packageList.RemoveAt(0);
+                    }
+                }
+                Thread.Sleep(2);
+            }
+        }
+
         private void DecodePacage(byte[] recievedPackage)
         {
             byte[] sizeArray = new byte[2];
-            byte type = recievedPackage[2];
+            UR_RTDE_Command type = (UR_RTDE_Command) recievedPackage[2];
             Array.Copy(recievedPackage, sizeArray, 2);
             sizeArray = CheckEndian(sizeArray);
             ushort size = BitConverter.ToUInt16(sizeArray, 0);
@@ -80,35 +112,37 @@ namespace UniversalRobotsConnect
 
                 switch (type)
                 {
-                    case (byte)UR_RTDE_Command.RTDE_REQUEST_PROTOCOL_VERSION:
+                    case UR_RTDE_Command.RTDE_REQUEST_PROTOCOL_VERSION:
                         _robotModel.RTDEProtocolVersion = DecodeProtocolVersion(payloadArray);
                         break;
-                    case (byte)UR_RTDE_Command.RTDE_GET_URCONTROL_VERSION:
+                    case UR_RTDE_Command.RTDE_GET_URCONTROL_VERSION:
                         DecodeUniversalRobotsControllerVersion(payloadArray);
                         break;
-                    case (byte)UR_RTDE_Command.RTDE_CONTROL_PACKAGE_SETUP_OUTPUTS:
+                    case UR_RTDE_Command.RTDE_CONTROL_PACKAGE_SETUP_OUTPUTS:
                         DecodeRTDESetupPackage(payloadArray, _rtdeOutputConfiguration);
                         break;
-                    case (byte)UR_RTDE_Command.RTDE_CONTROL_PACKAGE_SETUP_INPUTS:
+                    case UR_RTDE_Command.RTDE_CONTROL_PACKAGE_SETUP_INPUTS:
                         DecodeRTDESetupPackage(payloadArray, _rtdeInputConfiguration);
                         break;
-                    case (byte)UR_RTDE_Command.RTDE_DATA_PACKAGE:
+                    case UR_RTDE_Command.RTDE_DATA_PACKAGE:
                         DecodeRTDEDataPackage(payloadArray);
                         break;
-                    case (byte)UR_RTDE_Command.RTDE_CONTROL_PACKAGE_START:
+                    case UR_RTDE_Command.RTDE_CONTROL_PACKAGE_START:
                         _robotModel.RTDEConnectionState = DecodeRTDEControlPackageStart(payloadArray);
                         break;
-                    case (byte)UR_RTDE_Command.RTDE_CONTROL_PACKAGE_PAUSE:
+                    case UR_RTDE_Command.RTDE_CONTROL_PACKAGE_PAUSE:
                         _robotModel.RTDEConnectionState = DecodeRTDEControlPacagePause(payloadArray);
                         break;
                     default:
-                        break;
-                        //throw new NotImplementedException("Package type not implemented " + (UR_RTDE_Command)type);   TODO fixme - vi kan sommetider få en pakke 37 .. hvad så end det er .. skal fixes 
+                        log.Error("Package type not implemented " + type);
+                        throw new NotImplementedException("Package type not implemented " + type);   //TODO fixme - vi kan sommetider få en pakke 37 .. hvad så end det er .. skal fixes 
+                        //break;
                 }
             }
             else
             {
-                //log.Error("Got a packet too small");  todo fixme - sørg for at få checket hvorfor den engang imellem sender en pakke der er for lille .. 
+                log.Error("Got a packet too small");  //todo fixme - sørg for at få checket hvorfor den engang imellem sender en pakke der er for lille .. 
+                throw new Exception("Got a packet too small");
             }
         }
 
@@ -507,5 +541,6 @@ namespace UniversalRobotsConnect
                 Debug.WriteLine(text);
             }
         }
+
     }
 }

@@ -35,26 +35,30 @@ namespace TestGui
         public MainWindow()
         {
             InitializeComponent();
-            //_robotConnector = new RobotConnector("172.16.74.129", false);
+            _robotConnector = new RobotConnector("172.16.74.129", false);
             //_robotConnector = new RobotConnector("192.168.0.3", true);
-            //_myRobotModel = _robotConnector.RobotModel;
+            _myRobotModel = _robotConnector.RobotModel;
             
             //_robotConnector.DashboardClient.PowerOff();
 
             //_robotConnector.DashboardClient.PowerOn();
 
-            DistanceSensor distanceSensor = new DistanceSensor("StandardAnalogInput0");
-            distanceSensor.TCP_Offset = new Vector6D(-0.012, 0.053, 0.051, 0, -0.018, 0.0);
-            distanceSensor.MaximumCurrent = 20;
-            distanceSensor.MinimumCurrent = 4;
-            distanceSensor.MaximumDistance = 0.5;
-            distanceSensor.MinimumDistance = 0.1;
+            //DistanceSensor distanceSensor = new DistanceSensor("StandardAnalogInput0");
+            //distanceSensor.TCP_Offset = new Vector6D(-0.012, 0.053, 0.051, 0, -0.018, 0.0);
+            //distanceSensor.MaximumCurrent = 20;
+            //distanceSensor.MinimumCurrent = 4;
+            //distanceSensor.MaximumDistance = 0.5;
+            //distanceSensor.MinimumDistance = 0.1;
 
-            Type[] types = new Type[] { typeof(Vector6D)};
+            //Type[] types = new Type[] { typeof(Vector6D)};
 
-            XmlTextWriter textWriter = new XmlTextWriter("test.xml", Encoding.UTF8);
-            XmlSerializer xmlSerializer = new XmlSerializer(typeof(DistanceSensor), types);
-            xmlSerializer.Serialize(textWriter, distanceSensor);
+            //XmlTextWriter textWriter = new XmlTextWriter("test.xml", Encoding.UTF8);
+            //XmlSerializer xmlSerializer = new XmlSerializer(typeof(DistanceSensor), types);
+            //xmlSerializer.Serialize(textWriter, distanceSensor);
+            //while (true)
+            //{
+            //    Thread.Sleep(10000);
+            //}
         }
     }
 }
