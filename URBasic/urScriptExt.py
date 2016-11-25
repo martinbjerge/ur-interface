@@ -73,6 +73,7 @@ class UrScriptExt(URBasic.urScript.UrScript):
         self.print_actual_joint_positions()
         self.__logger.info('Init done')
         
+        
     def close_urScriptExt(self):
         self.print_actual_tcp_pose()
         self.print_actual_joint_positions()

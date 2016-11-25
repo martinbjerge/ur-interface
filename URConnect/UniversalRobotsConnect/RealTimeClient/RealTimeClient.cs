@@ -35,7 +35,11 @@ namespace UniversalRobotsConnect
 
         public void Send(byte[] payload)
         {
-            log.Debug($"Send program to robot {Encoding.UTF8.GetString(payload)}");
+            byte[] sendBytes = new byte[payload.Length+2];
+            Array.Copy(payload, sendBytes, payload.Length);
+            sendBytes[sendBytes.Length - 2] = (byte) 92;        //backslash
+            sendBytes[sendBytes.Length - 1] = (byte) 'n';
+            log.Debug($"Send program to robot {Encoding.UTF8.GetString(sendBytes)}");
             _realtimeClientSender.SendData(payload);
             Thread.Sleep(150);      //Waiting to return to allow for RuntimeState to be right
         }
