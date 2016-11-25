@@ -61,7 +61,7 @@ class UrScriptExt(URBasic.urScript.UrScript):
     '''
 
 
-    def __init__(self, host, profile, robotModel, hasForceTorque, hw_Profile_filename='C:\\SourceCode\\bladerobot\\Interface\\HwProfiles.xml'):
+    def __init__(self, host, profile, robotModel, hasForceTorque=False, hw_Profile_filename='C:\\SourceCode\\bladerobot\\Interface\\HwProfiles.xml'):
         super().__init__(host, robotModel, hasForceTorque)        
         logger = URBasic.dataLogging.DataLogging()
         name = logger.AddEventLogging(__name__)        
@@ -70,10 +70,12 @@ class UrScriptExt(URBasic.urScript.UrScript):
         self.hwProfile = HardwareProfile(profile, hw_Profile_filename)
         self.__force_remote_set=False
         self.print_actual_tcp_pose()
+        self.print_actual_joint_positions()
         self.__logger.info('Init done')
         
     def close_urScriptExt(self):
         self.print_actual_tcp_pose()
+        self.print_actual_joint_positions()
         #self.close_rtc()
         #self.ur.DashboardClient.Close()  #TODO FIXME Check om det er rigtigt
         #self.dbh_demon.close_dbs()
@@ -746,12 +748,9 @@ end
     def print_pose(self, pose=None, q=None):
         '''
         print a pose 
-        '''
-        test = pose
-        
+        '''        
         if q is None:
-            print('Robot Pose: ' + str(pose.X) + ', ' + str(pose.Y) + ', ' + str(pose.Z) + ', ' + str(pose.RX) + ', ' + str(pose.RY) + ', ' + str(pose.RZ))
-            #print('Robot Pose: [{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*pose))
+            print('Robot Pose: [{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*pose))
         else:
             print('Robot joint positions: [{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*q))
 
