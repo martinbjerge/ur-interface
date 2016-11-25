@@ -146,6 +146,11 @@ namespace UniversalRobotsConnect
 
         public ConnectionState RTDEConnectionState { get; set; }
 
+        /// <summary>
+        /// Flag used when program using UR-Script and UR-ScriptEXT needs to shut down before completed
+        /// This can be in seperate threads - set this flag when need to stop and listen in all threads
+        /// </summary>
+        public bool StopRunningFlag { get; set; } = false;
         
         #region Digital Input Bits
 

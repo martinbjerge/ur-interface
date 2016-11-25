@@ -33,5 +33,5 @@ C:\SourceCode\ur-interface\URConnect\TestGui\obj\Debug\TestGui.Properties.Resour
 C:\SourceCode\ur-interface\URConnect\TestGui\obj\Debug\TestGui.csproj.GenerateResource.Cache
 C:\SourceCode\ur-interface\URConnect\TestGui\obj\Debug\TestGui.exe
 C:\SourceCode\ur-interface\URConnect\TestGui\obj\Debug\TestGui.pdb
-C:\SourceCode\ur-interface\URConnect\TestGui\bin\Debug\UniversalRobotsConnect.pdb
 C:\SourceCode\ur-interface\URConnect\TestGui\obj\Debug\TestGui.csprojResolveAssemblyReference.cache
+C:\SourceCode\ur-interface\URConnect\TestGui\bin\Debug\UniversalRobotsConnect.pdb
