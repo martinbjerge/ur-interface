@@ -64,7 +64,7 @@ class UrScript(object):
     '''
 
 
-    def __init__(self, host, robotModel, hasForceTorque):
+    def __init__(self, host, robotModel, hasForceTorque=False):
         '''
         Constructor see class description for more info.
         '''
@@ -73,10 +73,14 @@ class UrScript(object):
         self.__logger = logger.__dict__[name]
         self.ur = RobotConnector(robotModel, host, hasForceTorque)
         while(self.ur.RobotModel.ActualTCPPose == None):      ## check på om vi er startet
-            pass
+            time.sleep(0.001)
         self.__logger.info('Init done')
-
 #############   Module motion   ###############
+
+    def waitRobotIdleOrStopFlag(self):
+        while(self.ur.RobotModel.RuntimeState != 1 and not self.ur.RobotModel.StopRunningFlag):
+            time.sleep(0.001)
+
         
     def movej(self, q=None, a=1.4, v =1.05, t =0, r =0, wait=True, pose=None):
         '''
@@ -109,9 +113,7 @@ end
         
         self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
-        
+            self.waitRobotIdleOrStopFlag()
         
     def movel(self, pose=None, a=1.2, v =0.25, t =0, r =0, wait=True, q=None):
         '''
@@ -137,9 +139,7 @@ end
         
         self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
-        
+            self.waitRobotIdleOrStopFlag()
         
         
 
@@ -168,9 +168,7 @@ end
         
         self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
-        
+            self.waitRobotIdleOrStopFlag()
         
         
     def movec(self, pose_via=None, pose_to=None, a=1.2, v =0.25, r =0, wait=True, q_via=None, q_to=None):
@@ -203,8 +201,7 @@ end
         
         self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
+            self.waitRobotIdleOrStopFlag()
         
         
  
@@ -322,9 +319,7 @@ end'''
         
         self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
-        
+            self.waitRobotIdleOrStopFlag()
  
     def end_force_mode(self, wait=True):
         '''
@@ -336,9 +331,7 @@ end'''
         
         self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
-        
+            self.waitRobotIdleOrStopFlag()
         
     def servoc(self, pose, a=1.2, v =0.25, r =0, wait=True):
         '''
@@ -357,9 +350,7 @@ end'''
         
         self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
-        
+            self.waitRobotIdleOrStopFlag()
 
     def servoj(self, q, t =0.008, lookahead_time=0.1, gain=100, wait=True):
         '''
@@ -381,9 +372,7 @@ end'''
         
         self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
-        
+            self.waitRobotIdleOrStopFlag()
 
     def speedj(self, qd, a, t , wait=True):
         '''
@@ -402,9 +391,7 @@ end'''
         
         self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
-        
+            self.waitRobotIdleOrStopFlag()
 
     def stopj(self, a, wait=True):
         '''
@@ -418,9 +405,7 @@ end'''
         
         self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
-                
+            self.waitRobotIdleOrStopFlag()    
         
     def speedl(self, xd, a, t, aRot='a', wait=True):
         '''
@@ -440,9 +425,7 @@ end'''
         
         self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
-        
+            self.waitRobotIdleOrStopFlag()
 
     def stopl(self, a, aRot ='a', wait=True):
         '''
@@ -457,9 +440,7 @@ end'''
         
         self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
-        
+            self.waitRobotIdleOrStopFlag()
 
     def freedrive_mode(self, wait=False):
         '''
@@ -477,9 +458,8 @@ end'''
         
         self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
-        
+            self.waitRobotIdleOrStopFlag()
+            
     def end_freedrive_mode(self, wait=True):
         '''
         Set robot back in normal position control mode after freedrive mode.
@@ -489,9 +469,7 @@ end'''
         
         self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
-        
+            self.waitRobotIdleOrStopFlag()
         
     def teach_mode(self, wait=True):
         '''
@@ -508,9 +486,7 @@ end'''
         
         self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
-        
+            self.waitRobotIdleOrStopFlag()
 
     def end_teach_mode(self, wait=True):
         '''
@@ -521,9 +497,7 @@ end'''
         
         self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
-        
+            self.waitRobotIdleOrStopFlag()
     
         
     def conveyor_pulse_decode(self, in_type, A, B, wait=True):
@@ -562,9 +536,7 @@ end'''
         
         self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
-        
+            self.waitRobotIdleOrStopFlag()
         
     def set_conveyor_tick_count(self, tick_count, absolute_encoder_resolution=0, wait=True):
         '''
@@ -588,11 +560,9 @@ end'''
         
         self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
-        
+            self.waitRobotIdleOrStopFlag()
                 
-    def get_conveyor_tick_count(self, wait=True, rtde_reg='output_double_register_0'):
+    def get_conveyor_tick_count(self):
         '''
         Tells the tick count of the encoder, note that the controller interpolates tick counts to get 
         more accurate movements with low resolution encoders
@@ -601,24 +571,15 @@ end'''
             The conveyor encoder tick count
         '''
         
-        if self.has_get_data_attr(rtde_reg):
-            prg = '''def ur_get_conveyor_tick_count():
-            write_output_float_register(0, get_conveyor_tick_count())
-            end'''
-            programString = prg.format(**locals())
-        
-            self.ur.RealTimeClient.Send(programString)
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
-            return self.ur.RealTimeClient.Model.DigitalOutputDoubleRegister0
-            #if self.send_program(prg.format(**locals()), wait):
-            #    return self.get_data(rtde_reg, wait=True)
-            #else:
-            #    return False
-        else:
-            self.__logger.warning('RTDE register not configured, expecting: ' + rtde_reg)
-            return False
-        
+        prg = '''def ur_get_conveyor_tick_count():
+        write_output_float_register(0, get_conveyor_tick_count())
+        end'''
+        programString = prg.format(**locals())
+    
+        self.ur.RealTimeClient.Send(programString)
+        self.waitRobotIdleOrStopFlag()
+        return self.ur.RobotModel.outputDoubleRegister[0]
+
     def stop_conveyor_tracking(self, a=15, aRot ='a', wait=True):
         '''
         Stop tracking the conveyor, started by track conveyor linear() or
@@ -633,9 +594,7 @@ end'''
         
         self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
-        
+            self.waitRobotIdleOrStopFlag()
         
         
     def track_conveyor_circular(self, center, ticks_per_revolution, rotate_tool, wait=True):
@@ -661,9 +620,7 @@ end'''
         
         self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
-        
+            self.waitRobotIdleOrStopFlag()
         
 
 
@@ -687,9 +644,7 @@ end'''
         
         self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
-        
+            self.waitRobotIdleOrStopFlag()
 
     def position_deviation_warning(self, enabled, threshold =0.8, wait=True):
         '''
@@ -705,9 +660,7 @@ end'''
         
         self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
-        
+            self.waitRobotIdleOrStopFlag()
         
     def reset_revolution_counter(self, qNear=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], wait=True):
         '''
@@ -727,9 +680,7 @@ end'''
         
         self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
-        
+            self.waitRobotIdleOrStopFlag()
         
     def set_pos(self, q, wait=True):
         '''
@@ -743,13 +694,11 @@ end'''
         
         self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
-        
+            self.waitRobotIdleOrStopFlag()
 
 ####################   Module internals    ####################
     
-    def force(self):
+    def force(self, wait=True):
         '''
         Returns the force exerted at the TCP
         
@@ -758,12 +707,7 @@ end'''
         Return Value
         The force in Newtons (ﬂoat)
         '''
-        if(wait):
-            initialRobotTime = self.ur.RobotModel.RobotTimestamp
-            while(self.ur.RobotModel.RobotTimestamp == initialRobotTime):
-                pass
-
-        return None
+        raise NotImplementedError('Function Not yet implemented')
 
         
     def get_actual_joint_positions(self, wait=True):
@@ -780,9 +724,7 @@ end'''
         Shoulder, Elbow, Wrist1, Wrist2, Wrist3]
         '''
         if(wait):
-            initialRobotTime = self.ur.RobotModel.RobotTimestamp
-            while(self.ur.RobotModel.RobotTimestamp == initialRobotTime):
-                pass
+            self.sync()
         return self.ur.RobotModel.ActualQ 
     
 
@@ -801,10 +743,8 @@ end'''
         [Base, Shoulder, Elbow, Wrist1, Wrist2, Wrist3]
         '''
         if(wait):
-            initialRobotTime = self.ur.RobotModel.RobotTimestamp
-            while(self.ur.RobotModel.RobotTimestamp == initialRobotTime):
-                pass
-        return None
+            self.sync()
+        return self.ur.RobotModel.ActualQD
 
         
     def get_actual_tcp_pose(self, wait=True):
@@ -819,14 +759,11 @@ end'''
         The current actual TCP vector : ([X, Y, Z, Rx, Ry, Rz])
         '''
         if(wait):
-            initialRobotTime = self.ur.RobotModel.RobotTimestamp
-            while(self.ur.RobotModel.RobotTimestamp == initialRobotTime):
-                pass
-           
+            self.sync()
         return self.ur.RobotModel.ActualTCPPose
        
         
-    def get_actual_tcp_speed(self):
+    def get_actual_tcp_speed(self,wait=True):
         '''
         Returns the current measured TCP speed
         
@@ -838,9 +775,7 @@ end'''
         The current actual TCP velocity vector; ([X, Y, Z, Rx, Ry, Rz])
         '''
         if(wait):
-            initialRobotTime = self.ur.RobotModel.RobotTimestamp
-            while(self.ur.RobotModel.RobotTimestamp == initialRobotTime):
-                pass
+            self.sync()
         return self.ur.RobotModel.ActualTCPSpeed
         
     def get_actual_tool_ﬂange_pose(self):
@@ -857,7 +792,7 @@ end'''
         
         Note: See get actual tcp pose for the actual 6d pose including TCP offset.
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
         
     def get_controller_temp(self):
         '''
@@ -868,7 +803,7 @@ end'''
         Return Value:
         A temperature in degrees Celcius (ﬂoat)
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
         
     def get_inverse_kin(self, x, qnear =[-1.6, -1.7, -2.2, -0.8, 1.6, 0.0], maxPositionError =0.0001, maxOrientationError =0.0001):
         '''
@@ -887,7 +822,7 @@ end'''
         Return Value:
         joint positions        
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
 
     def get_joint_temp(self,j):
         '''
@@ -902,7 +837,7 @@ end'''
         Return Value:
         A temperature in degrees Celcius (ﬂoat)
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def get_joint_torques(self):
         '''
@@ -914,7 +849,7 @@ end'''
         Return Value:
         The joint torque vector in ; ([ﬂoat])
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
         
     def get_target_joint_positions(self):
         '''
@@ -929,7 +864,7 @@ end'''
         The current target joint angular position vector in rad: [Base,
         Shoulder, Elbow, Wrist1, Wrist2, Wrist3]
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def get_target_joint_speeds(self):
         '''
@@ -944,7 +879,7 @@ end'''
         The current target joint angular velocity vector in rad/s:
         [Base, Shoulder, Elbow, Wrist1, Wrist2, Wrist3]
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def get_target_tcp_pose(self):
         '''
@@ -957,7 +892,7 @@ end'''
         Return Value:
         The current target TCP vector; ([X, Y, Z, Rx, Ry, Rz])
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def get_target_tcp_speed(self):
         '''
@@ -971,7 +906,7 @@ end'''
         Return Value:
         The TCP speed; (pose)
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def get_tcp_force(self):
         '''
@@ -987,7 +922,7 @@ end'''
         Return Value:
         the wrench (pose)
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
         
     def get_tool_accelerometer_reading(self):
         '''
@@ -1001,7 +936,7 @@ end'''
         X, Y, and Z composant of the measured acceleration in
         SI-units (m/sˆ2).
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
         
     def get_tool_current(self):
         '''
@@ -1012,7 +947,7 @@ end'''
         Return Value:
         The tool current in ampere.
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def is_steady(self):
         '''
@@ -1030,7 +965,7 @@ end'''
         True when the robot is fully at rest. Returns False otherwise
         (bool)
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def is_within_safety_limits(self, pose):
         '''
@@ -1049,7 +984,7 @@ end'''
         Return Value:
         True if within limits, false otherwise (bool)
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def popup(self, s, title='Popup', warning=False, error =False):
         '''
@@ -1063,13 +998,13 @@ end'''
         warning: warning message?
         error:   error message?
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def powerdown(self):
         '''
         Shutdown the robot, and power off the robot and controller.
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def set_gravity(self, d, wait=True):
         '''
@@ -1095,9 +1030,7 @@ end'''
         
         self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
-    
+            self.waitRobotIdleOrStopFlag()    
 
     def set_payload(self, m, CoG):
         '''
@@ -1123,7 +1056,7 @@ end'''
         CoG: Center of Gravity: [CoGx, CoGy, CoGz] in meters.
              Optional.
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def set_payload_cog(self, CoG):
         '''
@@ -1142,7 +1075,7 @@ end'''
         Parameters:
         CoG: Center of Gravity: [CoGx, CoGy, CoGz] in meters.
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
         
     def set_payload_mass(self, m, wait=True):
         '''
@@ -1164,9 +1097,7 @@ end'''
         
         self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
-        
+            self.waitRobotIdleOrStopFlag()
 
     def set_tcp(self, pose, wait=True):
         '''
@@ -1187,9 +1118,7 @@ end'''
         
         self.ur.RealTimeClient.Send(programString)
         if(wait):
-            while(self.ur.RobotModel.RuntimeState != 1):
-                pass
-    
+            self.waitRobotIdleOrStopFlag()
 
     def sleep(self, t):
         '''
@@ -1198,14 +1127,17 @@ end'''
         Parameters:
         t: time [s]
         '''
-        return None
+        time.sleep(t)
     
     def sync(self):
         '''
         Uses up the remaining ”physical” time a thread has in the current
-        frame.
+        frame/sample.
         '''
-        return None
+        initialRobotTime = self.ur.RobotModel.RobotTimestamp
+        while(self.ur.RobotModel.RobotTimestamp == initialRobotTime):
+            time.sleep(0.001)
+
     
     def textmsg(self, s1, s2=''):
         '''
@@ -1219,7 +1151,7 @@ end'''
         s2: message string, variables of other types (int, bool poses
         etc.) can also be sent
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
 ############    Module urmath    #################        
     def pose_add(self,p_1, p_2):
@@ -1264,7 +1196,7 @@ end'''
         Return Value:
         boolean, The signal level. 
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
         
     def get_conﬁgurable_digital_out(self, n):
         '''
@@ -1278,7 +1210,7 @@ end'''
         Return Value:
         boolean, The signal level.
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def get_euromap_input(self, port_number):
         '''
@@ -1294,7 +1226,7 @@ end'''
         Return Value:
         A boolean, either True or False
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
         
     def get_euromap_output(self, port_number):
         '''
@@ -1312,7 +1244,7 @@ end'''
         Return Value:
         A boolean, either True or False
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
         
     def get_ﬂag(self, n):
         '''
@@ -1323,7 +1255,7 @@ end'''
         Return Value
         Boolean, The stored bit.
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
         
     def get_standard_analog_in(self, n, wait=True):
         '''
@@ -1341,18 +1273,14 @@ end'''
         
         if n == 0:
             if(wait):
-                initialRobotTime = self.ur.RobotModel.RobotTimestamp
-                while(self.ur.RobotModel.RobotTimestamp == initialRobotTime):
-                    pass
+                self.sync()
             return self.ur.RobotModel.StandardAnalogInput0
         elif n == 1:
             if(wait):
-                initialRobotTime = self.ur.RobotModel.RobotTimestamp
-                while(self.ur.RobotModel.RobotTimestamp == initialRobotTime):
-                    pass
+                self.sync()
             return self.ur.RobotModel.StandardAnalogInput1
         else:
-            return None
+            raise KeyError('Index out of range')
     
     def get_standard_analog_out(self, n, wait=True):
         '''
@@ -1367,18 +1295,14 @@ end'''
         '''
         if n == 0:
             if(wait):
-                initialRobotTime = self.ur.RobotModel.RobotTimestamp
-                while(self.ur.RobotModel.RobotTimestamp == initialRobotTime):
-                    pass
+                self.sync()
             return self.ur.RobotModel.StandardAnalogOutput0
         elif n == 1:
             if(wait):
-                initialRobotTime = self.ur.RobotModel.RobotTimestamp
-                while(self.ur.RobotModel.RobotTimestamp == initialRobotTime):
-                    pass
+                self.sync()
                 return self.ur.RobotModel.StandardAnalogOutput1
         else:
-            return None
+            raise KeyError('Index out of range')
         
     def get_standard_digital_in(self, n, wait=True):
         '''
@@ -1394,15 +1318,7 @@ end'''
         boolean, The signal level.
         '''
         
-        iobit = self.get_rtde_data('actual_digital_output_bits', wait)
-        if iobit is None:
-            return None
-        
-        if iobit & (1 << n):
-            return True
-        
-        return False
-
+        raise NotImplementedError('Function Not yet implemented')
         
     def get_standard_digital_out(self, n):
         '''
@@ -1416,7 +1332,7 @@ end'''
         Return Value:
         boolean, The signal level.
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def get_tool_analog_in(self, n):
         '''
@@ -1430,7 +1346,7 @@ end'''
         Return Value:
         ﬂoat, The signal level [0,1]
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def get_tool_digital_in(self, n):
         '''
@@ -1445,7 +1361,7 @@ end'''
         Return Value:
         boolean, The signal level.
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def get_tool_digital_out(self, n):
         '''
@@ -1460,7 +1376,7 @@ end'''
         Return Value:
         boolean, The signal level.
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def modbus_add_signal(self, IP, slave_number, signal_address, signal_type, signal_name):
         '''
@@ -1487,7 +1403,7 @@ end'''
                         If a string is supplied which is equal to an already added signal, 
                         the new signal will replace the old one.
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def modbus_delete_signal(self, signal_name):
         '''
@@ -1498,7 +1414,7 @@ end'''
         Parameters:
         signal_name: A string equal to the name of the signal that should be deleted.
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def modbus_get_signal_status(self, signal_name, is_secondary_program):
         '''
@@ -1518,7 +1434,7 @@ end'''
         register signals: The register value expressed as an unsigned
         integer.
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def modbus_send_custom_command(self, IP, slave_number, function_code, data):
         '''
@@ -1547,7 +1463,7 @@ end'''
         
         data:          An array of integers in which each entry must be a valid byte (0-255) value.
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def modbus_set_output_register(self, signal_name, register_value, is_secondary_program):
         '''
@@ -1561,7 +1477,7 @@ end'''
         register_value:       An integer which must be a valid word (0-65535) value.
         is_secondary_program: A boolean for interal use only. Must be set to False.
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
         
     def modbus_set_output_signal(self, signal_name, digital_value, is_secondary_program):
         '''
@@ -1575,7 +1491,7 @@ end'''
         digital_value:        A boolean to which value the signal will be set.
         is_secondary_program: A boolean for interal use only. Must be set to False.
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
         
     def modbus_set_runstate_dependent_choice(self, signal_name, runstate_choice):
         '''
@@ -1588,7 +1504,7 @@ end'''
         signal_name:     A string identifying an output digital signal that in advance has been added.
         runstate_choice: An integer: 0 = preserve program state, 1 = set low when a program is not running, 2 = set high when a program is not running.
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
         
     def modbus_set_signal_update_frequency(self, signal_name, update_frequency):
         '''
@@ -1601,7 +1517,7 @@ end'''
         signal_name: A string identifying an output digital signal that in advance has been added.
         update_frequency: An integer in the range 0-125 specifying the update frequency in Hz.
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def read_input_boolean_register(self, address):
         '''
@@ -1616,7 +1532,7 @@ end'''
         Return Value:
         The boolean value held by the register (True, False)
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def read_input_ﬂoat_register(self, address):
         '''
@@ -1631,7 +1547,7 @@ end'''
         Return Value:
         The value held by the register (ﬂoat)
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def read_input_integer_register(self, address):
         '''
@@ -1646,7 +1562,7 @@ end'''
         Return Value:
         The value held by the register [-2,147,483,648 : 2,147,483,647]
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def read_output_boolean_register(self, address):
         '''
@@ -1661,7 +1577,7 @@ end'''
         Return Value:
         The boolean value held by the register (True, False)
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def read_output_ﬂoat_register(self, address):
         '''
@@ -1676,7 +1592,7 @@ end'''
         Return Value:
         The value held by the register (ﬂoat)
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def read_output_integer_register(self, address):
         '''
@@ -1692,7 +1608,7 @@ end'''
         The int value held by the register [-2,147,483,648 :
         2,147,483,647]
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def read_port_bit(self, address):
         '''
@@ -1707,7 +1623,7 @@ end'''
         Return Value:
         The value held by the port (True, False)
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def read_port_register(self, address):
         '''
@@ -1722,7 +1638,7 @@ end'''
         Return Value:
         The signed integer value held by the port (-32768 : 32767)
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def rpc_factory(self, type, url ):
         '''
@@ -1758,7 +1674,7 @@ end'''
         Note: Giving the RPC instance a good name makes programs much
         more readable (i.e. ”proxy” is not a very good name).
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def rtde_set_watchdog(self, variable_name, min_frequency, action='pause'):
         '''
@@ -1785,7 +1701,7 @@ end'''
         Note: Only one watchdog is necessary per RTDE input package to
         guarantee the speciﬁed action on missing updates.
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
         
     def set_analog_inputrange(self, port, range):
         '''
@@ -1807,7 +1723,7 @@ end'''
         Note: For Controller inputs ranges 1: -5-5V and 3: -10-10V are no longer
         supported and will show an exception in the GUI.
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def set_analog_outputdomain(self, port, domain):
         '''
@@ -1817,7 +1733,7 @@ end'''
         port: analog output port number
         domain: analog output domain: 0: 4-20mA, 1: 0-10V
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def set_conﬁgurable_digital_out(self, n, b):
         '''
@@ -1829,7 +1745,7 @@ end'''
         n: The number (id) of the output, integer: [0:7]
         b: The signal level. (boolean)
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def set_euromap_output(self, port_number, signal_value):
         '''
@@ -1844,7 +1760,7 @@ end'''
         Euromap67 output signals.
         signal value: A boolean, either True or False
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def set_euromap_runstate_dependent_choice(self, port_number, runstate_choice):
         '''
@@ -1863,7 +1779,7 @@ end'''
         running, 2 = set high when a program is
         not running.
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def set_ﬂag(self, n, b):
         '''
@@ -1874,7 +1790,7 @@ end'''
         n: The number (id) of the ﬂag, integer: [0:32]
         b: The stored bit. (boolean)
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def set_runstate_conﬁgurable_digital_output_to_value(self, outputId, state):
         '''
@@ -1894,7 +1810,7 @@ end'''
         when program is running and low when it is
         stopped.
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def set_runstate_standard_analog_output_to_value(self, outputId, state):
         '''
@@ -1913,7 +1829,7 @@ end'''
         Max when program is not running, 3 = Max when
         program is running and Min when it is stopped.
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def set_runstate_standard_digital_output_to_value(self, outputId, state):
         '''
@@ -1932,7 +1848,7 @@ end'''
         when program is running and low when it is
         stopped.
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def set_runstate_tool_digital_output_to_value(self, outputId, state):
         '''
@@ -1951,7 +1867,7 @@ end'''
         when program is running and low when it is
         stopped.
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def set_standard_analog_input_domain(self, port, domain):
         '''
@@ -1963,7 +1879,7 @@ end'''
         port: analog input port number: 0 or 1
         domain: analog input domains: 0: 4-20mA, 1: 0-10V
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def set_standard_analog_out(self, n, f):
         '''
@@ -1972,7 +1888,7 @@ end'''
         n: The number (id) of the input, integer: [0:1]
         f: The relative signal level [0;1] (ﬂoat)
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def set_standard_digital_out(self, n, b):
         '''
@@ -1984,7 +1900,7 @@ end'''
         n: The number (id) of the input, integer: [0:7]
         b: The signal level. (boolean)
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def set_tool_analog_input_domain(self, port, domain):
         '''
@@ -1996,7 +1912,7 @@ end'''
         port: analog input port number: 0 or 1
         domain: analog input domains: 0: 4-20mA, 1: 0-10V
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def set_tool_digital_out(self, n, b):
         '''
@@ -2009,7 +1925,7 @@ end'''
         n: The number (id) of the output, integer: [0:1]
         b: The signal level. (boolean)
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def set_tool_voltage(self, voltage):
         '''
@@ -2021,7 +1937,7 @@ end'''
         voltage: The voltage (as an integer) at the tool connector,
         integer: 0, 12 or 24.
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def write_output_boolean_register(self, address, value):
         '''
@@ -2046,7 +1962,7 @@ end'''
         address: Address of the register (0:23)
         value: Value to set in the register (ﬂoat)
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def write_output_integer_register(self, address, value):
         '''
@@ -2060,7 +1976,7 @@ end'''
         value: Value to set in the register [-2,147,483,648 :
         2,147,483,647]
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def write_port_bit(self, address, value):
         '''
@@ -2073,7 +1989,7 @@ end'''
         page ”UsingModbusServer” )
         value: Value to be set in the register (True, False)
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
     def write_port_register(self, address, value):
         '''
@@ -2087,5 +2003,5 @@ end'''
         value: Value to be set in the port (0 : 65536) or (-32768 :
         32767)
         '''
-        return None
+        raise NotImplementedError('Function Not yet implemented')
     
