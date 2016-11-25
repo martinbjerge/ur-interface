@@ -78,6 +78,7 @@ class UrScript(object):
 #############   Module motion   ###############
 
     def waitRobotIdleOrStopFlag(self):
+        time.sleep(0.010)
         while(self.ur.RobotModel.RuntimeState != 1 and not self.ur.RobotModel.StopRunningFlag):
             time.sleep(0.001)
 
