@@ -36,9 +36,16 @@ namespace TestGui
         {
             InitializeComponent();
             _robotConnector = new RobotConnector("172.16.74.129", false);
-            //_robotConnector = new RobotConnector("192.168.0.3", true);
+            //_robotConnector = new RobotConnector("192.168.0.3", false);
             _myRobotModel = _robotConnector.RobotModel;
             
+
+
+
+            _robotConnector.RealTimeClient.Send("set_tcp(p[0.023, 0.053, 0.15, 0.000, 0.000, 0.000])");
+
+
+
             //_robotConnector.DashboardClient.PowerOff();
 
             //_robotConnector.DashboardClient.PowerOn();
@@ -55,10 +62,10 @@ namespace TestGui
             //XmlTextWriter textWriter = new XmlTextWriter("test.xml", Encoding.UTF8);
             //XmlSerializer xmlSerializer = new XmlSerializer(typeof(DistanceSensor), types);
             //xmlSerializer.Serialize(textWriter, distanceSensor);
-            //while (true)
-            //{
-            //    Thread.Sleep(10000);
-            //}
+            while (true)
+            {
+                Thread.Sleep(1000);
+            }
         }
     }
 }
