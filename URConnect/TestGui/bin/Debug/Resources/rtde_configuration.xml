@@ -51,12 +51,12 @@
     <field name="tool_output_current" type="DOUBLE"/>
     <field name="tcp_force_scalar" type="DOUBLE"/>
 
-    <!--<field name="output_bit_registers0_to_31" type="UINT32"/>
-        <field name="output_bit_registers32_to_63" type="UINT32"/>
+    <field name="output_bit_registers0_to_31" type="UINT32"/>
+    <field name="output_bit_registers32_to_63" type="UINT32"/>
         
-        <field name="output_int_register_0" type="INT32"/>
-        <field name="output_int_register_1" type="INT32"/>
-        <field name="output_int_register_2" type="INT32"/>
+    <!--<field name="output_int_register_0" type="INT32"/>
+    <field name="output_int_register_1" type="INT32"/>
+    <field name="output_int_register_2" type="INT32"/>
         <field name="output_int_register_3" type="INT32"/>
         <field name="output_int_register_4" type="INT32"/>
         <field name="output_int_register_5" type="INT32"/>

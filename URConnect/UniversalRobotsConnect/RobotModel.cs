@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -86,42 +87,45 @@ namespace UniversalRobotsConnect
 
         #region BackingFields
 
-        private bool _digitalOutputBit0;
-        private bool _digitalOutputBit1;
-        private bool _digitalOutputBit2;
-        private bool _digitalOutputBit3;
-        private bool _digitalOutputBit4;
-        private bool _digitalOutputBit5;
-        private bool _digitalOutputBit6;
-        private bool _digitalOutputBit7;
-        private Vector6D _actualTCPPose;
+        //private bool _digitalOutputBit0;
+        //private bool _digitalOutputBit1;
+        //private bool _digitalOutputBit2;
+        //private bool _digitalOutputBit3;
+        //private bool _digitalOutputBit4;
+        //private bool _digitalOutputBit5;
+        //private bool _digitalOutputBit6;
+        //private bool _digitalOutputBit7;
+        private double[] _actualTCPPose;
         private RobotMode _robotMode;
         private SafetyMode _safetyMode;
         private int _rtdeProtocolVersion;
-        private Vector6D _targetQ;
+        private double[] _targetQ;
         private double _vector6DPrecision = 0.00001;
-        private Vector6D _targetQD;
-        private Vector6D _targetQDD;
-        private Vector6D _targetCurrent;
-        private Vector6D _targetMoment;
-        private Vector6D _actualQ;
-        private Vector6D _actualQD;
-        private Vector6D _actualCurrent;
-        private bool _digitalInputBit0;
-        private bool _digitalInputBit1;
-        private bool _digitalInputBit2;
-        private bool _digitalInputBit3;
-        private bool _digitalInputBit4;
-        private bool _digitalInputBit5;
-        private bool _digitalInputBit6;
-        private bool _digitalInputBit7;
-        private Vector6D _targetTCPPose;
+        private double[] _targetQD;
+        private double[] _targetQDD;
+        private double[] _targetCurrent;
+        private double[] _targetMoment;
+        private double[] _actualQ;
+        private double[] _actualQD;
+        private double[] _actualCurrent;
+        //private bool _digitalInputBit0;
+        //private bool _digitalInputBit1;
+        //private bool _digitalInputBit2;
+        //private bool _digitalInputBit3;
+        //private bool _digitalInputBit4;
+        //private bool _digitalInputBit5;
+        //private bool _digitalInputBit6;
+        //private bool _digitalInputBit7;
+        private double[] _targetTCPPose;
         private RuntimeState _runtimeState;
         //private bool _robotStatusPowerOn;
         private SafetyStatus _safetyStatus = new SafetyStatus();
         private RobotStatus _robotStatus = new RobotStatus();
         private double _robotTimeStamp;
-        private Vector6D _forceTorque;
+        private double[] _forceTorque;
+        private BitArray _digitalOutputBits;
+        private BitArray _digitalInputBits;
+        private BitArray _outputBitRegisters = new BitArray(64);
 
         #endregion
 
@@ -154,221 +158,50 @@ namespace UniversalRobotsConnect
         
         #region Digital Input Bits
 
-        public bool DigitalInputBit0
+        public bool GetDigitalInputBit(int bitnumber)
         {
-            get { return _digitalInputBit0; }
+            return _digitalInputBits[bitnumber];
+        }
+
+        internal BitArray DigitalInputBits
+        {
             set
             {
-                if (value != _digitalInputBit0)
+                if (_digitalInputBits != value)
                 {
-                    _digitalInputBit0 = value;
-                    log.Info($"{RobotTimestamp} ,DigitalInputBit0, {_digitalInputBit0}");
+                    _digitalInputBits = value;
+                    log.Info($"{RobotTimestamp} ,DigitalInputBits, {_digitalInputBits}");
+
                 }
+
             }
         }
 
-        public bool DigitalInputBit1
-        {
-            get { return _digitalInputBit1; }
-            set
-            {
-                if (value != _digitalInputBit1)
-                {
-                    _digitalInputBit1 = value;
-                    log.Info($"{RobotTimestamp} ,DigitalInputBit1, {_digitalInputBit1}");
-                }
-            }
-        }
-
-        public bool DigitalInputBit2
-        {
-            get { return _digitalInputBit2; }
-            set
-            {
-                if (value != _digitalInputBit2)
-                {
-                    _digitalInputBit2 = value;
-                    log.Info($"{RobotTimestamp} ,DigitalInputBit2, {_digitalInputBit2}");
-                }
-            }
-        }
-
-        public bool DigitalInputBit3
-        {
-            get { return _digitalInputBit3; }
-            set
-            {
-                if (value != _digitalInputBit3)
-                {
-                    _digitalInputBit3 = value;
-                    log.Info($"{RobotTimestamp} ,DigitalInputBit3, {_digitalInputBit3}");
-                }
-            }
-        }
-
-        public bool DigitalInputBit4
-        {
-            get { return _digitalInputBit4; }
-            set
-            {
-                if (value != _digitalInputBit4)
-                {
-                    _digitalInputBit4 = value;
-                    log.Info($"{RobotTimestamp} ,DigitalInputBit4, {_digitalInputBit4}");
-                }
-            }
-        }
-
-        public bool DigitalInputBit5
-        {
-            get { return _digitalInputBit5; }
-            set
-            {
-                if (value != _digitalInputBit5)
-                {
-                    _digitalInputBit5 = value;
-                    log.Info($"{RobotTimestamp} ,DigitalInputBit5, {_digitalInputBit5}");
-                }
-            }
-        }
-
-        public bool DigitalInputBit6
-        {
-            get { return _digitalInputBit6; }
-            set
-            {
-                if (value != _digitalInputBit6)
-                {
-                    _digitalInputBit6 = value;
-                    log.Info($"{RobotTimestamp} ,DigitalInputBit6, {_digitalInputBit6}");
-                }
-            }
-        }
-
-        public bool DigitalInputBit7
-        {
-            get { return _digitalInputBit7; }
-            set
-            {
-                if (value != _digitalInputBit7)
-                {
-                    _digitalInputBit7 = value;
-                    log.Info($"{RobotTimestamp} ,DigitalInputBit7, {_digitalInputBit7}");
-                }
-            }
-        }
-
+        
 
         #endregion
 
-        
+
         #region Digital Output Bits
 
-        public bool DigitalOutputBit0
+
+        internal BitArray DigitalOutputBits
         {
-            get { return _digitalOutputBit0; }
             set
-            {
-                if (value != _digitalOutputBit0)
+            {   
+                if(value != _digitalOutputBits)
                 {
-                    _digitalOutputBit0 = value;
-                    log.Info($"{RobotTimestamp} ,DigitalOutputBit0, {_digitalOutputBit0}");
-                }
-            }
-        }
-            
-        public bool DigitalOutputBit1
-        {
-            get { return _digitalOutputBit1; }
-            set
-            {
-                if (value != _digitalOutputBit1)
-                {
-                    _digitalOutputBit1 = value;
-                    log.Info($"{RobotTimestamp} ,DigitalOutputBit1, {_digitalOutputBit1}");
+                    _digitalOutputBits = value;
+                    log.Info($"{RobotTimestamp} ,DigitalOutputBits, {_digitalOutputBits}");
                 }
             }
         }
 
-        public bool DigitalOutputBit2
+        public bool GetDigitalOutputBit(int bitNumber)
         {
-            get { return _digitalOutputBit2; }
-            set
-            {
-                if (value != _digitalOutputBit2)
-                {
-                    _digitalOutputBit2 = value;
-                    log.Info($"{RobotTimestamp} ,DigitalOutputBit2, {_digitalOutputBit2}");
-                }
-            }
+            return _digitalOutputBits[bitNumber];
         }
-
-        public bool DigitalOutputBit3
-        {
-            get { return _digitalOutputBit3; }
-            set
-            {
-                if (value != _digitalOutputBit3)
-                {
-                    _digitalOutputBit3 = value;
-                    log.Info($"{RobotTimestamp} ,DigitalOutputBit3, {_digitalOutputBit3}");
-                }
-            }
-        }
-
-        public bool DigitalOutputBit4
-        {
-            get { return _digitalOutputBit4; }
-            set
-            {
-                if (value != _digitalOutputBit4)
-                {
-                    _digitalOutputBit4 = value;
-                    log.Info($"{RobotTimestamp} ,DigitalOutputBit4, {_digitalOutputBit4}");
-                }
-            }
-        }
-
-        public bool DigitalOutputBit5
-        {
-            get { return _digitalOutputBit5; }
-            set
-            {
-                if (value != _digitalOutputBit5)
-                {
-                    _digitalOutputBit5 = value;
-                    log.Info($"{RobotTimestamp} ,DigitalOutputBit5, {_digitalOutputBit5}");
-                }
-            }
-        }
-
-        public bool DigitalOutputBit6
-        {
-            get { return _digitalOutputBit6; }
-            set
-            {
-                if (value != _digitalOutputBit6)
-                {
-                    _digitalOutputBit6 = value;
-                    log.Info($"{RobotTimestamp} ,DigitalOutputBit6, {_digitalOutputBit6}");
-                }
-            }
-        }
-
-        public bool DigitalOutputBit7
-        {
-            get { return _digitalOutputBit7; }
-            set
-            {
-                if (value != _digitalOutputBit7)
-                {
-                    _digitalOutputBit7 = value;
-                    log.Info($"{RobotTimestamp} ,DigitalOutputBit7, {_digitalOutputBit7}");
-                }
-            }
-        }
-
-
+        
         #endregion
 
 
@@ -385,7 +218,7 @@ namespace UniversalRobotsConnect
             }
         }
 
-        public Vector6D ActualTCPPose
+        public double[] ActualTCPPose
         {
             get { return _actualTCPPose; }
             set
@@ -393,7 +226,7 @@ namespace UniversalRobotsConnect
                 if (!Vector6DEquals(_actualTCPPose, value, _vector6DPrecision))
                 {
                     _actualTCPPose = value;
-                    log.Info($"{RobotTimestamp}, ActualTCPPose,{_actualTCPPose.X}, {_actualTCPPose.Y}, {_actualTCPPose.Z}, {_actualTCPPose.RX}, {_actualTCPPose.RY}, {_actualTCPPose.RZ}");
+                    log.Info($"{RobotTimestamp}, ActualTCPPose,{_actualTCPPose[0]}, {_actualTCPPose[1]}, {_actualTCPPose[2]}, {_actualTCPPose[3]}, {_actualTCPPose[4]}, {_actualTCPPose[5]}");
                 }
             }
         }
@@ -423,7 +256,7 @@ namespace UniversalRobotsConnect
             }
         }
 
-        public Vector6D TargetQ
+        public double[] TargetQ
         {
             get { return _targetQ; }
             set
@@ -431,12 +264,12 @@ namespace UniversalRobotsConnect
                 if (!Vector6DEquals(_targetQ, value, _vector6DPrecision))
                 {
                     _targetQ = value;
-                    log.Info($"{RobotTimestamp}, TargetQ,{_targetQ.X}, {_targetQ.Y}, {_targetQ.Z}, {_targetQ.RX}, {_targetQ.RY}, {_targetQ.RZ}");
+                    log.Info($"{RobotTimestamp}, TargetQ,{_targetQ[0]}, {_targetQ[1]}, {_targetQ[2]}, {_targetQ[3]}, {_targetQ[4]}, {_targetQ[5]}");
                 }
             }
         }
 
-        public Vector6D TargetQD
+        public double[] TargetQD
         {
             get { return _targetQD; }
             set
@@ -444,12 +277,12 @@ namespace UniversalRobotsConnect
                 if (!Vector6DEquals(_targetQD, value, _vector6DPrecision))
                 {
                     _targetQD = value;
-                    log.Info($"{RobotTimestamp}, TargetQD,{_targetQD.X}, {_targetQD.Y}, {_targetQD.Z}, {_targetQD.RX}, {_targetQD.RY}, {_targetQD.RZ}");
+                    log.Info($"{RobotTimestamp}, TargetQD,{_targetQD[0]}, {_targetQD[1]}, {_targetQD[2]}, {_targetQD[3]}, {_targetQD[4]}, {_targetQD[5]}");
                 }
             }
         }
 
-        public Vector6D TargetQDD
+        public double[] TargetQDD
         {
             get { return _targetQDD; }
             set
@@ -457,12 +290,12 @@ namespace UniversalRobotsConnect
                 if (!Vector6DEquals(_targetQDD, value, _vector6DPrecision))
                 {
                     _targetQDD = value;
-                    log.Info($"{RobotTimestamp}, TargetQDD,{_targetQDD.X}, {_targetQDD.Y}, {_targetQDD.Z}, {_targetQDD.RX}, {_targetQDD.RY}, {_targetQDD.RZ}");
+                    log.Info($"{RobotTimestamp}, TargetQDD,{_targetQDD[0]}, {_targetQDD[1]}, {_targetQDD[2]}, {_targetQDD[3]}, {_targetQDD[4]}, {_targetQDD[5]}");
                 }
             }
         }
 
-        public Vector6D TargetCurrent       //////////////////// GIVER DET MENING AT TARGET CURRENT ER VECTOR 6D ??????????????????????????
+        public double[] TargetCurrent       //////////////////// GIVER DET MENING AT TARGET CURRENT ER VECTOR 6D ??????????????????????????
         {
             get { return _targetCurrent; }
             set
@@ -470,12 +303,12 @@ namespace UniversalRobotsConnect
                 if (!Vector6DEquals(_targetCurrent, value, _vector6DPrecision))
                 {
                     _targetCurrent = value;
-                    log.Info($"{RobotTimestamp}, TargetCurrent,{_targetCurrent.X}, {_targetCurrent.Y}, {_targetCurrent.Z}, {_targetCurrent.RX}, {_targetCurrent.RY}, {_targetCurrent.RZ}");
+                    log.Info($"{RobotTimestamp}, TargetCurrent,{_targetCurrent[0]}, {_targetCurrent[1]}, {_targetCurrent[2]}, {_targetCurrent[3]}, {_targetCurrent[4]}, {_targetCurrent[5]}");
                 }
             }
         }
 
-        public Vector6D TargetMoment        //////////////////// GIVER DET MENING AT TARGET Moment ER VECTOR 6D ??????????????????????????
+        public double[] TargetMoment        //////////////////// GIVER DET MENING AT TARGET Moment ER VECTOR 6D ??????????????????????????
         {
             get { return _targetMoment; }
             set
@@ -483,12 +316,12 @@ namespace UniversalRobotsConnect
                 if (!Vector6DEquals(_targetMoment, value, _vector6DPrecision))
                 {
                     _targetMoment = value;
-                    log.Info($"{RobotTimestamp}, TargetMoment,{_targetMoment.X}, {_targetMoment.Y}, {_targetMoment.Z}, {_targetMoment.RX}, {_targetMoment.RY}, {_targetMoment.RZ}");
+                    log.Info($"{RobotTimestamp}, TargetMoment,{_targetMoment[0]}, {_targetMoment[1]}, {_targetMoment[2]}, {_targetMoment[3]}, {_targetMoment[4]}, {_targetMoment[5]}");
                 }
             }
         }
 
-        public Vector6D ActualQ
+        public double[] ActualQ
         {
             get { return _actualQ; }
             set
@@ -496,12 +329,12 @@ namespace UniversalRobotsConnect
                 if (!Vector6DEquals(_actualQ, value, _vector6DPrecision))
                 {
                     _actualQ = value;
-                    log.Info($"{RobotTimestamp}, ActualQ,{_actualQ.X}, {_actualQ.Y}, {_actualQ.Z}, {_actualQ.RX}, {_actualQ.RY}, {_actualQ.RZ}");
+                    log.Info($"{RobotTimestamp}, ActualQ,{_actualQ[0]}, {_actualQ[1]}, {_actualQ[2]}, {_actualQ[3]}, {_actualQ[4]}, {_actualQ[5]}");
                 }
             }
         }
 
-        public Vector6D ActualQD
+        public double[] ActualQD
         {
             get {return _actualQD;}
             set
@@ -509,12 +342,12 @@ namespace UniversalRobotsConnect
                 if (!Vector6DEquals(_actualQD, value, _vector6DPrecision))
                 {
                     _actualQD = value;
-                    log.Info($"{RobotTimestamp}, ActualQD,{_actualQD.X}, {_actualQD.Y}, {_actualQD.Z}, {_actualQD.RX}, {_actualQD.RY}, {_actualQD.RZ}");
+                    log.Info($"{RobotTimestamp}, ActualQD,{_actualQD[0]}, {_actualQD[1]}, {_actualQD[2]}, {_actualQD[3]}, {_actualQD[4]}, {_actualQD[5]}");
                 }
             }
         }
 
-        public Vector6D ActualCurrent
+        public double[] ActualCurrent
         {
             get { return _actualCurrent; }
             set
@@ -522,16 +355,16 @@ namespace UniversalRobotsConnect
                 if (!Vector6DEquals(_actualCurrent, value, _vector6DPrecision))
                 {
                     _actualCurrent = value;
-                    log.Info($"{RobotTimestamp}, ActualCurrent,{_actualCurrent.X}, {_actualCurrent.Y}, {_actualCurrent.Z}, {_actualCurrent.RX}, {_actualCurrent.RY}, {_actualCurrent.RZ}");
+                    log.Info($"{RobotTimestamp}, ActualCurrent,{_actualCurrent[0]}, {_actualCurrent[1]}, {_actualCurrent[2]}, {_actualCurrent[3]}, {_actualCurrent[4]}, {_actualCurrent[5]}");
                 }
             }
         }
 
-        public Vector6D JointControlOutput { get; set; }
-        public Vector6D ActualTCPSpeed { get; set; }
-        public Vector6D ActualTCPForce { get; set; }
+        public double[] JointControlOutput { get; set; }
+        public double[] ActualTCPSpeed { get; set; }
+        public double[] ActualTCPForce { get; set; }
 
-        public Vector6D TargetTCPPose
+        public double[] TargetTCPPose
         {
             get
             {
@@ -543,18 +376,18 @@ namespace UniversalRobotsConnect
                 //log.Info($"{RobotTimestamp}, TargetTCPPose,{_targetTCPPose.X}, {_targetTCPPose.Y}, {_targetTCPPose.Z}, {_targetTCPPose.RX}, {_targetTCPPose.RY}, {_targetTCPPose.RZ}");   //LOGSPAM
             }
         }
-        public Vector6D TargetTCPSpeed { get; set; }
-        public Vector6D JointTemperatures { get; set; }
+        public double[] TargetTCPSpeed { get; set; }
+        public double[] JointTemperatures { get; set; }
         public double ActualExecutionTime { get; set; }
-        public Vector6D JointMode { get; set; }     //must use jointmode enum
-        public Vector3D ActualToolAccelerometer { get; set; }
+        public double[] JointMode { get; set; }     //must use jointmode enum
+        public double[] ActualToolAccelerometer { get; set; }
         public double SpeedScaling { get; set; }
         public double TargetSpeedFraction { get; set; }
         public double ActualMomentum { get; set; }
         public double ActualMainVoltage { get; set; }
         public double ActualRobotVoltage { get; set; }
         public double ActualRobotCurrent { get; set; }
-        public Vector6D ActualJointVoltage { get; set; }
+        public double[] ActualJointVoltage { get; set; }
 
         /// <summary>
         /// Running state of a RealTimeClient program send to the Robot
@@ -595,7 +428,7 @@ namespace UniversalRobotsConnect
 
         public double TCPForceScalar { get; set; }
 
-        public Vector6D ForceTourqe
+        public double[] ForceTourqe
         {
             get { return _forceTorque; }
             set
@@ -603,37 +436,81 @@ namespace UniversalRobotsConnect
                 if (!Vector6DEquals(_forceTorque, value, _vector6DPrecision))
                 {
                     _forceTorque = value;
-                    log.Info($"{RobotTimestamp}, ForceTorque,{_forceTorque.X}, {_forceTorque.Y}, {_forceTorque.Z}, {_forceTorque.RX}, {_forceTorque.RY}, {_forceTorque.RZ}");
+                    log.Info($"{RobotTimestamp}, ForceTorque,{_forceTorque[0]}, {_forceTorque[1]}, {_forceTorque[2]}, {_forceTorque[3]}, {_forceTorque[4]}, {_forceTorque[5]}");
                 }
             }
         }
 
+        #region OutputBitRegisters
 
-        private bool Vector6DEquals(Vector6D firstVector6D, Vector6D secondVector6D, double precision)
+        public bool GetOutputBitRegister(int bitNumber)
+        {
+            return _outputBitRegisters[bitNumber];
+        }
+
+        internal BitArray OutputBitRegisters0to31
+        {
+            set
+            { 
+                for (int i = 0; i < 31; i++)
+                {
+                    if (_outputBitRegisters[i] != value[i])
+                    {
+                        _outputBitRegisters[i] = value[i];
+                        log.Info($"{RobotTimestamp}, OutputBitRegister{i} {(bool)value[i]}");
+                    }
+                    i++;
+                }
+            }
+        }
+
+        internal BitArray OutputBitRegisters32to63
+        {
+            set
+            {
+                for (int i = 32; i < 63; i++)
+                {
+                    if (_outputBitRegisters[i] != value[i-32])
+                    {
+                        _outputBitRegisters[i] = value[i];
+                        log.Info($"{RobotTimestamp}, OutputBitRegister{i} {(bool)value[i-32]}");
+                    }
+                    i++;
+                }
+            }
+        }
+        #endregion
+
+
+
+
+
+
+        private bool Vector6DEquals(double[] firstVector6D, double[] secondVector6D, double precision)
         {
             if (firstVector6D == null || secondVector6D == null)
                 return false;
-            if (firstVector6D.X - secondVector6D.X > precision || secondVector6D.X - firstVector6D.X > precision )
+            if (firstVector6D[0] - secondVector6D[0] > precision || secondVector6D[0] - firstVector6D[0] > precision )
             {
                 return false;
             }
-            if (firstVector6D.Y - secondVector6D.Y > precision || secondVector6D.Y - firstVector6D.Y > precision)
+            if (firstVector6D[1] - secondVector6D[1] > precision || secondVector6D[1] - firstVector6D[1] > precision)
             {
                 return false;
             }
-            if (firstVector6D.Z - secondVector6D.Z > precision || secondVector6D.Z - firstVector6D.Z > precision)
+            if (firstVector6D[2] - secondVector6D[2] > precision || secondVector6D[2] - firstVector6D[2] > precision)
             {
                 return false;
             }
-            if (firstVector6D.RX - secondVector6D.RX > precision || secondVector6D.RX - firstVector6D.RX > precision)
+            if (firstVector6D[3] - secondVector6D[3] > precision || secondVector6D[3] - firstVector6D[3] > precision)
             {
                 return false;
             }
-            if (firstVector6D.RY - secondVector6D.RY > precision || secondVector6D.RY - firstVector6D.RY > precision)
+            if (firstVector6D[4] - secondVector6D[4] > precision || secondVector6D[4] - firstVector6D[4] > precision)
             {
                 return false;
             }
-            if (firstVector6D.RZ - secondVector6D.RZ > precision || secondVector6D.RZ- firstVector6D.RZ > precision)
+            if (firstVector6D[5] - secondVector6D[5] > precision || secondVector6D[5] - firstVector6D[5] > precision)
             {
                 return false;
             }

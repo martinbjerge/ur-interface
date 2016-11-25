@@ -69,7 +69,7 @@ namespace UniversalRobotsConnect
             double.TryParse(values[3], out rx);
             double.TryParse(values[4], out ry);
             double.TryParse(values[5], out rz);
-            _robotModel.ForceTourqe = new Vector6D(x,y,z,rx,ry,rz);
+            _robotModel.ForceTourqe = new double[] {};
         }
     }
 }

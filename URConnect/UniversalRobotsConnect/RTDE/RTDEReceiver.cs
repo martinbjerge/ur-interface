@@ -198,7 +198,7 @@ namespace UniversalRobotsConnect
             var x = GetDoubleFromPayloadArray(payloadArray, ref payloadArrayIndex);
             var y = GetDoubleFromPayloadArray(payloadArray, ref payloadArrayIndex);
             var z = GetDoubleFromPayloadArray(payloadArray, ref payloadArrayIndex);
-            return new Vector3D(x, y, z);
+            return new double[] { x, y, z};
         }
 
         private object GetVector6DInt32FromPayloadArray(byte[] payloadArray, ref int payloadArrayIndex)
@@ -209,11 +209,14 @@ namespace UniversalRobotsConnect
             var rx = GetInt32FromPayloadArray(payloadArray, ref payloadArrayIndex);
             var ry = GetInt32FromPayloadArray(payloadArray, ref payloadArrayIndex);
             var rz = GetInt32FromPayloadArray(payloadArray, ref payloadArrayIndex);
-            return new Vector6D(x, y, z, rx, ry, rz);
+            return new double[]
+            {
+                x, y, z, rx, ry, rz
+            };
         }
 
 
-        private Vector6D GetVector6DFromPayloadArray(byte[] payloadArray, ref int payloadArrayIndex)
+        private double[] GetVector6DFromPayloadArray(byte[] payloadArray, ref int payloadArrayIndex)
         {
             var x = GetDoubleFromPayloadArray(payloadArray, ref payloadArrayIndex);
             var y = GetDoubleFromPayloadArray(payloadArray, ref payloadArrayIndex);
@@ -221,7 +224,7 @@ namespace UniversalRobotsConnect
             var rx = GetDoubleFromPayloadArray(payloadArray, ref payloadArrayIndex);
             var ry = GetDoubleFromPayloadArray(payloadArray, ref payloadArrayIndex);
             var rz = GetDoubleFromPayloadArray(payloadArray, ref payloadArrayIndex);
-            return new Vector6D(x, y, z, rx, ry, rz);
+            return new double[] { x, y, z, rx, ry, rz};
         }
 
         private double GetDoubleFromPayloadArray(byte[] payloadArray, ref int payloadArrayIndex)
@@ -274,60 +277,61 @@ namespace UniversalRobotsConnect
                     _robotModel.RobotTimestamp = (double)value;
                     break;
                 case "target_q":
-                    _robotModel.TargetQ = (Vector6D)value;
+                    _robotModel.TargetQ = (double[])value;
                     break;
                 case "target_qd":
-                    _robotModel.TargetQD = (Vector6D)value;
+                    _robotModel.TargetQD = (double[])value;
                     break;
                 case "target_qdd":
-                    _robotModel.TargetQDD = (Vector6D)value;
+                    _robotModel.TargetQDD = (double[])value;
                     break;
                 case "target_current":
-                    _robotModel.TargetCurrent = (Vector6D)value;
+                    _robotModel.TargetCurrent = (double[])value;
                     break;
                 case "target_moment":
-                    _robotModel.TargetMoment = (Vector6D)value;
+                    _robotModel.TargetMoment = (double[])value;
                     break;
                 case "actual_q":
-                    _robotModel.ActualQ = (Vector6D)value;
+                    _robotModel.ActualQ = (double[])value;
                     break;
                 case "actual_qd":
-                    _robotModel.ActualQD = (Vector6D)value;
+                    _robotModel.ActualQD = (double[])value;
                     break;
                 case "actual_current":
-                    _robotModel.ActualCurrent = (Vector6D)value;
+                    _robotModel.ActualCurrent = (double[])value;
                     break;
                 case "joint_control_output":
-                    _robotModel.JointControlOutput = (Vector6D)value;
+                    _robotModel.JointControlOutput = (double[])value;
                     break;
                 case "actual_TCP_pose":
-                    _robotModel.ActualTCPPose = (Vector6D)value;
+                    _robotModel.ActualTCPPose = (double[])value;
                     break;
                 case "actual_TCP_speed":
-                    _robotModel.ActualTCPSpeed = (Vector6D)value;
+                    _robotModel.ActualTCPSpeed = (double[])value;
                     break;
                 case "actual_TCP_force":
-                    _robotModel.ActualTCPForce = (Vector6D)value;
+                    _robotModel.ActualTCPForce = (double[])value;
                     break;
                 case "target_TCP_pose":
-                    _robotModel.TargetTCPPose = (Vector6D)value;
+                    _robotModel.TargetTCPPose = (double[])value;
                     break;
                 case "target_TCP_speed":
-                    _robotModel.TargetTCPSpeed = (Vector6D)value;
+                    _robotModel.TargetTCPSpeed = (double[])value;
                     break;
                 case "actual_digital_input_bits":
-                    BitArray inputBits = new BitArray(new byte[] { (byte)(UInt64)value });
-                    _robotModel.DigitalInputBit0 = inputBits[0];
-                    _robotModel.DigitalInputBit1 = inputBits[1];
-                    _robotModel.DigitalInputBit2 = inputBits[2];
-                    _robotModel.DigitalInputBit3 = inputBits[3];
-                    _robotModel.DigitalInputBit4 = inputBits[4];
-                    _robotModel.DigitalInputBit5 = inputBits[5];
-                    _robotModel.DigitalInputBit6 = inputBits[6];
-                    _robotModel.DigitalInputBit7 = inputBits[7];
+                    _robotModel.DigitalInputBits = new BitArray(new byte[] { (byte)(UInt64)value });
+                    //BitArray inputBits = new BitArray(new byte[] { (byte)(UInt64)value });
+                    //_robotModel.DigitalInputBit0 = inputBits[0];
+                    //_robotModel.DigitalInputBit1 = inputBits[1];
+                    //_robotModel.DigitalInputBit2 = inputBits[2];
+                    //_robotModel.DigitalInputBit3 = inputBits[3];
+                    //_robotModel.DigitalInputBit4 = inputBits[4];
+                    //_robotModel.DigitalInputBit5 = inputBits[5];
+                    //_robotModel.DigitalInputBit6 = inputBits[6];
+                    //_robotModel.DigitalInputBit7 = inputBits[7];
                     break;
                 case "joint_temperatures":
-                    _robotModel.JointTemperatures = (Vector6D)value;
+                    _robotModel.JointTemperatures = (double[])value;
                     break;
                 case "actual_execution_time":
                     _robotModel.ActualExecutionTime = (double)value;
@@ -336,13 +340,13 @@ namespace UniversalRobotsConnect
                     _robotModel.RobotMode = (RobotMode)(int)value;
                     break;
                 case "joint_mode":
-                    _robotModel.JointMode = (Vector6D)value;                //ToDo - split modes for each joint
+                    _robotModel.JointMode = (double[])value;               
                     break;
                 case "safety_mode":
                     _robotModel.SafetyMode = (SafetyMode)(int)value;
                     break;
                 case "actual_tool_accelerometer":
-                    _robotModel.ActualToolAccelerometer = (Vector3D)value;
+                    _robotModel.ActualToolAccelerometer = (double[])value;
                     break;
                 case "speed_scaling":
                     _robotModel.SpeedScaling = (double)value;
@@ -363,18 +367,19 @@ namespace UniversalRobotsConnect
                     _robotModel.ActualRobotCurrent = (double)value;
                     break;
                 case "actual_joint_voltage":
-                    _robotModel.ActualJointVoltage = (Vector6D)value;
+                    _robotModel.ActualJointVoltage = (double[])value;
                     break;
                 case "actual_digital_output_bits":
-                    BitArray bitArray = new BitArray(new byte[] { (byte)(UInt64)value });
-                    _robotModel.DigitalOutputBit0 = bitArray[0];
-                    _robotModel.DigitalOutputBit1 = bitArray[1];
-                    _robotModel.DigitalOutputBit2 = bitArray[2];
-                    _robotModel.DigitalOutputBit3 = bitArray[3];
-                    _robotModel.DigitalOutputBit4 = bitArray[4];
-                    _robotModel.DigitalOutputBit5 = bitArray[5];
-                    _robotModel.DigitalOutputBit6 = bitArray[6];
-                    _robotModel.DigitalOutputBit7 = bitArray[7];
+                    _robotModel.DigitalOutputBits = new BitArray(new byte[] { (byte)(UInt64)value });
+                    //BitArray bitArray = new BitArray(new byte[] { (byte)(UInt64)value });
+                    //_robotModel.DigitalOutputBit0 = bitArray[0];
+                    //_robotModel.DigitalOutputBit1 = bitArray[1];
+                    //_robotModel.DigitalOutputBit2 = bitArray[2];
+                    //_robotModel.DigitalOutputBit3 = bitArray[3];
+                    //_robotModel.DigitalOutputBit4 = bitArray[4];
+                    //_robotModel.DigitalOutputBit5 = bitArray[5];
+                    //_robotModel.DigitalOutputBit6 = bitArray[6];
+                    //_robotModel.DigitalOutputBit7 = bitArray[7];
                     break;
                 case "runtime_state":
                     _robotModel.RuntimeState = (RuntimeState)(uint) value;
@@ -440,8 +445,13 @@ namespace UniversalRobotsConnect
                 case "tcp_force_scalar":
                     _robotModel.TCPForceScalar = (double)value;
                     break;
-
-
+                case "output_bit_registers0_to_31":
+                    _robotModel.OutputBitRegisters0to31 = new BitArray(BitConverter.GetBytes((UInt32)value) );
+                    break;
+                case "output_bit_registers32_to_63":
+                    _robotModel.OutputBitRegisters32to63 = new BitArray(BitConverter.GetBytes((UInt32)value));
+                    break;
+                    
 
 
 
