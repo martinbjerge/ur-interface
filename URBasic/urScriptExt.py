@@ -73,7 +73,6 @@ class UrScriptExt(URBasic.urScript.UrScript):
         self.print_actual_joint_positions()
         self.__logger.info('Init done')
         
-        
     def close_urScriptExt(self):
         self.print_actual_tcp_pose()
         self.print_actual_joint_positions()
@@ -166,13 +165,17 @@ class UrScriptExt(URBasic.urScript.UrScript):
             #check_rtde_outputs = self.has_set_rtde_data_attr('configurable_digital_output') and self.has_set_rtde_data_attr('configurable_digital_output_mask')
             check_rtde_outputs = True    #Dem har vi altid med 
         elif 'BDO' == port[:3]:
-            check_rtde_outputs = self.has_set_rtde_data_attr('standard_digital_output') and self.has_set_rtde_data_attr('standard_digital_output_mask')
+            #check_rtde_outputs = self.has_set_rtde_data_attr('standard_digital_output') and self.has_set_rtde_data_attr('standard_digital_output_mask')
+            check_rtde_outputs = True    #Dem har vi altid med
         elif 'BAO' == port[:3]:
-            check_rtde_outputs = self.has_set_rtde_data_attr('standard_analog_output_mask')
+            #check_rtde_outputs = self.has_set_rtde_data_attr('standard_analog_output_mask')
+            check_rtde_outputs = True    #Dem har vi altid med
             if 0 == int(port[4:]):
-                check_rtde_outputs = check_rtde_outputs and self.has_set_rtde_data_attr('standard_analog_output_0')
+                #check_rtde_outputs = check_rtde_outputs and self.has_set_rtde_data_attr('standard_analog_output_0')
+                check_rtde_outputs = True    #Dem har vi altid med
             elif 1 == int(port[4:]):        
-                check_rtde_outputs = check_rtde_outputs and self.has_set_rtde_data_attr('standard_analog_output_1')
+                #check_rtde_outputs = check_rtde_outputs and self.has_set_rtde_data_attr('standard_analog_output_1')
+                check_rtde_outputs = True    #Dem har vi altid med
         elif 'TDO' == port[:3]:
             pass
         
@@ -181,6 +184,7 @@ class UrScriptExt(URBasic.urScript.UrScript):
                 #self.set_rtde_data('configurable_digital_output_mask', np.power(2,int(port[4:])))
                 if value:
                     #self.set_rtde_data('configurable_digital_output', np.power(2,int(port[4:])))
+                    #self.set_conﬁgurable_digital_out(int(port[4:]), value)
                     self.ur.RTDE.SetConfigurableDigitalOutput(int(port[4:]), True)
                 else:
                     self.ur.RTDE.SetConfigurableDigitalOutput(int(port[4:]), False)        
