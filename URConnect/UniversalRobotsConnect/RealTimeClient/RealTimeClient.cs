@@ -41,7 +41,7 @@ namespace UniversalRobotsConnect
             sendBytes[sendBytes.Length - 1] = (byte) 'n';
             log.Debug($"Send program to robot {Encoding.UTF8.GetString(sendBytes)}");
             _realtimeClientSender.SendData(payload);
-            Thread.Sleep(150);      //Waiting to return to allow for RuntimeState to be right
+            Thread.Sleep(500);      //Waiting to return to allow for RuntimeState to be right - ToDo - calculate based on program size
         }
 
         public void Send(string payload)
