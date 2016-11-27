@@ -78,7 +78,7 @@ class UrScript(object):
 #############   Module motion   ###############
 
     def waitRobotIdleOrStopFlag(self):
-        time.sleep(0.010)
+        time.sleep(0.10)
         while(self.ur.RobotModel.RuntimeState != 1 and not self.ur.RobotModel.StopRunningFlag):
             time.sleep(0.001)
 
@@ -1197,7 +1197,7 @@ end'''
         Return Value:
         boolean, The signal level. 
         '''
-        raise NotImplementedError('Function Not yet implemented')
+        return self.ur.RobotModel.DigitalInputBits[n]
         
     def get_conﬁgurable_digital_out(self, n):
         '''
@@ -1318,8 +1318,7 @@ end'''
         Return Value:
         boolean, The signal level.
         '''
-        
-        raise NotImplementedError('Function Not yet implemented')
+        return self.ur.RobotModel.DigitalInputBits[n]
         
     def get_standard_digital_out(self, n):
         '''
@@ -1746,7 +1745,7 @@ end'''
         n: The number (id) of the output, integer: [0:7]
         b: The signal level. (boolean)
         '''
-        raise NotImplementedError('Function Not yet implemented')
+        self.ur.RTDE.SetConfigurableDigitalOutput(n, b)
     
     def set_euromap_output(self, port_number, signal_value):
         '''
@@ -1901,7 +1900,7 @@ end'''
         n: The number (id) of the input, integer: [0:7]
         b: The signal level. (boolean)
         '''
-        raise NotImplementedError('Function Not yet implemented')
+        self.ur.RTDE.SetStandardDigitalOutput(n, b)
     
     def set_tool_analog_input_domain(self, port, domain):
         '''

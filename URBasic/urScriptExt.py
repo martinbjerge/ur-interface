@@ -76,23 +76,7 @@ class UrScriptExt(URBasic.urScript.UrScript):
     def close_urScriptExt(self):
         self.print_actual_tcp_pose()
         self.print_actual_joint_positions()
-        #self.close_rtc()
-        #self.ur.DashboardClient.Close()  #TODO FIXME Check om det er rigtigt
-        #self.dbh_demon.close_dbs()
         
-    def send_program(self, prg='', wait=True, timeout=300.):
-        self.__force_remote_set=False
-        #status =  URBasic.urScript.UrScript.send_program(self, prg=prg, wait=wait, timeout=timeout)
-        self.ur.RealTimeClient.Send(prg)
-        if not prg == 'def resetRegister():\n  write_output_boolean_register(0, False)\n  write_output_boolean_register(1, False)\nend':
-            #if self.get_safety_status()['StoppedDueToSafety']:
-            if self.ur.RobotModel.SafetyStatus.StoppedDueToSafety:
-                return False
-            else:
-                return True
-                #return status
-        
-        return True
     
     def reset_error(self):
         '''
@@ -106,28 +90,15 @@ class UrScriptExt(URBasic.urScript.UrScript):
         '''
         
         if not self.ur.RobotModel.RobotStatus.PowerOn:
-            #while not self.set_gravity([0,-9.82,0]): pass
             self.ur.DashboardClient.PowerOn()
-            ##self.dbh_demon.ur_power_on()
-            ##self.dbh_demon.wait_dbs()
-            #while not self.set_gravity([0,-9.82,0]): pass
             self.ur.DashboardClient.BrakeRelease()
-            ##self.dbh_demon.ur_brake_release()
-            ##self.dbh_demon.wait_dbs()
             time.sleep(2)
         if self.ur.RobotModel.SafetyStatus.StoppedDueToSafety:         #self.get_safety_status()['StoppedDueToSafety']:
             self.ur.DashboardClient.UnlockProtectiveStop()
-            ##self.dbh_demon.ur_unlock_protective_stop()
-            ##self.dbh_demon.wait_dbs()
             self.ur.DashboardClient.CloseSafetyPopup()
-            ##self.dbh_demon.ur_close_safety_popup()
-            ##self.dbh_demon.wait_dbs()
             self.ur.DashboardClient.BrakeRelease()
-            #self.dbh_demon.ur_brake_release()
-            #self.dbh_demon.wait_dbs()
             time.sleep(2)
             
-        #return self.get_robot_status()['PowerOn'] & (not self.get_safety_status()['StoppedDueToSafety'])
         return self.ur.RobotModel.RobotStatus.PowerOn & (not self.ur.RobotModel.SafetyStatus.StoppedDueToSafety)
             
     def get_in(self, port, wait=True):
@@ -160,47 +131,14 @@ class UrScriptExt(URBasic.urScript.UrScript):
         Status (bool): Status, True if signal set successfully.
         '''
         
-        check_rtde_outputs = False        
         if 'BCO' == port[:3]:
-            #check_rtde_outputs = self.has_set_rtde_data_attr('configurable_digital_output') and self.has_set_rtde_data_attr('configurable_digital_output_mask')
-            check_rtde_outputs = True    #Dem har vi altid med 
+            self.set_conﬁgurable_digital_out(int(port[4:]), value)
         elif 'BDO' == port[:3]:
-            #check_rtde_outputs = self.has_set_rtde_data_attr('standard_digital_output') and self.has_set_rtde_data_attr('standard_digital_output_mask')
-            check_rtde_outputs = True    #Dem har vi altid med
+            self.set_standard_digital_out(int(port[4:]), value)
         elif 'BAO' == port[:3]:
-            #check_rtde_outputs = self.has_set_rtde_data_attr('standard_analog_output_mask')
-            check_rtde_outputs = True    #Dem har vi altid med
-            if 0 == int(port[4:]):
-                #check_rtde_outputs = check_rtde_outputs and self.has_set_rtde_data_attr('standard_analog_output_0')
-                check_rtde_outputs = True    #Dem har vi altid med
-            elif 1 == int(port[4:]):        
-                #check_rtde_outputs = check_rtde_outputs and self.has_set_rtde_data_attr('standard_analog_output_1')
-                check_rtde_outputs = True    #Dem har vi altid med
+            pass
         elif 'TDO' == port[:3]:
             pass
-        
-        if check_rtde_outputs:
-            if 'BCO' == port[:3]:
-                #self.set_rtde_data('configurable_digital_output_mask', np.power(2,int(port[4:])))
-                if value:
-                    #self.set_rtde_data('configurable_digital_output', np.power(2,int(port[4:])))
-                    #self.set_conﬁgurable_digital_out(int(port[4:]), value)
-                    self.ur.RTDE.SetConfigurableDigitalOutput(int(port[4:]), True)
-                else:
-                    self.ur.RTDE.SetConfigurableDigitalOutput(int(port[4:]), False)        
-                    #self.set_rtde_data('configurable_digital_output', 0)
-            elif 'BDO' == port[:3]:
-                #self.set_rtde_data('standard_digital_output_mask', np.power(2,int(port[4:])))
-                if value:
-                    self.ur.RTDE.SetConfigurableDigitalOutput(int(port[4:]), True)
-                    #self.set_rtde_data('standard_digital_output', np.power(2,int(port[4:])))
-                else:        
-                    self.ur.RTDE.SetConfigurableDigitalOutput(int(port[4:]), False)
-                    #self.set_rtde_data('standard_digital_output', 0)
-            elif 'BAO' == port[:3]:
-                pass
-            elif 'TDO' == port[:3]:
-                pass
 
             #if self.send_rtde_data():
             #    return True
@@ -690,42 +628,6 @@ end
         Status (bool): Status, True if signal set successfully.
         
         """
-        prefix="p"
-        t_val=''
-        if pose is None:
-            prefix=""
-            pose=q
-        pose = np.array(pose)
-        if movetype == 'j' or movetype == 'l':
-            tval='t={t},'.format(**locals())
-                            
-        movestr = ''
-        if np.size(pose.shape)==2:
-            for idx in range(np.size(pose, 0)):
-                posex = np.round(pose[idx], 4)
-                posex = posex.tolist()
-                if (np.size(pose, 0)-1)==idx:
-                    r=0
-                movestr +=  '    force_mode({prefix}{posex}, {selection_vector}, {wrench}, {f_type}, {limits})\n'.format(**locals())
-                movestr +=  '    move{movetype}({prefix}{posex}, a={a}, v={v}, {t_val} r={r})\n'.format(**locals())
-                
-            movestr +=  '    stopl({a}, {a})\n'.format(**locals())
-        else:
-            posex = np.round(pose, 4)
-            posex = posex.tolist()
-            movestr +=  '    force_mode({prefix}{posex}, {selection_vector}, {wrench}, {f_type}, {limits})\n'.format(**locals())
-            movestr +=  '    move{movetype}({prefix}{posex}, a={a}, v={v}, {t_val} r={r})\n'.format(**locals())
-
-        
-        prg_new =  '''def move_force():
-{movestr}
-    end_force_mode()
-end
-'''
-        
-        
-        
-        
         
         prg =  '''def move_force():
     force_mode(p{task_frame}, {selection_vector}, {wrench}, {f_type}, {limits})
@@ -735,8 +637,9 @@ end
 '''
         movestr = self._move(movetype, pose, a, v, t, r, wait, q)
         
-        self.send_program(prg.format(**locals()),wait)
-
+        self.ur.RealTimeClient.Send(prg.format(**locals()))
+        if(wait):
+            self.waitRobotIdleOrStopFlag()
 
     def print_actual_tcp_pose(self):
         '''
