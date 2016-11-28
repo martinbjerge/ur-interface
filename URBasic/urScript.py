@@ -1333,7 +1333,9 @@ end'''
         Return Value:
         boolean, The signal level.
         '''
-        raise NotImplementedError('Function Not yet implemented')
+        
+        return self.robotConnector.RobotModel.DigitalOutputBits.GetBit(n)
+        
     
     def get_tool_analog_in(self, n):
         '''
