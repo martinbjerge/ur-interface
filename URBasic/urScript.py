@@ -1319,7 +1319,7 @@ end'''
         Return Value:
         boolean, The signal level.
         '''
-        return self.ur.RobotModel.DigitalInputBits[n]
+        return self.robotConnector.RobotModel.DigitalInputBits.GetBit(n)
         
     def get_standard_digital_out(self, n):
         '''
@@ -1746,7 +1746,7 @@ end'''
         n: The number (id) of the output, integer: [0:7]
         b: The signal level. (boolean)
         '''
-        self.ur.RTDE.SetConfigurableDigitalOutput(n, b)
+        self.robotConnector.RTDE.SetConfigurableDigitalOutput(n, b)
     
     def set_euromap_output(self, port_number, signal_value):
         '''
@@ -1901,7 +1901,7 @@ end'''
         n: The number (id) of the input, integer: [0:7]
         b: The signal level. (boolean)
         '''
-        self.ur.RTDE.SetStandardDigitalOutput(n, b)
+        self.robotConnector.RTDE.SetStandardDigitalOutput(n, b)
     
     def set_tool_analog_input_domain(self, port, domain):
         '''
