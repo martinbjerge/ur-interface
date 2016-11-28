@@ -15,10 +15,14 @@ namespace UniversalRobotsConnect.Types
         {
             set
             {
-                if (_digitalBits != value)
+                for (int i = 0; i < _digitalBits.Length; i++)
                 {
-                    _digitalBits = value;
-                    //log.Info($"{RobotTimestamp} ,DigitalBits, {_digitalBits}");
+                    if (_digitalBits[i] != value[i])
+                    {
+                        _digitalBits[i] = value[i];
+                        //write to log
+                    }
+
                 }
 
             }
@@ -32,6 +36,11 @@ namespace UniversalRobotsConnect.Types
         public bool Bit5 => _digitalBits[5];
         public bool Bit6 => _digitalBits[6];
         public bool Bit7 => _digitalBits[7];
-        
+
+        public bool GetBit(int bitNumber)
+        {
+            return _digitalBits[bitNumber];
+        }
+
     }
 }

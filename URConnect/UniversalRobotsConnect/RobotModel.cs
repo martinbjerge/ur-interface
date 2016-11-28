@@ -110,8 +110,9 @@ namespace UniversalRobotsConnect
         private OutputIntRegister _outputIntRegister = new OutputIntRegister();
         private OutputDoubleRegister _outputDoubleRegister = new OutputDoubleRegister();
         private readonly DigitalBits _digitalInputbits = new DigitalBits();
+        private readonly DigitalBits _configurableInputbits = new DigitalBits();
         private readonly DigitalBits _digitalOutputbits = new DigitalBits();
-
+        private readonly DigitalBits _configurableOutputBits = new DigitalBits();
         #endregion
 
         public string Password { get; set; }
@@ -159,6 +160,11 @@ namespace UniversalRobotsConnect
             get { return _digitalInputbits; }
         }
 
+        public DigitalBits ConfigurableInputBits
+        {
+            get { return _configurableInputbits; }
+        }
+
         #endregion
 
 
@@ -167,6 +173,11 @@ namespace UniversalRobotsConnect
         public DigitalBits DigitalOutputBits
         {
             get { return _digitalOutputbits; }
+        }
+
+        public DigitalBits ConfigurableOutputBits
+        {
+            get { return _configurableOutputBits; }
         }
 
         #endregion

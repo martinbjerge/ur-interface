@@ -304,7 +304,9 @@ namespace UniversalRobotsConnect
                     _robotModel.TargetTCPSpeed = (double[])value;
                     break;
                 case "actual_digital_input_bits":
-                    _robotModel.DigitalInputbits.SetBits = new BitArray(new byte[] { (byte)(UInt64)value });
+                    byte[] bytes = BitConverter.GetBytes((UInt64) value);
+                    _robotModel.DigitalInputbits.SetBits = new BitArray(new byte[] { (byte) bytes[0]});
+                    _robotModel.ConfigurableInputBits.SetBits = new BitArray(new byte[] { (byte) bytes[1]});
                     break;
                 case "joint_temperatures":
                     _robotModel.JointTemperatures = (double[])value;
@@ -346,7 +348,9 @@ namespace UniversalRobotsConnect
                     _robotModel.ActualJointVoltage = (double[])value;
                     break;
                 case "actual_digital_output_bits":
-                    _robotModel.DigitalOutputBits.SetBits = new BitArray(new byte[] { (byte)(UInt64)value });
+                    byte[] outputBytes = BitConverter.GetBytes((UInt64)value);
+                    _robotModel.DigitalOutputBits.SetBits = new BitArray(new byte[] { (byte)outputBytes[0] });
+                    _robotModel.ConfigurableOutputBits.SetBits = new BitArray(new byte[] { (byte)outputBytes[1] });
                     break;
                 case "runtime_state":
                     _robotModel.RuntimeState = (RuntimeState)(uint) value;
