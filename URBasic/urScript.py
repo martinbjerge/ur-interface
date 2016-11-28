@@ -71,16 +71,19 @@ class UrScript(object):
         logger = URBasic.dataLogging.DataLogging()        
         name = logger.AddEventLogging(__name__)        
         self.__logger = logger.__dict__[name]
-        self.ur = RobotConnector(robotModel, host, hasForceTorque)
-        while(self.ur.RobotModel.ActualTCPPose == None):      ## check på om vi er startet
+        self.robotConnector = RobotConnector(robotModel, host, hasForceTorque)
+        while(self.robotConnector.RobotModel.ActualTCPPose == None):      ## check på om vi er startet
             time.sleep(0.001)
         self.__logger.info('Init done')
 #############   Module motion   ###############
 
     def waitRobotIdleOrStopFlag(self):
-        time.sleep(0.010)
-        while(self.ur.RobotModel.RuntimeState != 1 and not self.ur.RobotModel.StopRunningFlag):
-            time.sleep(0.001)
+        #print("Got into waitRobotIdleOrStopFlag and RuntimeState is " + str(self.robotConnector.RobotModel.RuntimeState))
+        #time.sleep(0.50)
+        while(self.robotConnector.RobotModel.RuntimeState != 1 and not self.robotConnector.RobotModel.StopRunningFlag):
+        #while(self.robotConnector.RobotModel.RuntimeState != 1):
+            #print("Waiting")
+            time.sleep(0.002)
 
         
     def movej(self, q=None, a=1.4, v =1.05, t =0, r =0, wait=True, pose=None):
@@ -112,7 +115,7 @@ end
         
         programString = prg.format(**locals())
         
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.SendProgram(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
         
@@ -138,7 +141,8 @@ end
         
         programString = prg.format(**locals())
         
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.SendProgram(programString)
+        #time.sleep(0.5)
         if(wait):
             self.waitRobotIdleOrStopFlag()
         
@@ -167,7 +171,7 @@ end
         movestr = self._move(movetype='p', pose=pose, a=a, v=v, t=0, r=r, wait=wait, q=q)
         programString = prg.format(**locals())
         
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.SendProgram(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
         
@@ -200,7 +204,7 @@ end
         
         programString = prg.format(**locals())
         
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.SendProgram(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
         
@@ -318,7 +322,7 @@ end'''
         
         programString = prg.format(**locals())
         
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.SendProgram(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
  
@@ -330,7 +334,7 @@ end'''
         prg = 'end_force_mode()'        
         programString = prg.format(**locals())
         
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.Send(programString)                      ##### ToDo - check if send or sendprogram
         if(wait):
             self.waitRobotIdleOrStopFlag()
         
@@ -349,7 +353,7 @@ end'''
         
         programString = prg.format(**locals())
         
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.Send(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
 
@@ -371,7 +375,7 @@ end'''
         prg = 'servoj({q}, 0.5, 0.5, {t}, {lookahead_time}, {gain})'
         programString = prg.format(**locals())
         
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.Send(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
 
@@ -390,7 +394,7 @@ end'''
         prg = 'speedj({qd}, {a}, {t})'
         programString = prg.format(**locals())
         
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.Send(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
 
@@ -404,7 +408,7 @@ end'''
         prg = 'stopj({a})'
         programString = prg.format(**locals())
         
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.Send(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()    
         
@@ -424,7 +428,7 @@ end'''
         prg = 'speedl({xd}, {a}, {t}, {aRot})'
         programString = prg.format(**locals())
         
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.Send(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
 
@@ -439,7 +443,7 @@ end'''
         prg = 'stopl({a}, {aRot})'
         programString = prg.format(**locals())
         
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.Send(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
 
@@ -457,7 +461,7 @@ end'''
 end'''
         programString = prg.format(**locals())
         
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.Send(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
             
@@ -468,7 +472,7 @@ end'''
         prg = 'end_freedrive_mode()'        
         programString = prg.format(**locals())
         
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.Send(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
         
@@ -485,7 +489,7 @@ end'''
         end'''
         programString = prg.format(**locals())
         
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.Send(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
 
@@ -496,7 +500,7 @@ end'''
         prg = 'end_teach_mode()'        
         programString = prg.format(**locals())
         
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.Send(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
     
@@ -535,7 +539,7 @@ end'''
         prg = 'conveyor_pulse_decode({in_type}, {A}, {B})'        
         programString = prg.format(**locals())
         
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.Send(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
         
@@ -559,7 +563,7 @@ end'''
         prg = 'set_conveyor_tick_count({tick_count}, {absolute_encoder_resolution})'
         programString = prg.format(**locals())
         
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.Send(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
                 
@@ -577,9 +581,9 @@ end'''
         end'''
         programString = prg.format(**locals())
     
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.Send(programString)
         self.waitRobotIdleOrStopFlag()
-        return self.ur.RobotModel.outputDoubleRegister[0]
+        return self.robotConnector.RobotModel.outputDoubleRegister[0]
 
     def stop_conveyor_tracking(self, a=15, aRot ='a', wait=True):
         '''
@@ -593,7 +597,7 @@ end'''
         
         programString = prg.format(**locals())
         
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.Send(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
         
@@ -619,7 +623,7 @@ end'''
         
         programString = prg.format(**locals())
         
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.Send(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
         
@@ -643,7 +647,7 @@ end'''
         
         programString = prg.format(**locals())
         
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.Send(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
 
@@ -659,7 +663,7 @@ end'''
         
         programString = prg.format(**locals())
         
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.Send(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
         
@@ -679,7 +683,7 @@ end'''
         
         programString = prg.format(**locals())
         
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.Send(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
         
@@ -693,7 +697,7 @@ end'''
         
         programString = prg.format(**locals())
         
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.Send(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
 
@@ -726,7 +730,7 @@ end'''
         '''
         if(wait):
             self.sync()
-        return self.ur.RobotModel.ActualQ 
+        return self.robotConnector.RobotModel.ActualQ 
     
 
         
@@ -745,7 +749,7 @@ end'''
         '''
         if(wait):
             self.sync()
-        return self.ur.RobotModel.ActualQD
+        return self.robotConnector.RobotModel.ActualQD
 
         
     def get_actual_tcp_pose(self, wait=True):
@@ -761,7 +765,7 @@ end'''
         '''
         if(wait):
             self.sync()
-        return self.ur.RobotModel.ActualTCPPose
+        return self.robotConnector.RobotModel.ActualTCPPose
        
         
     def get_actual_tcp_speed(self,wait=True):
@@ -777,7 +781,7 @@ end'''
         '''
         if(wait):
             self.sync()
-        return self.ur.RobotModel.ActualTCPSpeed
+        return self.robotConnector.RobotModel.ActualTCPSpeed
         
     def get_actual_tool_ﬂange_pose(self):
         '''
@@ -1029,7 +1033,7 @@ end'''
         
         programString = prg.format(**locals())
         
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.Send(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()    
 
@@ -1096,7 +1100,7 @@ end'''
         
         programString = prg.format(**locals())
         
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.Send(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
 
@@ -1117,7 +1121,7 @@ end'''
         
         programString = prg.format(**locals())
         
-        self.ur.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.Send(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
 
@@ -1135,8 +1139,8 @@ end'''
         Uses up the remaining ”physical” time a thread has in the current
         frame/sample.
         '''
-        initialRobotTime = self.ur.RobotModel.RobotTimestamp
-        while(self.ur.RobotModel.RobotTimestamp == initialRobotTime):
+        initialRobotTime = self.robotConnector.RobotModel.RobotTimestamp
+        while(self.robotConnector.RobotModel.RobotTimestamp == initialRobotTime):
             time.sleep(0.001)
 
     
@@ -1197,7 +1201,8 @@ end'''
         Return Value:
         boolean, The signal level. 
         '''
-        raise NotImplementedError('Function Not yet implemented')
+        self.robotConnector.RobotModel.
+        
         
     def get_conﬁgurable_digital_out(self, n):
         '''
@@ -1275,11 +1280,11 @@ end'''
         if n == 0:
             if(wait):
                 self.sync()
-            return self.ur.RobotModel.StandardAnalogInput0
+            return self.robotConnector.RobotModel.StandardAnalogInput0
         elif n == 1:
             if(wait):
                 self.sync()
-            return self.ur.RobotModel.StandardAnalogInput1
+            return self.robotConnector.RobotModel.StandardAnalogInput1
         else:
             raise KeyError('Index out of range')
     
@@ -1297,11 +1302,11 @@ end'''
         if n == 0:
             if(wait):
                 self.sync()
-            return self.ur.RobotModel.StandardAnalogOutput0
+            return self.robotConnector.RobotModel.StandardAnalogOutput0
         elif n == 1:
             if(wait):
                 self.sync()
-                return self.ur.RobotModel.StandardAnalogOutput1
+                return self.robotConnector.RobotModel.StandardAnalogOutput1
         else:
             raise KeyError('Index out of range')
         

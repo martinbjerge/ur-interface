@@ -77,22 +77,23 @@ class UrScriptExt(URBasic.urScript.UrScript):
         self.print_actual_tcp_pose()
         self.print_actual_joint_positions()
         #self.close_rtc()
-        #self.ur.DashboardClient.Close()  #TODO FIXME Check om det er rigtigt
+        #self.robotConnector.DashboardClient.Close()  #TODO FIXME Check om det er rigtigt
         #self.dbh_demon.close_dbs()
         
     def send_program(self, prg='', wait=True, timeout=300.):
         self.__force_remote_set=False
         #status =  URBasic.urScript.UrScript.send_program(self, prg=prg, wait=wait, timeout=timeout)
-        self.ur.RealTimeClient.Send(prg)
-        if not prg == 'def resetRegister():\n  write_output_boolean_register(0, False)\n  write_output_boolean_register(1, False)\nend':
-            #if self.get_safety_status()['StoppedDueToSafety']:
-            if self.ur.RobotModel.SafetyStatus.StoppedDueToSafety:
-                return False
-            else:
-                return True
+        self.robotConnector.RealTimeClient.SendProgram(prg)
+        while(self.robotConnector.RobotModel.RuntimeState != 1):
+            pass
+        
+        if self.robotConnector.RobotModel.SafetyStatus.StoppedDueToSafety:
+            return False
+        else:
+            return True
                 #return status
         
-        return True
+        
     
     def reset_error(self):
         '''
@@ -105,30 +106,30 @@ class UrScriptExt(URBasic.urScript.UrScript):
         
         '''
         
-        if not self.ur.RobotModel.RobotStatus.PowerOn:
+        if not self.robotConnector.RobotModel.RobotStatus.PowerOn:
             #while not self.set_gravity([0,-9.82,0]): pass
-            self.ur.DashboardClient.PowerOn()
+            self.robotConnector.DashboardClient.PowerOn()
             ##self.dbh_demon.ur_power_on()
             ##self.dbh_demon.wait_dbs()
             #while not self.set_gravity([0,-9.82,0]): pass
-            self.ur.DashboardClient.BrakeRelease()
+            self.robotConnector.DashboardClient.BrakeRelease()
             ##self.dbh_demon.ur_brake_release()
             ##self.dbh_demon.wait_dbs()
             time.sleep(2)
-        if self.ur.RobotModel.SafetyStatus.StoppedDueToSafety:         #self.get_safety_status()['StoppedDueToSafety']:
-            self.ur.DashboardClient.UnlockProtectiveStop()
+        if self.robotConnector.RobotModel.SafetyStatus.StoppedDueToSafety:         #self.get_safety_status()['StoppedDueToSafety']:
+            self.robotConnector.DashboardClient.UnlockProtectiveStop()
             ##self.dbh_demon.ur_unlock_protective_stop()
             ##self.dbh_demon.wait_dbs()
-            self.ur.DashboardClient.CloseSafetyPopup()
+            self.robotConnector.DashboardClient.CloseSafetyPopup()
             ##self.dbh_demon.ur_close_safety_popup()
             ##self.dbh_demon.wait_dbs()
-            self.ur.DashboardClient.BrakeRelease()
+            self.robotConnector.DashboardClient.BrakeRelease()
             #self.dbh_demon.ur_brake_release()
             #self.dbh_demon.wait_dbs()
             time.sleep(2)
             
         #return self.get_robot_status()['PowerOn'] & (not self.get_safety_status()['StoppedDueToSafety'])
-        return self.ur.RobotModel.RobotStatus.PowerOn & (not self.ur.RobotModel.SafetyStatus.StoppedDueToSafety)
+        return self.robotConnector.RobotModel.RobotStatus.PowerOn & (not self.robotConnector.RobotModel.SafetyStatus.StoppedDueToSafety)
             
     def get_in(self, port, wait=True):
         '''
@@ -185,17 +186,17 @@ class UrScriptExt(URBasic.urScript.UrScript):
                 if value:
                     #self.set_rtde_data('configurable_digital_output', np.power(2,int(port[4:])))
                     #self.set_conﬁgurable_digital_out(int(port[4:]), value)
-                    self.ur.RTDE.SetConfigurableDigitalOutput(int(port[4:]), True)
+                    self.robotConnector.RTDE.SetConfigurableDigitalOutput(int(port[4:]), True)
                 else:
-                    self.ur.RTDE.SetConfigurableDigitalOutput(int(port[4:]), False)        
+                    self.robotConnector.RTDE.SetConfigurableDigitalOutput(int(port[4:]), False)        
                     #self.set_rtde_data('configurable_digital_output', 0)
             elif 'BDO' == port[:3]:
                 #self.set_rtde_data('standard_digital_output_mask', np.power(2,int(port[4:])))
                 if value:
-                    self.ur.RTDE.SetConfigurableDigitalOutput(int(port[4:]), True)
+                    self.robotConnector.RTDE.SetConfigurableDigitalOutput(int(port[4:]), True)
                     #self.set_rtde_data('standard_digital_output', np.power(2,int(port[4:])))
                 else:        
-                    self.ur.RTDE.SetConfigurableDigitalOutput(int(port[4:]), False)
+                    self.robotConnector.RTDE.SetConfigurableDigitalOutput(int(port[4:]), False)
                     #self.set_rtde_data('standard_digital_output', 0)
             elif 'BAO' == port[:3]:
                 pass
@@ -304,12 +305,12 @@ class UrScriptExt(URBasic.urScript.UrScript):
 #            RobotState['TeachButtonPressed'] = True
 #        if statbit & (1 << 3):
 #            RobotState['PowerButtonPressed'] = True
-    #    test = self.ur.RobotModel.RobotStatusPowerOn
+    #    test = self.robotConnector.RobotModel.RobotStatusPowerOn
         
-    #    RobotState['PowerOn'] = self.ur.RobotModel.RobotStatus.PowerOn
-    #    RobotState['ProgramRunning'] = self.ur.RobotModel.RobotStatus.ProgramRunning
-    #    RobotState['TeachButtonPressed'] = self.ur.RobotModel.RobotStatus.TeachButtonPressed
-    #    RobotState['PowerButtonPressed'] = self.ur.RobotModel.RobotStatus.PowerButtonPressed
+    #    RobotState['PowerOn'] = self.robotConnector.RobotModel.RobotStatus.PowerOn
+    #    RobotState['ProgramRunning'] = self.robotConnector.RobotModel.RobotStatus.ProgramRunning
+    #    RobotState['TeachButtonPressed'] = self.robotConnector.RobotModel.RobotStatus.TeachButtonPressed
+    #    RobotState['PowerButtonPressed'] = self.robotConnector.RobotModel.RobotStatus.PowerButtonPressed
 
         
     #    return RobotState

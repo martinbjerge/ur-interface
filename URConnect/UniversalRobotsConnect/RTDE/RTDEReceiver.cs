@@ -411,7 +411,6 @@ namespace UniversalRobotsConnect
                 case "tcp_force_scalar":
                     _robotModel.TCPForceScalar = (double)value;
                     break;
-
                 #region outputBitRegisters
 
                 case "output_bit_registers0_to_31":
@@ -575,8 +574,6 @@ namespace UniversalRobotsConnect
 
 
                 #endregion
-
-
                 default:
                     throw new NotImplementedException("Did not find any handling for " + key);
             }
