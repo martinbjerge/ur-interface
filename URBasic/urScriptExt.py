@@ -161,10 +161,8 @@ class UrScriptExt(URBasic.urScript.UrScript):
         Status (bool): Status, True if signal set successfully.
         '''
         
-        check_rtde_outputs = False        
         if 'BCO' == port[:3]:
-            #check_rtde_outputs = self.has_set_rtde_data_attr('configurable_digital_output') and self.has_set_rtde_data_attr('configurable_digital_output_mask')
-            check_rtde_outputs = True    #Dem har vi altid med 
+            self.set_conﬁgurable_digital_out(int(port[4:]), value)
         elif 'BDO' == port[:3]:
             #check_rtde_outputs = self.has_set_rtde_data_attr('standard_digital_output') and self.has_set_rtde_data_attr('standard_digital_output_mask')
             check_rtde_outputs = True    #Dem har vi altid med
@@ -691,42 +689,6 @@ end
         Status (bool): Status, True if signal set successfully.
         
         """
-        prefix="p"
-        t_val=''
-        if pose is None:
-            prefix=""
-            pose=q
-        pose = np.array(pose)
-        if movetype == 'j' or movetype == 'l':
-            tval='t={t},'.format(**locals())
-                            
-        movestr = ''
-        if np.size(pose.shape)==2:
-            for idx in range(np.size(pose, 0)):
-                posex = np.round(pose[idx], 4)
-                posex = posex.tolist()
-                if (np.size(pose, 0)-1)==idx:
-                    r=0
-                movestr +=  '    force_mode({prefix}{posex}, {selection_vector}, {wrench}, {f_type}, {limits})\n'.format(**locals())
-                movestr +=  '    move{movetype}({prefix}{posex}, a={a}, v={v}, {t_val} r={r})\n'.format(**locals())
-                
-            movestr +=  '    stopl({a}, {a})\n'.format(**locals())
-        else:
-            posex = np.round(pose, 4)
-            posex = posex.tolist()
-            movestr +=  '    force_mode({prefix}{posex}, {selection_vector}, {wrench}, {f_type}, {limits})\n'.format(**locals())
-            movestr +=  '    move{movetype}({prefix}{posex}, a={a}, v={v}, {t_val} r={r})\n'.format(**locals())
-
-        
-        prg_new =  '''def move_force():
-{movestr}
-    end_force_mode()
-end
-'''
-        
-        
-        
-        
         
         prg =  '''def move_force():
     force_mode(p{task_frame}, {selection_vector}, {wrench}, {f_type}, {limits})
@@ -736,8 +698,9 @@ end
 '''
         movestr = self._move(movetype, pose, a, v, t, r, wait, q)
         
-        self.send_program(prg.format(**locals()),wait)
-
+        self.ur.RealTimeClient.Send(prg.format(**locals()))
+        if(wait):
+            self.waitRobotIdleOrStopFlag()
 
     def print_actual_tcp_pose(self):
         '''
