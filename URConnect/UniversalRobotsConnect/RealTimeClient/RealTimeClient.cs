@@ -33,7 +33,7 @@ namespace UniversalRobotsConnect
             _realtimeClientSender = new RealTimeClientSender(_stream);
         }
 
-        public void Send(byte[] payload)
+        public async void Send(byte[] payload)
         {
             byte[] sendBytes = new byte[payload.Length+2];
             Array.Copy(payload, sendBytes, payload.Length);
@@ -41,7 +41,7 @@ namespace UniversalRobotsConnect
             sendBytes[sendBytes.Length - 1] = (byte) 'n';
             log.Debug($"Send program to robot {Encoding.UTF8.GetString(sendBytes)}");
             _realtimeClientSender.SendData(payload);
-            Thread.Sleep(500);      //Waiting to return to allow for RuntimeState to be right - ToDo - calculate based on program size
+            await Task.Delay(100);
         }
 
         public void Send(string payload)
@@ -49,5 +49,24 @@ namespace UniversalRobotsConnect
             Send(Encoding.UTF8.GetBytes(payload));
         }
 
+        public void SendProgram(byte[] payload)
+        {
+            byte[] sendBytes = new byte[payload.Length + 2];
+            Array.Copy(payload, sendBytes, payload.Length);
+            sendBytes[sendBytes.Length - 2] = (byte)92;        //backslash
+            sendBytes[sendBytes.Length - 1] = (byte)'n';
+            log.Debug($"Send program to robot {Encoding.UTF8.GetString(sendBytes)}");
+            _realtimeClientSender.SendData(payload);
+            while (_robotModel.RuntimeState != RuntimeState.Running)
+            {
+                //Wait for program to finish processing and start running on the robot
+            }
+            //ToDo - handle timeout for invalid RTC Data
+        }
+
+        public void SendProgram(string payload)
+        {
+            SendProgram(Encoding.UTF8.GetBytes(payload));
+        }
     }
 }

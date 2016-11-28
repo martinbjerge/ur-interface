@@ -86,15 +86,6 @@ namespace UniversalRobotsConnect
         private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         #region BackingFields
-
-        //private bool _digitalOutputBit0;
-        //private bool _digitalOutputBit1;
-        //private bool _digitalOutputBit2;
-        //private bool _digitalOutputBit3;
-        //private bool _digitalOutputBit4;
-        //private bool _digitalOutputBit5;
-        //private bool _digitalOutputBit6;
-        //private bool _digitalOutputBit7;
         private double[] _actualTCPPose;
         private RobotMode _robotMode;
         private SafetyMode _safetyMode;
@@ -108,14 +99,6 @@ namespace UniversalRobotsConnect
         private double[] _actualQ;
         private double[] _actualQD;
         private double[] _actualCurrent;
-        //private bool _digitalInputBit0;
-        //private bool _digitalInputBit1;
-        //private bool _digitalInputBit2;
-        //private bool _digitalInputBit3;
-        //private bool _digitalInputBit4;
-        //private bool _digitalInputBit5;
-        //private bool _digitalInputBit6;
-        //private bool _digitalInputBit7;
         private double[] _targetTCPPose;
         private RuntimeState _runtimeState;
         //private bool _robotStatusPowerOn;
@@ -123,9 +106,11 @@ namespace UniversalRobotsConnect
         private RobotStatus _robotStatus = new RobotStatus();
         private double _robotTimeStamp;
         private double[] _forceTorque;
-        private BitArray _digitalOutputBits;
-        private BitArray _digitalInputBits;
-        private BitArray _outputBitRegisters = new BitArray(64);
+        private bool _stopRunningFlag = false;
+        private OutputIntRegister _outputIntRegister = new OutputIntRegister();
+        private OutputDoubleRegister _outputDoubleRegister = new OutputDoubleRegister();
+        private readonly DigitalBits _digitalInputbits = new DigitalBits();
+        private readonly DigitalBits _digitalOutputbits = new DigitalBits();
 
         #endregion
 
@@ -154,54 +139,36 @@ namespace UniversalRobotsConnect
         /// Flag used when program using UR-Script and UR-ScriptEXT needs to shut down before completed
         /// This can be in seperate threads - set this flag when need to stop and listen in all threads
         /// </summary>
-        public bool StopRunningFlag { get; set; } = false;
+        public bool StopRunningFlag
+        {
+            get { return _stopRunningFlag; }
+            set
+            {
+                if (_stopRunningFlag != value)
+                {
+                    _stopRunningFlag = value;
+                    log.Info($"{RobotTimestamp} , StopRunningFlag, {_stopRunningFlag}");
+                }
+            }
+        }
         
         #region Digital Input Bits
 
-        public bool GetDigitalInputBit(int bitnumber)
+        public DigitalBits DigitalInputbits
         {
-            return _digitalInputBits[bitnumber];
+            get { return _digitalInputbits; }
         }
-
-        internal BitArray DigitalInputBits
-        {
-            set
-            {
-                if (_digitalInputBits != value)
-                {
-                    _digitalInputBits = value;
-                    log.Info($"{RobotTimestamp} ,DigitalInputBits, {_digitalInputBits}");
-
-                }
-
-            }
-        }
-
-        
 
         #endregion
 
 
         #region Digital Output Bits
 
-
-        internal BitArray DigitalOutputBits
+        public DigitalBits DigitalOutputBits
         {
-            set
-            {   
-                if(value != _digitalOutputBits)
-                {
-                    _digitalOutputBits = value;
-                    log.Info($"{RobotTimestamp} ,DigitalOutputBits, {_digitalOutputBits}");
-                }
-            }
+            get { return _digitalOutputbits; }
         }
 
-        public bool GetDigitalOutputBit(int bitNumber)
-        {
-            return _digitalOutputBits[bitNumber];
-        }
-        
         #endregion
 
 
@@ -295,7 +262,7 @@ namespace UniversalRobotsConnect
             }
         }
 
-        public double[] TargetCurrent       //////////////////// GIVER DET MENING AT TARGET CURRENT ER VECTOR 6D ??????????????????????????
+        public double[] TargetCurrent 
         {
             get { return _targetCurrent; }
             set
@@ -308,7 +275,7 @@ namespace UniversalRobotsConnect
             }
         }
 
-        public double[] TargetMoment        //////////////////// GIVER DET MENING AT TARGET Moment ER VECTOR 6D ??????????????????????????
+        public double[] TargetMoment       
         {
             get { return _targetMoment; }
             set
@@ -403,7 +370,7 @@ namespace UniversalRobotsConnect
                     log.Info($"{RobotTimestamp}, RuntimeState, {_runtimeState}");
                 }
             }
-        }  //probably an enum .. must fix
+        }
         public double IOCurrent { get; set; }
         public double ToolAnalogInput0 { get; set; }
         public double ToolAnalogInput1 { get; set; }
@@ -443,45 +410,29 @@ namespace UniversalRobotsConnect
 
         #region OutputBitRegisters
 
-        public bool GetOutputBitRegister(int bitNumber)
-        {
-            return _outputBitRegisters[bitNumber];
-        }
+        public OutputBitRegister OutputBitRegister { get; } = new OutputBitRegister();
 
-        internal BitArray OutputBitRegisters0to31
-        {
-            set
-            { 
-                for (int i = 0; i < 31; i++)
-                {
-                    if (_outputBitRegisters[i] != value[i])
-                    {
-                        _outputBitRegisters[i] = value[i];
-                        log.Info($"{RobotTimestamp}, OutputBitRegister{i} {(bool)value[i]}");
-                    }
-                    i++;
-                }
-            }
-        }
-
-        internal BitArray OutputBitRegisters32to63
-        {
-            set
-            {
-                for (int i = 32; i < 63; i++)
-                {
-                    if (_outputBitRegisters[i] != value[i-32])
-                    {
-                        _outputBitRegisters[i] = value[i];
-                        log.Info($"{RobotTimestamp}, OutputBitRegister{i} {(bool)value[i-32]}");
-                    }
-                    i++;
-                }
-            }
-        }
         #endregion
 
+        #region OutputIntRegisters
 
+        public OutputIntRegister OutputIntRegister
+        {
+            get { return _outputIntRegister; }
+            set { _outputIntRegister = value; }
+        }
+
+        #endregion
+
+        #region OutputDoubleRegisters
+
+        public OutputDoubleRegister OutputDoubleRegister
+        {
+            get { return _outputDoubleRegister; }
+            set { _outputDoubleRegister = value; }
+        }
+
+        #endregion
 
 
 

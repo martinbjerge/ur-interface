@@ -135,14 +135,14 @@ namespace UniversalRobotsConnect
                         break;
                     default:
                         log.Error("Package type not implemented " + type);
-                        throw new NotImplementedException("Package type not implemented " + type);   //TODO fixme - vi kan sommetider få en pakke 37 .. hvad så end det er .. skal fixes 
-                        //break;
+                        //throw new NotImplementedException("Package type not implemented " + type);  
+                        break;
                 }
             }
             else
             {
-                log.Error("Got a packet too small");  //todo fixme - sørg for at få checket hvorfor den engang imellem sender en pakke der er for lille .. 
-                throw new Exception("Got a packet too small");
+                //log.Error("Got a packet too small");  
+                //throw new Exception("Got a packet too small");
             }
         }
 
@@ -319,16 +319,7 @@ namespace UniversalRobotsConnect
                     _robotModel.TargetTCPSpeed = (double[])value;
                     break;
                 case "actual_digital_input_bits":
-                    _robotModel.DigitalInputBits = new BitArray(new byte[] { (byte)(UInt64)value });
-                    //BitArray inputBits = new BitArray(new byte[] { (byte)(UInt64)value });
-                    //_robotModel.DigitalInputBit0 = inputBits[0];
-                    //_robotModel.DigitalInputBit1 = inputBits[1];
-                    //_robotModel.DigitalInputBit2 = inputBits[2];
-                    //_robotModel.DigitalInputBit3 = inputBits[3];
-                    //_robotModel.DigitalInputBit4 = inputBits[4];
-                    //_robotModel.DigitalInputBit5 = inputBits[5];
-                    //_robotModel.DigitalInputBit6 = inputBits[6];
-                    //_robotModel.DigitalInputBit7 = inputBits[7];
+                    _robotModel.DigitalInputbits.SetBits = new BitArray(new byte[] { (byte)(UInt64)value });
                     break;
                 case "joint_temperatures":
                     _robotModel.JointTemperatures = (double[])value;
@@ -370,16 +361,7 @@ namespace UniversalRobotsConnect
                     _robotModel.ActualJointVoltage = (double[])value;
                     break;
                 case "actual_digital_output_bits":
-                    _robotModel.DigitalOutputBits = new BitArray(new byte[] { (byte)(UInt64)value });
-                    //BitArray bitArray = new BitArray(new byte[] { (byte)(UInt64)value });
-                    //_robotModel.DigitalOutputBit0 = bitArray[0];
-                    //_robotModel.DigitalOutputBit1 = bitArray[1];
-                    //_robotModel.DigitalOutputBit2 = bitArray[2];
-                    //_robotModel.DigitalOutputBit3 = bitArray[3];
-                    //_robotModel.DigitalOutputBit4 = bitArray[4];
-                    //_robotModel.DigitalOutputBit5 = bitArray[5];
-                    //_robotModel.DigitalOutputBit6 = bitArray[6];
-                    //_robotModel.DigitalOutputBit7 = bitArray[7];
+                    _robotModel.DigitalOutputBits.SetBits = new BitArray(new byte[] { (byte)(UInt64)value });
                     break;
                 case "runtime_state":
                     _robotModel.RuntimeState = (RuntimeState)(uint) value;
@@ -407,8 +389,6 @@ namespace UniversalRobotsConnect
                     _robotModel.SafetyStatus.Fault = safetystatusBitArray2[1];
                     _robotModel.SafetyStatus.StoppedDueToSafety = safetystatusBitArray2[2];
                     break;
-
-
                 case "standard_analog_input0":
                     _robotModel.StandardAnalogInput0 = (double)value;
                     break;
@@ -422,13 +402,10 @@ namespace UniversalRobotsConnect
                 case "standard_analog_output1":
                     _robotModel.StandardAnalogOutput = (double)value;
                     break;
-
-
                 case "io_current":
                     _robotModel.IOCurrent = (double)value;
                     break;
-
-
+                    
 
                 case "tool_analog_input0":
                     _robotModel.ToolAnalogInput0 = (double)value;
@@ -445,14 +422,170 @@ namespace UniversalRobotsConnect
                 case "tcp_force_scalar":
                     _robotModel.TCPForceScalar = (double)value;
                     break;
+
+                #region outputBitRegisters
+
                 case "output_bit_registers0_to_31":
-                    _robotModel.OutputBitRegisters0to31 = new BitArray(BitConverter.GetBytes((UInt32)value) );
+                    _robotModel.OutputBitRegister.SetOutputBitRegisters0to31 = new BitArray(BitConverter.GetBytes((UInt32)value));
                     break;
                 case "output_bit_registers32_to_63":
-                    _robotModel.OutputBitRegisters32to63 = new BitArray(BitConverter.GetBytes((UInt32)value));
+                    _robotModel.OutputBitRegister.SetOutputBitRegisters32to63 = new BitArray(BitConverter.GetBytes((UInt32)value));
                     break;
-                    
 
+                #endregion
+
+                #region outputIntRegisters
+                case "output_int_register_0":
+                    _robotModel.OutputIntRegister.Register0 = (int) value;
+                    break;
+                //case "output_int_register_1":
+                //    _robotModel.SetOutputIntRegister(1, (int)value);
+                //    break;
+                //case "output_int_register_2":
+                //    _robotModel.SetOutputIntRegister(2, (int)value);
+                //    break;
+                //case "output_int_register_3":
+                //    _robotModel.SetOutputIntRegister(3, (int)value);
+                //    break;
+                //case "output_int_register_4":
+                //    _robotModel.SetOutputIntRegister(4, (int)value);
+                //    break;
+                //case "output_int_register_5":
+                //    _robotModel.SetOutputIntRegister(5, (int)value);
+                //    break;
+                //case "output_int_register_6":
+                //    _robotModel.SetOutputIntRegister(6, (int)value);
+                //    break;
+                //case "output_int_register_7":
+                //    _robotModel.SetOutputIntRegister(7, (int)value);
+                //    break;
+                //case "output_int_register_8":
+                //    _robotModel.SetOutputIntRegister(8, (int)value);
+                //    break;
+                //case "output_int_register_9":
+                //    _robotModel.SetOutputIntRegister(9, (int)value);
+                //    break;
+                //case "output_int_register_10":
+                //    _robotModel.SetOutputIntRegister(10, (int)value);
+                //    break;
+                //case "output_int_register_11":
+                //    _robotModel.SetOutputIntRegister(11, (int)value);
+                //    break;
+                //case "output_int_register_12":
+                //    _robotModel.SetOutputIntRegister(12, (int)value);
+                //    break;
+                //case "output_int_register_13":
+                //    _robotModel.SetOutputIntRegister(13, (int)value);
+                //    break;
+                //case "output_int_register_14":
+                //    _robotModel.SetOutputIntRegister(14, (int)value);
+                //    break;
+                //case "output_int_register_15":
+                //    _robotModel.SetOutputIntRegister(15, (int)value);
+                //    break;
+                //case "output_int_register_16":
+                //    _robotModel.SetOutputIntRegister(16, (int)value);
+                //    break;
+                //case "output_int_register_17":
+                //    _robotModel.SetOutputIntRegister(17, (int)value);
+                //    break;
+                //case "output_int_register_18":
+                //    _robotModel.SetOutputIntRegister(18, (int)value);
+                //    break;
+                //case "output_int_register_19":
+                //    _robotModel.SetOutputIntRegister(19, (int)value);
+                //    break;
+                //case "output_int_register_20":
+                //    _robotModel.SetOutputIntRegister(20, (int)value);
+                //    break;
+                //case "output_int_register_21":
+                //    _robotModel.SetOutputIntRegister(21, (int)value);
+                //    break;
+                //case "output_int_register_22":
+                //    _robotModel.SetOutputIntRegister(22, (int)value);
+                //    break;
+                //case "output_int_register_23":
+                //    _robotModel.SetOutputIntRegister(23, (int)value);
+                //    break;
+
+                #endregion
+
+                #region outputDoubleRegisters
+                case "output_double_register_0":
+                    _robotModel.OutputDoubleRegister.Register0 = (double) value;
+                    break;
+                //case "output_double_register_1":
+                //    _robotModel.SetOutputDoubleRegister(1, (double)value);
+                //    break;
+                //case "output_double_register_2":
+                //    _robotModel.SetOutputDoubleRegister(2, (double)value);
+                //    break;
+                //case "output_double_register_3":
+                //    _robotModel.SetOutputDoubleRegister(3, (double)value);
+                //    break;
+                //case "output_double_register_4":
+                //    _robotModel.SetOutputDoubleRegister(4, (double)value);
+                //    break;
+                //case "output_double_register_5":
+                //    _robotModel.SetOutputDoubleRegister(5, (double)value);
+                //    break;
+                //case "output_double_register_6":
+                //    _robotModel.SetOutputDoubleRegister(6, (double)value);
+                //    break;
+                //case "output_double_register_7":
+                //    _robotModel.SetOutputDoubleRegister(7, (double)value);
+                //    break;
+                //case "output_double_register_8":
+                //    _robotModel.SetOutputDoubleRegister(8, (double)value);
+                //    break;
+                //case "output_double_register_9":
+                //    _robotModel.SetOutputDoubleRegister(9, (double)value);
+                //    break;
+                //case "output_double_register_10":
+                //    _robotModel.SetOutputDoubleRegister(10, (double)value);
+                //    break;
+                //case "output_double_register_11":
+                //    _robotModel.SetOutputDoubleRegister(11, (double)value);
+                //    break;
+                //case "output_double_register_12":
+                //    _robotModel.SetOutputDoubleRegister(12, (double)value);
+                //    break;
+                //case "output_double_register_13":
+                //    _robotModel.SetOutputDoubleRegister(13, (double)value);
+                //    break;
+                //case "output_double_register_14":
+                //    _robotModel.SetOutputDoubleRegister(14, (double)value);
+                //    break;
+                //case "output_double_register_15":
+                //    _robotModel.SetOutputDoubleRegister(15, (double)value);
+                //    break;
+                //case "output_double_register_16":
+                //    _robotModel.SetOutputDoubleRegister(16, (double)value);
+                //    break;
+                //case "output_double_register_17":
+                //    _robotModel.SetOutputDoubleRegister(17, (double)value);
+                //    break;
+                //case "output_double_register_18":
+                //    _robotModel.SetOutputDoubleRegister(18, (double)value);
+                //    break;
+                //case "output_double_register_19":
+                //    _robotModel.SetOutputDoubleRegister(19, (double)value);
+                //    break;
+                //case "output_double_register_20":
+                //    _robotModel.SetOutputDoubleRegister(20, (double)value);
+                //    break;
+                //case "output_double_register_21":
+                //    _robotModel.SetOutputDoubleRegister(21, (double)value);
+                //    break;
+                //case "output_double_register_22":
+                //    _robotModel.SetOutputDoubleRegister(22, (double)value);
+                //    break;
+                //case "output_double_register_23":
+                //    _robotModel.SetOutputDoubleRegister(23, (double)value);
+                //    break;
+
+
+                #endregion
 
 
                 default:

@@ -84,6 +84,10 @@
     <Compile Include="SandCommand.cs" />
     <Compile Include="SoakCommand.cs" />
     <Compile Include="StructConverter.cs" />
+    <Compile Include="Types\DigitalBits.cs" />
+    <Compile Include="Types\OutputBitRegister.cs" />
+    <Compile Include="Types\OutputDoubleRegister.cs" />
+    <Compile Include="Types\OutputIntRegister.cs" />
     <Compile Include="Types\RobotStatus.cs" />
     <Compile Include="Types\SafetyStatus.cs" />
     <Compile Include="Types\Vector3D.cs" />
