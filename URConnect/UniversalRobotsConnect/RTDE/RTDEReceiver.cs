@@ -47,31 +47,16 @@ namespace UniversalRobotsConnect
                     if (_stream.CanRead)
                     {
                         byte[] myReadBuffer = new byte[65000];
-                        //StringBuilder myCompleteMessage = new StringBuilder();
                         int numberOfBytesRead = 0;
-
                         do
                         {
                             numberOfBytesRead = _stream.Read(myReadBuffer, 0, myReadBuffer.Length);
-                            //numberOfBytesRead = numberOfBytesRead + thisRead;
-                            //myCompleteMessage.AppendFormat("{0}", Encoding.UTF8.GetString(myReadBuffer, 0, numberOfBytesRead));
                         }
                         while (_stream.DataAvailable);
 
                         byte[] package =  new byte[numberOfBytesRead];
                         Array.Copy(myReadBuffer, package, numberOfBytesRead);
                         _packageList.Add(package);
-                        //myReadBuffer.CopyTo(package, 0);
-
-                        //_packageList.Add();
-                        //log.Debug($"Package length: {numberOfBytesRead}");
-
-                        //_packageList.Add(myCompleteMessage.ToString());
-                        //DecodePacage(myReadBuffer);
-                        //DecodePacage(Encoding.UTF8.GetBytes(myCompleteMessage.ToString()));
-
-
-                        //DecodePacage(package);
                     }
                     else
                     {
@@ -105,7 +90,7 @@ namespace UniversalRobotsConnect
             Array.Copy(recievedPackage, sizeArray, 2);
             sizeArray = CheckEndian(sizeArray);
             ushort size = BitConverter.ToUInt16(sizeArray, 0);
-            if (size > 3)
+            if ((size > 3) && (size == recievedPackage.Length) )
             {
                 byte[] payloadArray = new byte[size - 3];
                 Array.Copy(recievedPackage, 3, payloadArray, 0, size - 3);
@@ -141,8 +126,8 @@ namespace UniversalRobotsConnect
             }
             else
             {
-                //log.Error("Got a packet too small");  
-                //throw new Exception("Got a packet too small");
+                //log.Error("Got a packet of unexpected size");  
+                //throw new Exception("Got a packet of unexpected size");
             }
         }
 
