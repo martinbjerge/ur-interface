@@ -66,14 +66,12 @@ class UrScriptExt(URBasic.urScript.UrScript):
         logger = URBasic.dataLogging.DataLogging()
         name = logger.AddEventLogging(__name__)        
         self.__logger = logger.__dict__[name]
-        #self.dbh_demon = URBasic.dashboard.DashBoard(host)
-        self.hwProfile = HardwareProfile(profile, hw_Profile_filename)
         self.__force_remote_set=False
         self.print_actual_tcp_pose()
         self.print_actual_joint_positions()
         self.__logger.info('Init done')
         
-    def close_urScriptExt(self):
+    def close(self):
         self.print_actual_tcp_pose()
         self.print_actual_joint_positions()
         #self.close_rtc()
@@ -667,7 +665,7 @@ end
 '''
         movestr = self._move(movetype, pose, a, v, t, r, wait, q)
         
-        self.ur.RealTimeClient.Send(prg.format(**locals()))
+        self.robotConnector.RealTimeClient.SendProgram(prg.format(**locals()))
         if(wait):
             self.waitRobotIdleOrStopFlag()
 
