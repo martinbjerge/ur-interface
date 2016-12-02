@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -44,6 +45,40 @@ namespace UniversalRobotsConnect
         private BitArray _standardDigitalOutputBitArray = new BitArray(8);
         private int[] _rtdeInputInts = new int[24];
         private double[] _rtdeInputDoubles = new double[24];
+
+        public RTDE(RobotModel robotModel, ConcurrentQueue<RobotModel> robotData)
+        {
+            _robotModel = robotModel;
+            _client = new TcpClient(_robotModel.IpAddress.ToString(), port);
+            _stream = _client.GetStream();
+            _rtdeOutputConfiguration = new List<KeyValuePair<string, string>>();
+            _rtdeInputConfiguration = new List<KeyValuePair<string, string>>();
+
+            _rtdeReceiver = new RTDEReceiver(_stream, _robotModel, _rtdeOutputConfiguration, _rtdeInputConfiguration, robotData);
+            _rtdeSender = new RTDESender(_stream/*, _rtdeOutputConfiguration*/);
+            _rtdeReceiver.DataReceived += OnDataReceived;
+
+
+            GetControllerVersion();
+            while (_robotModel.URControlVersion == null)
+            {
+                Thread.Sleep(10);
+            }
+            NegotiateProtocolVersion();
+            while (_robotModel.RTDEProtocolVersion != 1)
+            {
+                Thread.Sleep(10);
+            }
+
+            SetupRtdeInterface();
+            Thread.Sleep(300);
+            StartRTDEInterface();
+            while (_robotModel.RTDEConnectionState != ConnectionState.Started)
+            {
+                Thread.Sleep(10);
+            }
+
+        }
 
         public void SendData(byte[] data)
         {
@@ -286,26 +321,7 @@ namespace UniversalRobotsConnect
         
 
 
-        public RTDE(RobotModel robotModel)
-        {
-            _robotModel = robotModel;
-            _client = new TcpClient(_robotModel.IpAddress.ToString(), port);    
-            _stream = _client.GetStream();
-            _rtdeOutputConfiguration = new List<KeyValuePair<string, string>>();
-            _rtdeInputConfiguration = new List<KeyValuePair<string, string>>();
-
-            _rtdeReceiver = new RTDEReceiver(_stream, _robotModel, _rtdeOutputConfiguration, _rtdeInputConfiguration);
-            _rtdeSender = new RTDESender(_stream/*, _rtdeOutputConfiguration*/);
-            _rtdeReceiver.DataReceived += OnDataReceived;
-
-
-            GetControllerVersion();
-            NegotiateProtocolVersion();
-            SetupRtdeInterface();
-            StartRTDEInterface();
-
-
-        }
+       
 
         
 
@@ -314,7 +330,6 @@ namespace UniversalRobotsConnect
             log.Debug("Get Controller Version from Robot");
             byte [] myBytes = new byte[0];
             byte[] testBytes = CreatePackage((byte)UR_RTDE_Command.RTDE_GET_URCONTROL_VERSION , myBytes);
-
             _rtdeSender.SendData(testBytes);
         }
 
@@ -453,6 +468,7 @@ namespace UniversalRobotsConnect
             log.Debug("Starting RTDE Interface");
             byte[] myBytes = new byte[0];
             byte[] package = CreatePackage((byte) UR_RTDE_Command.RTDE_CONTROL_PACKAGE_START, myBytes);
+            _rtdeReceiver.RtdePackageSize = GetRtdeDatePackageSize(_rtdeOutputConfiguration);
             _rtdeSender.SendData(package);
         }
 
@@ -461,8 +477,50 @@ namespace UniversalRobotsConnect
             log.Debug("Pausing RTDE Interface");
             byte[] myBytes = new byte[0];
             byte[] package = CreatePackage((byte)UR_RTDE_Command.RTDE_CONTROL_PACKAGE_PAUSE, myBytes);
+            _rtdeReceiver.RtdePackageSize = 0;
             _rtdeSender.SendData(package);
         }
+
+        private int GetRtdeDatePackageSize(List<KeyValuePair<string, string>> rtdeOutputConfiguration)
+        {
+            int packageSize = 11;    //Header is 3 bytes - timestamp will be 8 bytes
+            foreach (var keyValuePair in rtdeOutputConfiguration)
+            {
+                if (keyValuePair.Key != "timestamp")
+                {
+                    switch (keyValuePair.Value)
+                    {
+                        case "DOUBLE":
+                            packageSize = packageSize + 8;
+                            break;
+                        case "UINT64":
+                            packageSize = packageSize + 8;
+                            break;
+                        case "VECTOR6D":
+                            packageSize = packageSize + 48;
+                            break;
+                        case "INT32":
+                            packageSize = packageSize + 4;
+                            break;
+                        case "VECTOR6INT32":
+                            packageSize = packageSize + 24;
+                            break;
+                        case "VECTOR3D":
+                            packageSize = packageSize + 24;
+                            break;
+                        case "UINT32":
+                            packageSize = packageSize + 4;
+                            break;
+                        default:
+                            throw new ArgumentException("Datatype in rtde output not known");
+                    }
+                }
+
+            }
+
+            return packageSize;
+        }
+
 
     }
 }

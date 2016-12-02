@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -83,7 +84,7 @@ namespace UniversalRobotsConnect
     public class RobotModel
     {
 
-        private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        //private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         #region BackingFields
         private double[] _actualTCPPose;
@@ -113,6 +114,8 @@ namespace UniversalRobotsConnect
         private readonly DigitalBits _configurableInputbits = new DigitalBits();
         private readonly DigitalBits _digitalOutputbits = new DigitalBits();
         private readonly DigitalBits _configurableOutputBits = new DigitalBits();
+        
+
         #endregion
 
         public string Password { get; set; }
@@ -134,6 +137,8 @@ namespace UniversalRobotsConnect
             }
         }
 
+        public DateTime LastUpdateTimestamp { get; set; }
+
         public ConnectionState RTDEConnectionState { get; set; }
 
         /// <summary>
@@ -148,7 +153,7 @@ namespace UniversalRobotsConnect
                 if (_stopRunningFlag != value)
                 {
                     _stopRunningFlag = value;
-                    log.Info($"{RobotTimestamp} , StopRunningFlag, {_stopRunningFlag}");
+                    //log.Info($"{RobotTimestamp} , StopRunningFlag, {_stopRunningFlag}");
                 }
             }
         }
@@ -191,7 +196,7 @@ namespace UniversalRobotsConnect
                 if (_rtdeProtocolVersion != value)
                 {
                     _rtdeProtocolVersion = value;
-                    log.Info(RobotTimestamp + " ,RTDEProtocolVersion: " + _rtdeProtocolVersion);
+                    //log.Info(RobotTimestamp + " ,RTDEProtocolVersion: " + _rtdeProtocolVersion);
                 }
             }
         }
@@ -204,7 +209,7 @@ namespace UniversalRobotsConnect
                 if (!Vector6DEquals(_actualTCPPose, value, _vector6DPrecision))
                 {
                     _actualTCPPose = value;
-                    log.Info($"{RobotTimestamp}, ActualTCPPose,{_actualTCPPose[0]}, {_actualTCPPose[1]}, {_actualTCPPose[2]}, {_actualTCPPose[3]}, {_actualTCPPose[4]}, {_actualTCPPose[5]}");
+                    //log.Info($"{RobotTimestamp}, ActualTCPPose,{_actualTCPPose[0]}, {_actualTCPPose[1]}, {_actualTCPPose[2]}, {_actualTCPPose[3]}, {_actualTCPPose[4]}, {_actualTCPPose[5]}");
                 }
             }
         }
@@ -217,7 +222,7 @@ namespace UniversalRobotsConnect
                 if (_robotMode!= value)
                 {
                     _robotMode = value;
-                    log.Info(RobotTimestamp + " ,Robotmode, " + _robotMode);
+                    //log.Info(RobotTimestamp + " ,Robotmode, " + _robotMode);
                 }
             }
         }
@@ -229,7 +234,7 @@ namespace UniversalRobotsConnect
                 if (_safetyMode != value)
                 {
                     _safetyMode = value;
-                    log.Info(RobotTimestamp +" ,SafetyMode, " + _safetyMode);
+                    //log.Info(RobotTimestamp +" ,SafetyMode, " + _safetyMode);
                 }
             }
         }
@@ -242,7 +247,7 @@ namespace UniversalRobotsConnect
                 if (!Vector6DEquals(_targetQ, value, _vector6DPrecision))
                 {
                     _targetQ = value;
-                    log.Info($"{RobotTimestamp}, TargetQ,{_targetQ[0]}, {_targetQ[1]}, {_targetQ[2]}, {_targetQ[3]}, {_targetQ[4]}, {_targetQ[5]}");
+                    //log.Info($"{RobotTimestamp}, TargetQ,{_targetQ[0]}, {_targetQ[1]}, {_targetQ[2]}, {_targetQ[3]}, {_targetQ[4]}, {_targetQ[5]}");
                 }
             }
         }
@@ -255,7 +260,7 @@ namespace UniversalRobotsConnect
                 if (!Vector6DEquals(_targetQD, value, _vector6DPrecision))
                 {
                     _targetQD = value;
-                    log.Info($"{RobotTimestamp}, TargetQD,{_targetQD[0]}, {_targetQD[1]}, {_targetQD[2]}, {_targetQD[3]}, {_targetQD[4]}, {_targetQD[5]}");
+                    //log.Info($"{RobotTimestamp}, TargetQD,{_targetQD[0]}, {_targetQD[1]}, {_targetQD[2]}, {_targetQD[3]}, {_targetQD[4]}, {_targetQD[5]}");
                 }
             }
         }
@@ -268,7 +273,7 @@ namespace UniversalRobotsConnect
                 if (!Vector6DEquals(_targetQDD, value, _vector6DPrecision))
                 {
                     _targetQDD = value;
-                    log.Info($"{RobotTimestamp}, TargetQDD,{_targetQDD[0]}, {_targetQDD[1]}, {_targetQDD[2]}, {_targetQDD[3]}, {_targetQDD[4]}, {_targetQDD[5]}");
+                    //log.Info($"{RobotTimestamp}, TargetQDD,{_targetQDD[0]}, {_targetQDD[1]}, {_targetQDD[2]}, {_targetQDD[3]}, {_targetQDD[4]}, {_targetQDD[5]}");
                 }
             }
         }
@@ -281,7 +286,7 @@ namespace UniversalRobotsConnect
                 if (!Vector6DEquals(_targetCurrent, value, _vector6DPrecision))
                 {
                     _targetCurrent = value;
-                    log.Info($"{RobotTimestamp}, TargetCurrent,{_targetCurrent[0]}, {_targetCurrent[1]}, {_targetCurrent[2]}, {_targetCurrent[3]}, {_targetCurrent[4]}, {_targetCurrent[5]}");
+                    //log.Info($"{RobotTimestamp}, TargetCurrent,{_targetCurrent[0]}, {_targetCurrent[1]}, {_targetCurrent[2]}, {_targetCurrent[3]}, {_targetCurrent[4]}, {_targetCurrent[5]}");
                 }
             }
         }
@@ -294,7 +299,7 @@ namespace UniversalRobotsConnect
                 if (!Vector6DEquals(_targetMoment, value, _vector6DPrecision))
                 {
                     _targetMoment = value;
-                    log.Info($"{RobotTimestamp}, TargetMoment,{_targetMoment[0]}, {_targetMoment[1]}, {_targetMoment[2]}, {_targetMoment[3]}, {_targetMoment[4]}, {_targetMoment[5]}");
+                    //log.Info($"{RobotTimestamp}, TargetMoment,{_targetMoment[0]}, {_targetMoment[1]}, {_targetMoment[2]}, {_targetMoment[3]}, {_targetMoment[4]}, {_targetMoment[5]}");
                 }
             }
         }
@@ -307,7 +312,7 @@ namespace UniversalRobotsConnect
                 if (!Vector6DEquals(_actualQ, value, _vector6DPrecision))
                 {
                     _actualQ = value;
-                    log.Info($"{RobotTimestamp}, ActualQ,{_actualQ[0]}, {_actualQ[1]}, {_actualQ[2]}, {_actualQ[3]}, {_actualQ[4]}, {_actualQ[5]}");
+                    //log.Info($"{RobotTimestamp}, ActualQ,{_actualQ[0]}, {_actualQ[1]}, {_actualQ[2]}, {_actualQ[3]}, {_actualQ[4]}, {_actualQ[5]}");
                 }
             }
         }
@@ -320,7 +325,7 @@ namespace UniversalRobotsConnect
                 if (!Vector6DEquals(_actualQD, value, _vector6DPrecision))
                 {
                     _actualQD = value;
-                    log.Info($"{RobotTimestamp}, ActualQD,{_actualQD[0]}, {_actualQD[1]}, {_actualQD[2]}, {_actualQD[3]}, {_actualQD[4]}, {_actualQD[5]}");
+                    //log.Info($"{RobotTimestamp}, ActualQD,{_actualQD[0]}, {_actualQD[1]}, {_actualQD[2]}, {_actualQD[3]}, {_actualQD[4]}, {_actualQD[5]}");
                 }
             }
         }
@@ -333,7 +338,7 @@ namespace UniversalRobotsConnect
                 if (!Vector6DEquals(_actualCurrent, value, _vector6DPrecision))
                 {
                     _actualCurrent = value;
-                    log.Info($"{RobotTimestamp}, ActualCurrent,{_actualCurrent[0]}, {_actualCurrent[1]}, {_actualCurrent[2]}, {_actualCurrent[3]}, {_actualCurrent[4]}, {_actualCurrent[5]}");
+                    //log.Info($"{RobotTimestamp}, ActualCurrent,{_actualCurrent[0]}, {_actualCurrent[1]}, {_actualCurrent[2]}, {_actualCurrent[3]}, {_actualCurrent[4]}, {_actualCurrent[5]}");
                 }
             }
         }
@@ -377,8 +382,13 @@ namespace UniversalRobotsConnect
             {
                 if (_runtimeState != value)
                 {
+                    //Debug.WriteLine($"RuntimeState {value} is just set in model - RobotTime {RobotTimestamp}");
                     _runtimeState = value;
-                    log.Info($"{RobotTimestamp}, RuntimeState, {_runtimeState}");
+                    ////log.Info($"{RobotTimestamp}, RuntimeState, {_runtimeState}");
+                    //if (value == RuntimeState.Running)
+                    //{
+                    //    Debug.WriteLine("WE ARE FINALLY RUNNING");
+                    //}
                 }
             }
         }
@@ -414,7 +424,7 @@ namespace UniversalRobotsConnect
                 if (!Vector6DEquals(_forceTorque, value, _vector6DPrecision))
                 {
                     _forceTorque = value;
-                    log.Info($"{RobotTimestamp}, ForceTorque,{_forceTorque[0]}, {_forceTorque[1]}, {_forceTorque[2]}, {_forceTorque[3]}, {_forceTorque[4]}, {_forceTorque[5]}");
+                    //log.Info($"{RobotTimestamp}, ForceTorque,{_forceTorque[0]}, {_forceTorque[1]}, {_forceTorque[2]}, {_forceTorque[3]}, {_forceTorque[4]}, {_forceTorque[5]}");
                 }
             }
         }
@@ -443,8 +453,11 @@ namespace UniversalRobotsConnect
             set { _outputDoubleRegister = value; }
         }
 
+        public URControlVersion URControlVersion { get; set; }
+
         #endregion
 
+        public bool ClearToSend { get; set; }
 
 
 

@@ -73,11 +73,11 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="RobotConnector.cs" />
-    <Compile Include="RobotController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RobotModel.cs" />
     <Compile Include="Command.cs" />
     <Compile Include="RopeRoboticsRobotModel.cs" />
+    <Compile Include="RTDE\RTDEDatePackageDecoder.cs" />
     <Compile Include="RTDE\RTDEReceiver.cs" />
     <Compile Include="RTDE\RTDE.cs" />
     <Compile Include="RTDE\RTDESender.cs" />
@@ -90,6 +90,7 @@
     <Compile Include="Types\OutputIntRegister.cs" />
     <Compile Include="Types\RobotStatus.cs" />
     <Compile Include="Types\SafetyStatus.cs" />
+    <Compile Include="Types\URControlVersion.cs" />
     <Compile Include="Types\Vector3D.cs" />
     <Compile Include="Types\Vector6D.cs" />
   </ItemGroup>

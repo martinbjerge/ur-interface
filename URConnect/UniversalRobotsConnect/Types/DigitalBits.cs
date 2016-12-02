@@ -11,7 +11,7 @@ namespace UniversalRobotsConnect.Types
     {
         private BitArray _digitalBits = new BitArray(8);
 
-        public BitArray SetBits
+        public BitArray AllBits
         {
             set
             {
@@ -26,7 +26,14 @@ namespace UniversalRobotsConnect.Types
                 }
 
             }
+            get
+            {
+                return _digitalBits;
+                
+            }
         }
+
+       
 
         public bool Bit0 => _digitalBits[0];
         public bool Bit1 => _digitalBits[1];

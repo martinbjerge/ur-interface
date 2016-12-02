@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <rtde_config>
   <receive key="out">
-    <field name="target_q" type="VECTOR6D"/>
-    <field name="target_qd" type="VECTOR6D"/>
-    <field name="target_qdd" type="VECTOR6D"/>
-    <field name="target_current" type="VECTOR6D"/>
-    <field name="target_moment" type="VECTOR6D"/>
+    <!--<field name="target_q" type="VECTOR6D"/>-->
+    <!--<field name="target_qd" type="VECTOR6D"/>-->
+    <!--<field name="target_qdd" type="VECTOR6D"/>-->
+    <!--<field name="target_current" type="VECTOR6D"/>-->
+    <!--<field name="target_moment" type="VECTOR6D"/>-->
     <field name="actual_q" type="VECTOR6D"/>
     <field name="actual_qd" type="VECTOR6D"/>
     <field name="actual_current" type="VECTOR6D"/>
@@ -27,7 +27,7 @@
     <field name="actual_momentum" type="DOUBLE"/>
     <field name="actual_main_voltage" type="DOUBLE"/>
     <field name="actual_robot_voltage" type="DOUBLE"/>
-    <field name="actual_robot_current" type="DOUBLE"/>
+    <field name="actual_robot_current" type="DOUBLE"/>  
     <field name="actual_joint_voltage" type="VECTOR6D"/>
     <field name="actual_digital_output_bits" type="UINT64"/>
     <field name="runtime_state" type="UINT32"/>
@@ -55,7 +55,7 @@
     <field name="output_bit_registers32_to_63" type="UINT32"/>
 
     <field name="output_int_register_0" type="INT32"/>
-    <!--<field name="output_int_register_1" type="INT32"/>-->
+    <field name="output_int_register_1" type="INT32"/>
     <!--<field name="output_int_register_2" type="INT32"/>-->
     <!--<field name="output_int_register_3" type="INT32"/>-->
     <!--<field name="output_int_register_4" type="INT32"/>-->
@@ -80,7 +80,7 @@
     <!--<field name="output_int_register_23" type="INT32"/>-->
 
     <field name="output_double_register_0" type="DOUBLE"/>
-    <!--<field name="output_double_register_1" type="DOUBLE"/>-->
+    <field name="output_double_register_1" type="DOUBLE"/>
     <!--<field name="output_double_register_2" type="DOUBLE"/>-->
     <!--<field name="output_double_register_3" type="DOUBLE"/>-->
     <!--<field name="output_double_register_4" type="DOUBLE"/>-->

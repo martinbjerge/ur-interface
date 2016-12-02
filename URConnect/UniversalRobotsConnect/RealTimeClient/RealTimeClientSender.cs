@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
@@ -13,14 +14,14 @@ namespace UniversalRobotsConnect
     {
         private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        private List<byte[]> _dataToSend = new List<byte[]>();
+        ConcurrentQueue<byte[]> _dataToSend = new ConcurrentQueue<byte[]>();
         private NetworkStream _stream;
         private Thread _thread;
         
 
         internal void SendData(byte[] data)
         {
-            _dataToSend.Add(data);
+            _dataToSend.Enqueue(data);
         }
 
         internal RealTimeClientSender(NetworkStream stream)
@@ -36,11 +37,14 @@ namespace UniversalRobotsConnect
             {
                 if (_dataToSend.Count > 0)
                 {
-                    Thread.Sleep(130);      //From experience we know the Universal Robotics robot doesnt like to recieve quicker than 125 ms
-                    _stream.Write(_dataToSend[0], 0, _dataToSend[0].Length);
-                    _dataToSend.RemoveAt(0);
+                    byte[] package;
+                    bool success = _dataToSend.TryDequeue(out package);
+                    if (success)
+                    {
+                        _stream.Write(package, 0, package.Length);
+                    }
                 }
-
+                Thread.Sleep(10);
             }
         }
     }

@@ -38,7 +38,7 @@ namespace UniversalRobotsConnect.Types
                 {
                     if (_outputBitRegisters[i] != value[i - 32])
                     {
-                        _outputBitRegisters[i] = value[i];
+                        _outputBitRegisters[i] = value[i-32];
                         //log.Info($"{RobotTimestamp}, OutputBitRegister{i} {(bool)value[i - 32]}");
                     }
                     i++;

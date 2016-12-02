@@ -24,7 +24,7 @@ namespace UniversalRobotsConnect
             //_robotModel = robotModel;
             _stream = stream;
             _thread = new Thread(Run);
-            _thread.Start();
+            //_thread.Start();
         }
 
         private void Run()
@@ -33,30 +33,30 @@ namespace UniversalRobotsConnect
             {
                 if (_stream.DataAvailable)
                 {
-                    if (_stream.CanRead)
-                    {
-                        byte[] myReadBuffer = new byte[4000];
-                        StringBuilder myCompleteMessage = new StringBuilder();
-                        int numberOfBytesRead = 0;
+                    //if (_stream.CanRead)
+                    //{
+                    //    byte[] myReadBuffer = new byte[4000];
+                    //    StringBuilder myCompleteMessage = new StringBuilder();
+                    //    int numberOfBytesRead = 0;
 
-                        do
-                        {
-                            numberOfBytesRead = _stream.Read(myReadBuffer, 0, myReadBuffer.Length);
-                            myCompleteMessage.AppendFormat("{0}",
-                                Encoding.ASCII.GetString(myReadBuffer, 0, numberOfBytesRead));
-                        } while (_stream.DataAvailable);
+                    //    do
+                    //    {
+                    //        numberOfBytesRead = _stream.Read(myReadBuffer, 0, myReadBuffer.Length);
+                    //        myCompleteMessage.AppendFormat("{0}", Encoding.ASCII.GetString(myReadBuffer, 0, numberOfBytesRead));
+                    //    } while (_stream.DataAvailable);
 
-
+                    //    Thread.sleep
                         
 
-                        //log.Debug("RealtimeClient Received: " + myCompleteMessage);
-                    }
-                    else
-                    {
-                        Debug.WriteLine("Sorry.  You cannot read from this NetworkStream.");
-                        throw new SystemException();
-                    }
+                    //    //log.Debug("RealtimeClient Received: " + myCompleteMessage);
+                    //}
+                    //else
+                    //{
+                    //    Debug.WriteLine("Sorry.  You cannot read from this NetworkStream.");
+                    //    throw new SystemException();
+                    //}
                 }
+                
             }
         }
 
