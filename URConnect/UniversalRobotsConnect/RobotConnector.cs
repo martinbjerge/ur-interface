@@ -62,12 +62,11 @@ namespace UniversalRobotsConnect
             //}
             //log.Debug("Clear to send");
 
+
+            
+            Thread.Sleep(5000);
             Console.WriteLine("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   WE HAVE STARTED ROBOT    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
-
-            //ReadRTDEData();
-
-            //Thread.Sleep(5000);
             //string movetype = "movel";
             //string velocity = "0.4";
 
