@@ -61,19 +61,17 @@ class UrScriptExt(URBasic.urScript.UrScript):
     '''
 
 
-    def __init__(self, host, profile, robotModel, hasForceTorque=False, hw_Profile_filename='C:\\SourceCode\\bladerobot\\Interface\\HwProfiles.xml'):
+    def __init__(self, host, robotModel, hasForceTorque=False):
         super().__init__(host, robotModel, hasForceTorque)        
         logger = URBasic.dataLogging.DataLogging()
         name = logger.AddEventLogging(__name__)        
         self.__logger = logger.__dict__[name]
-        #self.dbh_demon = URBasic.dashboard.DashBoard(host)
-        self.hwProfile = HardwareProfile(profile, hw_Profile_filename)
         self.__force_remote_set=False
         self.print_actual_tcp_pose()
         self.print_actual_joint_positions()
         self.__logger.info('Init done')
         
-    def close_urScriptExt(self):
+    def close(self):
         self.print_actual_tcp_pose()
         self.print_actual_joint_positions()
         #self.close_rtc()
@@ -667,7 +665,7 @@ end
 '''
         movestr = self._move(movetype, pose, a, v, t, r, wait, q)
         
-        self.ur.RealTimeClient.Send(prg.format(**locals()))
+        self.robotConnector.RealTimeClient.SendProgram(prg.format(**locals()))
         if(wait):
             self.waitRobotIdleOrStopFlag()
 
@@ -691,45 +689,3 @@ end
             print('Robot Pose: [{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*pose))
         else:
             print('Robot joint positions: [{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*q))
-
-class HardwareProfile():
-    '''
-    Load a hardware / IO profile of a robot
-    '''
-
-
-    def __init__(self, profile, hw_Profile_filename='C:\SourceCode\bladerobot\Interface\HwProfiles.xml'):
-        '''
-        Constructor
-        '''
-        logger = URBasic.dataLogging.DataLogging()
-        name = logger.AddEventLogging(__name__)        
-        self.__logger = logger.__dict__[name]
-        self.__HwProfilesFile = hw_Profile_filename
-        self.loadHwProfile(profile)
-        self.__logger.info('Init done')
-
-        
-    def loadHwProfile(self, profile):
-        if not os.path.isfile(self.__HwProfilesFile):        
-            self.__logger.error("Configuration file don't exist : " + self.__HwProfilesFile)
-            return False
-        
-        tree = ET.parse(self.__HwProfilesFile)
-        root = tree.getroot()
-        
-        #setup data that can be send
-        prof = root.find(profile)
-        if prof is None:
-            self.__logger.error('Hardware profile not found')
-            return False
-        
-        for modu in prof:
-            if modu is not None:
-                for child in modu:
-                    self.__dict__[child.attrib['use']] = (modu.tag + '_' + child.attrib['id'])
-                    if modu.tag[-1] == 'O':
-                        self.__dict__['safeState_' + child.attrib['use']] = (child.attrib['safeState'])
-                            
-
-        
