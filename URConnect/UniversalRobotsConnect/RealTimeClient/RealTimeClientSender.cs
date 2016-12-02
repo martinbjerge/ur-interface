@@ -14,7 +14,7 @@ namespace UniversalRobotsConnect
     {
         private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        ConcurrentQueue<byte[]> _dataToSend = new ConcurrentQueue<byte[]>();
+        //ConcurrentQueue<byte[]> _dataToSend = new ConcurrentQueue<byte[]>();
         private NetworkStream _stream;
         //private Thread _thread;
         

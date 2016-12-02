@@ -34,7 +34,7 @@ namespace UniversalRobotsConnect
             _realtimeClientSender = new RealTimeClientSender(_stream);
         }
 
-        public async void Send(byte[] payload)
+        public void Send(byte[] payload)
         {
             byte[] sendBytes = new byte[payload.Length+2];
             Array.Copy(payload, sendBytes, payload.Length);
@@ -42,7 +42,7 @@ namespace UniversalRobotsConnect
             sendBytes[sendBytes.Length - 1] = (byte) 'n';
             log.Debug($"Send to robot {Encoding.UTF8.GetString(sendBytes)}");
             _realtimeClientSender.SendData(payload);
-            await Task.Delay(100);
+            Thread.Sleep(1);
         }
 
         public void Send(string payload)
