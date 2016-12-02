@@ -136,7 +136,7 @@ namespace UniversalRobotsConnect
                         }
                         _rtdeDataPackageQueue.Enqueue(payloadArray);
                         var delta = DateTime.Now - lastRtdeDataPackTime;
-                        if (delta.TotalMilliseconds > 24)
+                        if (delta.TotalMilliseconds > 100)
                         {
                             Console.WriteLine($"Real time since last RTDE Package decode: {delta.TotalMilliseconds} milliseconds");
                         }

@@ -36,15 +36,14 @@ namespace TestGui
         public MainWindow()
         {
             InitializeComponent();
-            //_robotConnector = new RobotConnector("172.16.74.129", false);
-            _robotConnector = new RobotConnector("192.168.0.3", false);
+            _robotConnector = new RobotConnector("172.16.74.129", false);
+            //_robotConnector = new RobotConnector("192.168.0.3", false);
             //_myRobotModel = _robotConnector.RobotModel;
 
             
-
             //_robotConnector.RealTimeClient.Send("set_tcp(p[0.023, 0.053, 0.15, 0.000, 0.000, 0.000])");
 
-
+            
 
             //_robotConnector.DashboardClient.PowerOff();
 
@@ -110,29 +109,34 @@ namespace TestGui
 
         private void button1_Click(object sender, RoutedEventArgs e)
         {
-            string movetype = "movel";
-            Debug.WriteLine("Button1 click");
-            _robotConnector.RealTimeClient.SendProgram($"def move_l():\n{movetype}(p[0.1, -0.706, -0.4302, 2.8509, 0.0054, -0.0], a = 0.4, v = 0.4, r = 0)\nstopl(0.4, 0.4)\nend\n");
-            Debug.WriteLine("First MoveL done");
-            _robotConnector.RealTimeClient.SendProgram($"def move_l():\n{movetype}(p[0.1, -0.706, -0.4302, 2.8509, 0.0054, -0.0], a = 0.4, v = 0.4, r = 0)\nstopl(0.4, 0.4)\nend\n");
-            Debug.WriteLine("Second MoveL done");
-            _robotConnector.RealTimeClient.SendProgram($"def move_l():\n{movetype}(p[0.1, -0.706, -0.4302, 2.8509, 0.0054, -0.0], a = 0.4, v = 0.4, r = 0)\nstopl(0.4, 0.4)\nend\n");
-            Debug.WriteLine("Third MoveL done");
-            _robotConnector.RealTimeClient.SendProgram($"def move_l():\n{movetype}(p[0.1, -0.706, -0.4302, 2.8509, 0.0054, -0.0], a = 0.4, v = 0.4, r = 0)\nstopl(0.4, 0.4)\nend\n");
-            Debug.WriteLine("Fourth First MoveL done");
-            _robotConnector.RealTimeClient.SendProgram($"def move_l():\n{movetype}(p[0.1, -0.706, -0.4302, 2.8509, 0.0054, -0.0], a = 0.4, v = 0.4, r = 0)\nstopl(0.4, 0.4)\nend\n");
-            Debug.WriteLine("Fifth MoveL done");
-            _robotConnector.RealTimeClient.SendProgram($"def move_l():\n{movetype}(p[0.1, -0.706, -0.4302, 2.8509, 0.0054, -0.0], a = 0.4, v = 0.4, r = 0)\nstopl(0.4, 0.4)\nend\n");
-            Debug.WriteLine("Sixth MoveL");
-            _robotConnector.RealTimeClient.SendProgram($"def move_l():\n{movetype}(p[0.1, -0.706, -0.4302, 2.8509, 0.0054, -0.0], a = 0.4, v = 0.4, r = 0)\nstopl(0.4, 0.4)\nend\n");
-            Debug.WriteLine("Seventh MoveL");
-            _robotConnector.RealTimeClient.SendProgram($"def move_l():\n{movetype}(p[0.1, -0.706, -0.4302, 2.8509, 0.0054, -0.0], a = 0.4, v = 0.4, r = 0)\nstopl(0.4, 0.4)\nend\n");
-            Debug.WriteLine("Eigth MoveL");
-            _robotConnector.RealTimeClient.SendProgram($"def move_l():\n{movetype}(p[0.1, -0.706, -0.4302, 2.8509, 0.0054, -0.0], a = 0.4, v = 0.4, r = 0)\nstopl(0.4, 0.4)\nend\n");
-            Debug.WriteLine("Ninth MoveL");
-            _robotConnector.RealTimeClient.SendProgram($"def move_l():\n{movetype}(p[0.1, -0.706, -0.4302, 2.8509, 0.0054, -0.0], a = 0.4, v = 0.4, r = 0)\nstopl(0.4, 0.4)\nend\n");
+            
 
-            Debug.WriteLine($"Returned from {movetype} and got all 10");
+            _robotConnector.RealTimeClient.SendProgram("def move_j():\nmovej( [0.321, -1.278, -1.967, -1.474, 1.578, 1.422], a = 1.4, v = 0.5,  r = 0)\nmovej( [-0.336, -1.471, -1.813, -1.44, 1.57, 0.765], a = 1.4, v = 0.5,  r = 0)\nmovej( [-0.335, -1.582, -2.072, -1.07, 1.57, 0.764], a = 1.4, v = 0.5,  r = 0)\nstopl(1.4, 1.4)\nend\n");
+
+
+            //string movetype = "movel";
+            //Debug.WriteLine("Button1 click");
+            //_robotConnector.RealTimeClient.SendProgram($"def move_l():\n{movetype}(p[0.1, -0.706, -0.4302, 2.8509, 0.0054, -0.0], a = 0.4, v = 0.4, r = 0)\nstopl(0.4, 0.4)\nend\n");
+            //Debug.WriteLine("First MoveL done");
+            //_robotConnector.RealTimeClient.SendProgram($"def move_l():\n{movetype}(p[0.1, -0.706, -0.4302, 2.8509, 0.0054, -0.0], a = 0.4, v = 0.4, r = 0)\nstopl(0.4, 0.4)\nend\n");
+            //Debug.WriteLine("Second MoveL done");
+            //_robotConnector.RealTimeClient.SendProgram($"def move_l():\n{movetype}(p[0.1, -0.706, -0.4302, 2.8509, 0.0054, -0.0], a = 0.4, v = 0.4, r = 0)\nstopl(0.4, 0.4)\nend\n");
+            //Debug.WriteLine("Third MoveL done");
+            //_robotConnector.RealTimeClient.SendProgram($"def move_l():\n{movetype}(p[0.1, -0.706, -0.4302, 2.8509, 0.0054, -0.0], a = 0.4, v = 0.4, r = 0)\nstopl(0.4, 0.4)\nend\n");
+            //Debug.WriteLine("Fourth First MoveL done");
+            //_robotConnector.RealTimeClient.SendProgram($"def move_l():\n{movetype}(p[0.1, -0.706, -0.4302, 2.8509, 0.0054, -0.0], a = 0.4, v = 0.4, r = 0)\nstopl(0.4, 0.4)\nend\n");
+            //Debug.WriteLine("Fifth MoveL done");
+            //_robotConnector.RealTimeClient.SendProgram($"def move_l():\n{movetype}(p[0.1, -0.706, -0.4302, 2.8509, 0.0054, -0.0], a = 0.4, v = 0.4, r = 0)\nstopl(0.4, 0.4)\nend\n");
+            //Debug.WriteLine("Sixth MoveL");
+            //_robotConnector.RealTimeClient.SendProgram($"def move_l():\n{movetype}(p[0.1, -0.706, -0.4302, 2.8509, 0.0054, -0.0], a = 0.4, v = 0.4, r = 0)\nstopl(0.4, 0.4)\nend\n");
+            //Debug.WriteLine("Seventh MoveL");
+            //_robotConnector.RealTimeClient.SendProgram($"def move_l():\n{movetype}(p[0.1, -0.706, -0.4302, 2.8509, 0.0054, -0.0], a = 0.4, v = 0.4, r = 0)\nstopl(0.4, 0.4)\nend\n");
+            //Debug.WriteLine("Eigth MoveL");
+            //_robotConnector.RealTimeClient.SendProgram($"def move_l():\n{movetype}(p[0.1, -0.706, -0.4302, 2.8509, 0.0054, -0.0], a = 0.4, v = 0.4, r = 0)\nstopl(0.4, 0.4)\nend\n");
+            //Debug.WriteLine("Ninth MoveL");
+            //_robotConnector.RealTimeClient.SendProgram($"def move_l():\n{movetype}(p[0.1, -0.706, -0.4302, 2.8509, 0.0054, -0.0], a = 0.4, v = 0.4, r = 0)\nstopl(0.4, 0.4)\nend\n");
+
+            //Debug.WriteLine($"Returned from {movetype} and got all 10");
         }
     }
 }

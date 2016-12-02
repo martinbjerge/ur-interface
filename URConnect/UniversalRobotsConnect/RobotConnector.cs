@@ -92,7 +92,8 @@ namespace UniversalRobotsConnect
                     }
                     if (_robotData.Count > 2)
                     {
-                        Console.WriteLine($"Robotmodels in queue: {_robotData.Count}");
+                        log.Debug($"Robotmodels in queue: {_robotData.Count}");
+                        //Console.WriteLine($"Robotmodels in queue: {_robotData.Count}");
                     }
                 }
                 Thread.Sleep(4);
@@ -107,8 +108,8 @@ namespace UniversalRobotsConnect
             double delta = localRobotModel.RobotTimestamp - RobotModel.RobotTimestamp;
             if (delta > 0.008001)
             {
-                //log.Debug($"Too long since last robot timestamp {delta*1000} milliseconds at {localRobotModel.RobotTimestamp}");
-                Console.WriteLine($"Too long since last ROBOT TIMESTAMP {delta} milliseconds!!!!  WE LOST A PACKAGE!!!!!");
+                log.Debug($"Too long since last robot timestamp {delta*1000} milliseconds!!!!  WE LOST A PACKAGE!!!!!");
+                //Console.WriteLine($"Too long since last ROBOT TIMESTAMP {delta*1000} milliseconds!!!!  WE LOST A PACKAGE!!!!!");
             }
 
             RobotModel.ActualCurrent = localRobotModel.ActualCurrent;
@@ -148,20 +149,20 @@ namespace UniversalRobotsConnect
             TimeSpan realDelta = DateTime.Now - RobotModel.LastUpdateTimestamp;
             if (realDelta.TotalMilliseconds < 2)
             {
-                //Debug.WriteLine($"Realtime {realDelta.TotalMilliseconds} MS since last update - too Quick");
-                //await Task.Delay(2);
-                Thread.Sleep(2);
+                Thread.Sleep(2);    //we want to allow time for clients to update 
             }
             if (realDelta.TotalMilliseconds > 32)
             {
-                Console.WriteLine($"Realtime {realDelta.TotalMilliseconds} MS since last update - too slow");
+                log.Debug($"Realtime {realDelta.TotalMilliseconds} MS since last update - too slow");
+                //Console.WriteLine($"Realtime {realDelta.TotalMilliseconds} MS since last update - too slow");
             }
             RobotModel.LastUpdateTimestamp = DateTime.Now;
             RobotModel.RobotTimestamp = localRobotModel.RobotTimestamp;
             TimeSpan timespan = DateTime.Now - startTime;
             if (timespan.TotalMilliseconds > 4)
             {
-                Console.WriteLine($"Time to update model: {timespan.TotalMilliseconds}");
+                log.Debug($"Time to update model: {timespan.TotalMilliseconds}");
+                //Console.WriteLine($"Time to update model: {timespan.TotalMilliseconds}");
             }
 
         }

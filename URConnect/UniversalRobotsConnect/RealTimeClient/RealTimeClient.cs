@@ -28,7 +28,6 @@ namespace UniversalRobotsConnect
             _robotModel = robotModel;
             _client = new TcpClient(_robotModel.IpAddress.ToString(), port);
             _stream = _client.GetStream();
-
             log.Debug("Starting RealtimeClientReceiver");
             _realTimeClientReceiver = new RealTimeClientReceiver(_stream);
             log.Debug("Starting RealtimeClientSender");
@@ -57,23 +56,13 @@ namespace UniversalRobotsConnect
             Array.Copy(payload, sendBytes, payload.Length);
             sendBytes[sendBytes.Length - 2] = (byte)92;        //backslash
             sendBytes[sendBytes.Length - 1] = (byte)'n';
-            //while (_robotModel.RuntimeState != RuntimeState.Idle)
-            //{
-            //    Console.WriteLine($"Waiting for idle robot");
-            //    Thread.Sleep(2);
-            //}
             log.Debug($"Send program to robot {Encoding.UTF8.GetString(sendBytes)}");
             _realtimeClientSender.SendData(payload);
             while (_robotModel.RuntimeState != RuntimeState.Running)
             {
-                //Debug.WriteLine($"Waiting for program to start - Runtime state is {_robotModel.RuntimeState} - Robot Time {_robotModel.RobotTimestamp}");
                 Thread.Sleep(1);
             }
-            //Debug.WriteLine($"Finished waiting - program running - RobotTime {_robotModel.RobotTimestamp}");
             //ToDo - handle timeout for invalid RTC Data
-            //Thread.Sleep(8);
-
-            //await Task.Delay(500);
         }
 
         public void SendProgram(string payload)

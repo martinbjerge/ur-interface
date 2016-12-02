@@ -16,36 +16,37 @@ namespace UniversalRobotsConnect
 
         ConcurrentQueue<byte[]> _dataToSend = new ConcurrentQueue<byte[]>();
         private NetworkStream _stream;
-        private Thread _thread;
+        //private Thread _thread;
         
 
         internal void SendData(byte[] data)
         {
-            _dataToSend.Enqueue(data);
+            _stream.Write(data, 0, data.Length);
+            //_dataToSend.Enqueue(data);
         }
 
         internal RealTimeClientSender(NetworkStream stream)
         {
             _stream = stream;
-            _thread = new Thread(Run);
-            _thread.Start();
+            //_thread = new Thread(Run);
+            //_thread.Start();
         }
 
-        private void Run()
-        {
-            while (true)
-            {
-                if (_dataToSend.Count > 0)
-                {
-                    byte[] package;
-                    bool success = _dataToSend.TryDequeue(out package);
-                    if (success)
-                    {
-                        _stream.Write(package, 0, package.Length);
-                    }
-                }
-                Thread.Sleep(10);
-            }
-        }
+        //private void Run()
+        //{
+        //    while (true)
+        //    {
+        //        if (_dataToSend.Count > 0)
+        //        {
+        //            byte[] package;
+        //            bool success = _dataToSend.TryDequeue(out package);
+        //            if (success)
+        //            {
+        //                _stream.Write(package, 0, package.Length);
+        //            }
+        //        }
+        //        Thread.Sleep(2);
+        //    }
+        //}
     }
 }
