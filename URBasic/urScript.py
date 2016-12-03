@@ -1134,7 +1134,7 @@ end'''
         
         if type(pose).__module__ == np.__name__:
             pose = pose.tolist()
-        prg = 'set_tcp(p{pose})'
+        prg = 'set_tcp(p{pose})\n'
         
         programString = prg.format(**locals())
         

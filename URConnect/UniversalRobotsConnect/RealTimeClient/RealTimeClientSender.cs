@@ -14,14 +14,16 @@ namespace UniversalRobotsConnect
     {
         private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        //ConcurrentQueue<byte[]> _dataToSend = new ConcurrentQueue<byte[]>();
+        ConcurrentQueue<byte[]> _dataToSend = new ConcurrentQueue<byte[]>();
         private NetworkStream _stream;
-        //private Thread _thread;
-        
+        private Thread _thread;
+
 
         internal void SendData(byte[] data)
         {
             _stream.Write(data, 0, data.Length);
+            _stream.Flush();
+            Thread.Sleep(1);
             //_dataToSend.Enqueue(data);
         }
 
@@ -45,7 +47,7 @@ namespace UniversalRobotsConnect
         //                _stream.Write(package, 0, package.Length);
         //            }
         //        }
-        //        Thread.Sleep(2);
+        //        Thread.Sleep(50);
         //    }
         //}
     }
