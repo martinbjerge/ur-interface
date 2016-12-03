@@ -316,7 +316,8 @@ end
             force_mode(p{task_frame}, {selection_vector}, {wrench}, {f_type}, {limits})
             sync()
         end
-end'''
+end
+'''
         
         programString = prg.format(**locals())
         
@@ -456,7 +457,8 @@ end'''
         freedrive_mode()
         sleep(600)
     end
-end'''
+end
+'''
         programString = prg.format(**locals())
         
         self.robotConnector.RealTimeClient.SendProgram(programString)
@@ -481,10 +483,11 @@ end'''
         The robot will not be able to follow a trajectory (eg. a movej) in this mode.
         '''
         prg = '''def ur_teach_mode():
-        while True:
-            teach_mode()
-        end
-        end'''
+    while True:
+        teach_mode()
+    end
+end
+'''
         programString = prg.format(**locals())
         
         self.robotConnector.RealTimeClient.SendProgram(programString)
@@ -575,8 +578,9 @@ end'''
         '''
         
         prg = '''def ur_get_conveyor_tick_count():
-        write_output_float_register(0, get_conveyor_tick_count())
-        end'''
+    write_output_float_register(0, get_conveyor_tick_count())
+end
+'''
         programString = prg.format(**locals())
     
         self.robotConnector.RealTimeClient.SendProgram(programString)
@@ -1141,6 +1145,7 @@ end'''
         self.robotConnector.RealTimeClient.Send(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
+        time.sleep(0.01)
 
     def sleep(self, t):
         '''
