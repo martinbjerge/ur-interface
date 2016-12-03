@@ -329,7 +329,7 @@ end'''
         Resets the robot mode from force mode to normal operation.
         This is also done when a program stops.
         '''
-        prg = 'end_force_mode()'        
+        prg = 'end_force_mode()\n'        
         programString = prg.format(**locals())
         
         self.robotConnector.RealTimeClient.Send(programString)                      ##### ToDo - check if send or sendprogram
@@ -347,7 +347,7 @@ end'''
         v:    tool speed [m/s]
         r:    blend radius (of target pose) [m]
         '''
-        prg = 'servoc(p{pose}, {a}, {v}, {r})'
+        prg = 'servoc(p{pose}, {a}, {v}, {r})\n'
         
         programString = prg.format(**locals())
         
@@ -370,7 +370,7 @@ end'''
         lookahead_time: time [S], range [0.03,0.2] smoothens the trajectory with this lookahead time
         gain:           proportional gain for following target position, range [100,2000]
         '''
-        prg = 'servoj({q}, 0.5, 0.5, {t}, {lookahead_time}, {gain})'
+        prg = 'servoj({q}, 0.5, 0.5, {t}, {lookahead_time}, {gain})\n'
         programString = prg.format(**locals())
         
         self.robotConnector.RealTimeClient.Send(programString)
@@ -389,7 +389,7 @@ end'''
         a:  joint acceleration [rad/sˆ2] (of leading axis)
         t:  time [s] before the function returns (optional)
         '''
-        prg = 'speedj({qd}, {a}, {t})'
+        prg = 'speedj({qd}, {a}, {t})\n'
         programString = prg.format(**locals())
         
         self.robotConnector.RealTimeClient.Send(programString)
@@ -403,7 +403,7 @@ end'''
         Parameters
         a: joint acceleration [rad/sˆ2] (of leading axis)
         '''
-        prg = 'stopj({a})'
+        prg = 'stopj({a})\n'
         programString = prg.format(**locals())
         
         self.robotConnector.RealTimeClient.Send(programString)
@@ -423,7 +423,7 @@ end'''
         t:    time [s] before function returns (optional)
         aRot: tool acceleration [rad/sˆ2] (optional), if not deﬁned a, position acceleration, is used
         '''
-        prg = 'speedl({xd}, {a}, {t}, {aRot})'
+        prg = 'speedl({xd}, {a}, {t}, {aRot})\n'
         programString = prg.format(**locals())
         
         self.robotConnector.RealTimeClient.Send(programString)
@@ -438,7 +438,7 @@ end'''
         a:    tool accleration [m/sˆ2]
         aRot: tool acceleration [rad/sˆ2] (optional), if not deﬁned a, position acceleration, is used
         '''
-        prg = 'stopl({a}, {aRot})'
+        prg = 'stopl({a}, {aRot})\n'
         programString = prg.format(**locals())
         
         self.robotConnector.RealTimeClient.Send(programString)
@@ -459,7 +459,7 @@ end'''
 end'''
         programString = prg.format(**locals())
         
-        self.robotConnector.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.SendProgram(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
             
@@ -467,7 +467,7 @@ end'''
         '''
         Set robot back in normal position control mode after freedrive mode.
         '''
-        prg = 'end_freedrive_mode()'        
+        prg = 'end_freedrive_mode()\n'        
         programString = prg.format(**locals())
         
         self.robotConnector.RealTimeClient.Send(programString)
@@ -487,7 +487,7 @@ end'''
         end'''
         programString = prg.format(**locals())
         
-        self.robotConnector.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.SendProgram(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
 
@@ -495,7 +495,7 @@ end'''
         '''
         Set robot back in normal position control mode after freedrive mode.
         '''
-        prg = 'end_teach_mode()'        
+        prg = 'end_teach_mode()\n'        
         programString = prg.format(**locals())
         
         self.robotConnector.RealTimeClient.Send(programString)
@@ -534,7 +534,7 @@ end'''
             B: Encoder input B, values of 0-3 are the digital inputs 0-3.
         '''
         
-        prg = 'conveyor_pulse_decode({in_type}, {A}, {B})'        
+        prg = 'conveyor_pulse_decode({in_type}, {A}, {B})\n'        
         programString = prg.format(**locals())
         
         self.robotConnector.RealTimeClient.Send(programString)
@@ -558,7 +558,7 @@ end'''
                                     3 is a 24 bit unsigned encoder, range [0 ; 16777215]
                                     4 is a 32 bit unsigned encoder, range [0 ; 4294967295]
         '''
-        prg = 'set_conveyor_tick_count({tick_count}, {absolute_encoder_resolution})'
+        prg = 'set_conveyor_tick_count({tick_count}, {absolute_encoder_resolution})\n'
         programString = prg.format(**locals())
         
         self.robotConnector.RealTimeClient.Send(programString)
@@ -579,7 +579,7 @@ end'''
         end'''
         programString = prg.format(**locals())
     
-        self.robotConnector.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.SendProgram(programString)
         self.waitRobotIdleOrStopFlag()
         return self.robotConnector.RobotModel.outputDoubleRegister[0]
 
@@ -591,7 +591,7 @@ end'''
         a:    tool accleration [m/sˆ2] (optional)
         aRot: tool acceleration [rad/sˆ2] (optional), if not deﬁned a, position acceleration, is used
         '''
-        prg = 'stop_conveyor_tracking({a}, {aRot})'
+        prg = 'stop_conveyor_tracking({a}, {aRot})\n'
         
         programString = prg.format(**locals())
         
@@ -617,7 +617,7 @@ end'''
         rotate tool:          Should the tool rotate with the coneyor or stay in the orientation 
                               speciﬁed by the trajectory (movel() etc.).
         '''
-        prg = 'track_conveyor_circular({center}, {ticks_per_revolution}, {rotate_tool})'
+        prg = 'track_conveyor_circular({center}, {ticks_per_revolution}, {rotate_tool})\n'
         
         programString = prg.format(**locals())
         
@@ -641,7 +641,7 @@ end'''
                          coordinate system of the robot
         ticks per meter: How many tichs the encoder sees when the conveyor moves one meter
         '''
-        prg = 'track_conveyor_linear({direction}, {ticks_per_meter})'
+        prg = 'track_conveyor_linear({direction}, {ticks_per_meter})\n'
         
         programString = prg.format(**locals())
         
@@ -657,7 +657,7 @@ end'''
         threshold: (optional) should be a ratio in the range ]0;1], where 0 is no position deviation and 1 is the
                    position deviation that causes a protective stop (Float).
         '''
-        prg = 'position_deviation_warning({enabled}, {threshold})'
+        prg = 'position_deviation_warning({enabled}, {threshold})\n'
         
         programString = prg.format(**locals())
         
@@ -677,7 +677,7 @@ end'''
         qNear: Optional parameter, reset the revolution counter to one close to the given qNear joint vector. 
                If not deﬁned, the joint’s actual number of revolutions are used.
         ''' 
-        prg = 'reset_revolution_counter(qNear)'
+        prg = 'reset_revolution_counter(qNear)\n'
         
         programString = prg.format(**locals())
         
@@ -691,7 +691,7 @@ end'''
         Parameters
         q: joint positions
         '''
-        prg = 'set_pos({q})'
+        prg = 'set_pos({q})\n'
         
         programString = prg.format(**locals())
         
@@ -1046,7 +1046,7 @@ end'''
         set_gravity([0,0,9.82])  #Robot mounted at flore
         '''
     
-        prg = 'set_gravity({d})'
+        prg = 'set_gravity({d})\n'
         
         programString = prg.format(**locals())
         
@@ -1113,7 +1113,7 @@ end'''
         Parameters:
         m: mass in kilograms
         '''
-        prg = 'set_payload_mass({m})'
+        prg = 'set_payload_mass({m})\n'
         
         programString = prg.format(**locals())
         
