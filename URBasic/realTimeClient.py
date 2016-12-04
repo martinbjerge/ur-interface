@@ -25,9 +25,9 @@ __author__ = "Martin Huus Bjerge"
 __copyright__ = "Copyright 2016, Rope Robotics ApS, Denmark"
 __license__ = "MIT License"
 
-import URBasic.dataLogging
-import URBasic.rtde
+import URBasic
 import socket
+import threading
 import select
 import re
 import numpy as np
@@ -42,27 +42,16 @@ class ConnectionState:
     PAUSED = 3
     STARTED = 4
 
-
-class Singleton(type):
-    _instances = {}
-    def __call__(self, *args, **kwargs):
-        if self not in self._instances:
-            self._instances[self] = super(Singleton, self).__call__(*args, **kwargs)
-        return self._instances[self]
-
-
-class RT_CLient(URBasic.rtde.RTDE, metaclass=Singleton):
+class RealTimeClient(object):
     '''
     Interface to UR robot Real Time Client interface.
     For more detailes see this site:
     http://www.universal-robots.com/how-tos-and-faqs/how-to/ur-how-tos/remote-control-via-tcpip-16496/
     
-    Beside the Real Time Client, this inherits from the RTDE interface and thereby also open a 
-    connection to this data interface.
     The Real Time Client in this version is only used to send program and script commands 
     to the robot, not to read data from the robot, all data reading is done via the RTDE interface.
     
-    The constructor takes a UR robot hostname as input, and a RTDE configuration file, and optional a logger object.
+    The constructor takes a UR robot hostname as input, and a RTDE configuration file.
 
     Input parameters:
     host (string):  hostname or IP of UR Robot (RT CLient server)
@@ -76,18 +65,21 @@ class RT_CLient(URBasic.rtde.RTDE, metaclass=Singleton):
     '''
 
 
-    def __init__(self, host='localhost', rtde_conf_filename='rtde_configuration.xml'):
+    def __init__(self, robotModel):
         '''
         Constructor see class description for more info.
         '''
-        super().__init__(host, rtde_conf_filename) 
+        if(False):
+            assert isinstance(robotModel, URBasic.robotModel.RobotModel)  ### This line is to get code completion for RobotModel
+        self.__robotModel = robotModel
+
         logger = URBasic.dataLogging.DataLogging()
         name = logger.AddEventLogging(__name__, log2Consol=False)        
         self.__logger = logger.__dict__[name]
-        self.__host = host
-        self.__conn_state = ConnectionState.DISCONNECTED
+        self.__robotModel.rtcConnectionState = ConnectionState.DISCONNECTED
         self.__reconnectTimeout = 60
         self.__sock = None
+        self.__thread = None
         if self.__connect():
             self.__logger.info('RT_CLient constructor done')
         else:
@@ -108,14 +100,14 @@ class RT_CLient(URBasic.rtde.RTDE, metaclass=Singleton):
             return True
 
         t0 = time.time()
-        while (time.time()-t0<self.__reconnectTimeout) and self.__conn_state < ConnectionState.CONNECTED:
+        while (time.time()-t0<self.__reconnectTimeout) and self.__robotModel.rtcConnectionState < ConnectionState.CONNECTED:
             try:
                 self.__sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)            
                 self.__sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)         
                 self.__sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 self.__sock.settimeout(DEFAULT_TIMEOUT)
-                self.__sock.connect((self.__host, 30003))
-                self.__conn_state = ConnectionState.CONNECTED
+                self.__sock.connect((self.__robotModel.ipAddress, 30003))
+                self.__robotModel.rtcConnectionState = ConnectionState.CONNECTED
                 time.sleep(0.5)
                 self.__logger.info('Connected')
                 return True
@@ -126,7 +118,7 @@ class RT_CLient(URBasic.rtde.RTDE, metaclass=Singleton):
         return False
                 
 
-    def __disconnect(self):
+    def Disconnect(self):
         '''
         Disconnect the RT Client connection.
         '''        
@@ -134,23 +126,11 @@ class RT_CLient(URBasic.rtde.RTDE, metaclass=Singleton):
             self.__sock.close()
             self.__sock = None
             self.__logger.info('Disconnected')
-        self.__conn_state = ConnectionState.DISCONNECTED
+        self.__robotModel.rtcConnectionState = ConnectionState.DISCONNECTED
         return True
 
-    def close_rtc(self):
-        '''
-        Close the RT Client connection.
 
-        Example:
-        rob = URBasic.realTimeClient.RT_CLient('192.168.56.101')
-        rob.close_rtc()
-        '''
-        if self.is_rt_client_connected():
-            self.close_rtde()
-            self.__disconnect()
-
-
-    def is_rt_client_connected(self):
+    def IsRtcConnected(self):
         '''
         Returns True if the connection is open.
 
@@ -163,9 +143,9 @@ class RT_CLient(URBasic.rtde.RTDE, metaclass=Singleton):
         print(rob.is_connected())
         rob.disconnect()
         '''
-        return self.__conn_state > ConnectionState.DISCONNECTED
+        return self.__robotModel.rtcConnectionState > ConnectionState.DISCONNECTED
         
-    def send_program(self,prg='', wait=True, timeout=300.):
+    def SendProgram(self,prg=''):
         '''
         Send a new command or program (string) to the UR controller. 
         The command or program will be executed as soon as it’s received by the UR controller. 
@@ -175,11 +155,6 @@ class RT_CLient(URBasic.rtde.RTDE, metaclass=Singleton):
 
         Input parameters:
         prg (string): A string containing a single command or a whole program.
-        wait (bool): should this function wait for returning until the program have finished in the UR controller
-        timeout (float): If the program has nor finished within this time it will be terminated and this function will return  
-
-        Return value:
-        status (boolean): True if connected and False of not connected.
 
         Example:
         rob = URBasic.realTimeClient.RT_CLient('192.168.56.101',logger=logger)
@@ -187,42 +162,92 @@ class RT_CLient(URBasic.rtde.RTDE, metaclass=Singleton):
         rob.send_srt('set_digital_out(0, True)')
         rob.disconnect()        
         '''
-        if not self.is_rt_client_connected():
+        if not self.IsRtcConnected():
             if not self.__connect():
-                self.__logger.error('Send_program: Not connected to robot')
-                return False
+                self.__logger.error('SendProgram: Not connected to robot')
  
+        #Close down previous thread 
+        if self.__thread is not None:
+            if self.__robotModel.rtcProgramRunning:
+                self.__robotModel.stopRunningFlag = True
+            self.__thread.join()
         
-        if wait:
-            if self.has_get_rtde_data_attr('output_bit_registers0_to_31'):
-                def1 = prg.find('def ')
-                if def1>=0:
-                    prglen = len(prg)
-                    prg = prg.replace('):\n', '):\n  write_output_boolean_register(0, True)\n',1)
-                    if len(prg) == prglen:
-                        self.__logger.warning('Send_program: Syntax error in program')
-                        return False
-                        
-                    if (len(re.findall('def ', prg)))>1:
-                        mainprg = prg[0:prg[def1+4:].find('def ')+def1+4]
-                        mainPrgEnd = (np.max([mainprg.rfind('end '), mainprg.rfind('end\n')]))
-                        prg = prg.replace(prg[0:mainPrgEnd], prg[0:mainPrgEnd] + '\n  write_output_boolean_register(1, True)\n',1)
-                    else:
-                        mainPrgEnd = prg.rfind('end')
-                        prg = prg.replace(prg[0:mainPrgEnd], prg[0:mainPrgEnd] + '\n  write_output_boolean_register(1, True)\n',1)
-                        
-                else:
-                    prg = 'def script():\n  write_output_boolean_register(0, True)\n  ' + prg + '\n  write_output_boolean_register(1, True)\nend\n'
-            else:
-                self.__logger.warning('Send_program: RTDE signal "output_bit_registers0_to_31" not configured')
-                return False
-
-
+        #Rest status bits
+        self.__robotModel.stopRunningFlag = False
+        self.__robotModel.rtcProgramRunning = True
+        
+        #Send and wait from program
+        self.__sendPrg(self.__AddStatusBit2Prog(prg))        
+        self.__thread = threading.Thread(target=self.__waitForProgram2Finish, kwargs={'prg': prg})
+        self.__thread.start()
+        #self.__waitForProgram2Finish(prg)
             
-        t0 = time.time()
-        programSend = False
-        prg = prg+'\n'
-        while (time.time()-t0<self.__reconnectTimeout) and not programSend:
+    def Send(self,prg=''):
+        '''
+        Send a new command (string) to the UR controller. 
+        The command or program will be executed as soon as it’s received by the UR controller. 
+        Sending a new command or program while stop and existing running command or program and start the new one.
+        The program or command will also bee modified to include some control signals to be used
+        for monitoring if a program execution is successful and finished.  
+
+        Input parameters:
+        prg (string): A string containing a single command or a whole program.
+
+
+        Example:
+        rob = URBasic.realTimeClient.RT_CLient('192.168.56.101',logger=logger)
+        rob.connect()
+        rob.send_srt('set_digital_out(0, True)')
+        rob.disconnect()        
+        '''
+        if not self.IsRtcConnected():
+            if not self.__connect():
+                self.__logger.error('SendProgram: Not connected to robot')
+ 
+        #Close down previous thread 
+        if self.__thread is not None:
+            if self.__robotModel.rtcProgramRunning:
+                self.__robotModel.stopRunningFlag = True
+            self.__thread.join()
+        
+        #Rest status bits
+        self.__robotModel.stopRunningFlag = False
+        self.__robotModel.rtcProgramRunning = True
+        
+        #Send
+        self.__sendPrg(prg)      
+        self.__robotModel.rtcProgramRunning = False
+
+    def __AddStatusBit2Prog(self,prg):
+        '''
+        Modifying program to include status bit's in beginning and end of program
+        '''
+        def1 = prg.find('def ')
+        if def1>=0:
+            prglen = len(prg)
+            prg = prg.replace('):\n', '):\n  write_output_boolean_register(0, True)\n',1)
+            if len(prg) == prglen:
+                self.__logger.warning('Send_program: Syntax error in program')
+                return False
+                
+            if (len(re.findall('def ', prg)))>1:
+                mainprg = prg[0:prg[def1+4:].find('def ')+def1+4]
+                mainPrgEnd = (np.max([mainprg.rfind('end '), mainprg.rfind('end\n')]))
+                prg = prg.replace(prg[0:mainPrgEnd], prg[0:mainPrgEnd] + '\n  write_output_boolean_register(1, True)\n',1)
+            else:
+                mainPrgEnd = prg.rfind('end')
+                prg = prg.replace(prg[0:mainPrgEnd], prg[0:mainPrgEnd] + '\n  write_output_boolean_register(1, True)\n',1)
+                
+        else:
+            prg = 'def script():\n  write_output_boolean_register(0, True)\n  ' + prg + '\n  write_output_boolean_register(1, True)\nend\n'
+        return prg
+        
+    def __sendPrg(self,prg):
+        '''
+        Sending program str via socket
+        '''
+        programSend = False        
+        while not self.__robotModel.stopRunningFlag and not programSend:
             try:
                 (_, writable, _) = select.select([], [self.__sock], [], DEFAULT_TIMEOUT)
                 if len(writable):
@@ -231,43 +256,40 @@ class RT_CLient(URBasic.rtde.RTDE, metaclass=Singleton):
                     programSend = True
             except:
                 self.__sock = None
-                self.__conn_state = ConnectionState.ERROR
-                self.__logger.error('Could not send program!')
+                self.__robotModel.rtcConnectionState = ConnectionState.ERROR
+                self.__logger.warning('Could not send program!')
                 self.__connect()                
         if not programSend:
+            self.__robotModel.rtcProgramRunning = False
             self.__logger.error('Program re-sending timed out - Could not send program!')
-            return False
+        time.sleep(0.1)
 
-        wait_for_program_start = 10 + len(prg)/50
-        t = time.time()
+
+    def __waitForProgram2Finish(self,prg):
+        '''
+        waiting for program to finish
+        '''
+        waitForProgramStart = len(prg)/50
         notrun = 0
-        prg = 'def resetRegister():\n  write_output_boolean_register(0, False)\n  write_output_boolean_register(1, False)\nend'
-        while wait:
-            ctrlBits = self.get_rtde_data('output_bit_registers0_to_31', wait=True)
-            if (time.time()-t) > timeout:
-                self.__logger.warning('send_program: Program timed out')
-                self.send_program(prg, wait=False)
-                return False
-            elif (3&ctrlBits) == 0:
-                self.__logger.debug('send_program: Program not started')
+        prgRest = 'def resetRegister():\n  write_output_boolean_register(0, False)\n  write_output_boolean_register(1, False)\nend\n'
+        while not self.__robotModel.stopRunningFlag and self.__robotModel.rtcProgramRunning:            
+            if self.__robotModel.SafetyStatus().StoppedDueToSafety:
+                self.__robotModel.rtcProgramRunning = False
+                self.__logger.error('SendProgram: Safety Stop')
+            elif self.__robotModel.OutputBitRegister()[0] == False:
+                self.__logger.debug('sendProgram: Program not started')
                 notrun += 1
-                if notrun > wait_for_program_start:
-                    self.__logger.warning('send_program: Program not able to run')
-                    self.send_program(prg, wait=False)
-                    return False
-            elif (3&ctrlBits) == 1:
-                self.__logger.debug('send_program: UR running')
-            elif (3&ctrlBits) == 3:
-                self.__logger.info('send_program: Finished')
-                self.send_program(prg, wait=False)
-                time.sleep(0.1)
-                return True
+                if notrun > waitForProgramStart:
+                    self.__robotModel.rtcProgramRunning = False
+                    self.__logger.error('sendProgram: Program not able to run')
+            elif self.__robotModel.OutputBitRegister()[0] == True and self.__robotModel.OutputBitRegister()[1] == True:
+                self.__robotModel.rtcProgramRunning = False
+                self.__logger.info('sendProgram: Finished')
+            elif self.__robotModel.OutputBitRegister()[0] == True:
+                self.__logger.debug('sendProgram: UR running')
             else:
-                self.__logger.warning('Send_program: Unknown error: ' + bin(ctrlBits))
-                self.send_program(prg, wait=False)
-                return False
-
-        return True
-
-        
+                self.__robotModel.rtcProgramRunning = False
+                self.__logger.error('SendProgram: Unknown error')
+            time.sleep(0.05)
+        self.__sendPrg(prgRest)
         

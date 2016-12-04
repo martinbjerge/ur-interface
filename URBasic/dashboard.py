@@ -22,6 +22,7 @@ in advertising or otherwise to promote the sale, use or other dealings in this S
 without prior written authorization from "Rope Robotics ApS".
 
 '''
+from URBasic import robotModel
 __author__ = "Martin Huus Bjerge"
 __copyright__ = "Copyright 2016, Rope Robotics ApS, Denmark"
 __license__ = "MIT License"
@@ -42,15 +43,8 @@ class ConnectionState:
     PAUSED = 3
     STARTED = 4
 
-class Singleton(type):
-    _instances = {}
-    def __call__(self, *args, **kwargs):
-        if self not in self._instances:
-            self._instances[self] = super(Singleton, self).__call__(*args, **kwargs)
-        return self._instances[self]
 
-
-class DashBoard(threading.Thread, metaclass=Singleton): 
+class DashBoard(threading.Thread): 
     '''
     A Universal Robot can be controlled from remote by sending simple commands to the 
     GUI over a TCP/IP socket. This interface is called the "DashBoard server". 
@@ -71,14 +65,17 @@ class DashBoard(threading.Thread, metaclass=Singleton):
     
     '''
 
-    def __init__(self, host='localhost'):
+    def __init__(self, robotModel):
         '''
         Constructor see class description for more info.
         '''
+        if(False):
+            assert isinstance(robotModel, URBasic.robotModel.RobotModel)  ### This line is to get code completion for RobotModel
+        self.__robotModel = robotModel
+
         logger = URBasic.dataLogging.DataLogging()
         name = logger.AddEventLogging(__name__)        
         self._logger = logger.__dict__[name]
-        self.__host = host
         self.__reconnectTimeout = 60 #Seconds (while in run)
         self.__conn_state = ConnectionState.DISCONNECTED
         self.last_respond = None
@@ -353,7 +350,7 @@ class DashBoard(threading.Thread, metaclass=Singleton):
                 self.__sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)         
                 self.__sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 self.__sock.settimeout(DEFAULT_TIMEOUT)
-                self.__sock.connect((self.__host, 29999))
+                self.__sock.connect((self.__robotModel.ipAddress, 29999))
                 self.__conn_state = ConnectionState.CONNECTED
                 time.sleep(0.5)
                 self._logger.info('Connected')
@@ -364,14 +361,14 @@ class DashBoard(threading.Thread, metaclass=Singleton):
 
         return False
 
-    def close_dbs(self):
+    def close(self):
         '''
         Close the DashBoard connection.
         Example:
         rob = URBasic.dashboard.DashBoard('192.168.56.101', rtde_conf_filename='rtde_configuration.xml', logger=logger)
         rob.close_dbs()
         '''
-#        if self.is_rt_client_connected():
+#        if self.IsRtcConnected():
 #            self.close_rtc()
 
         if self.__stop_event is False:

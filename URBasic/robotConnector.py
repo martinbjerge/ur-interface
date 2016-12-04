@@ -20,21 +20,47 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 Except as contained in this notice, the name of "Rope Robotics ApS" shall not be used 
 in advertising or otherwise to promote the sale, use or other dealings in this Software 
 without prior written authorization from "Rope Robotics ApS".
-
 '''
 __author__ = "Martin Huus Bjerge"
 __copyright__ = "Copyright 2016, Rope Robotics ApS, Denmark"
 __license__ = "MIT License"
 
-from URBasic.dashboard import DashBoard
-from URBasic.dataLogging import DataLogging
-from URBasic.kinematic import *
-from URBasic.manipulation import *
-from URBasic.realTimeClient import RealTimeClient
-from URBasic.robotConnector import RobotConnector
-from URBasic.robotModel import RobotModel
-from URBasic.rtde import RTDE
-from URBasic.urScript import UrScript
-from URBasic.urScriptExt import UrScriptExt
+import URBasic
+import URplus
 
+class RobotConnector(object):
+    '''
+    Class to hold all connection to the Universal Robot and plus devises  
+         
+    Input parameters:
+
+    '''
+
+
+    def __init__(self,robotModel, host, hasForceTorque=False):
+        '''
+        Constructor see class description for more info.
+        '''
+        if(False):
+            assert isinstance(robotModel, URBasic.robotModel.RobotModel)  ### This line is to get code completion for RobotModel
+        self.RobotModel = robotModel
+        self.RobotModel.ipAddress = host
+        self.RobotModel.hasForceTorqueSensor = hasForceTorque
+        self.RealTimeClient = URBasic.realTimeClient.RealTimeClient(robotModel)
+        self.RTDE = URBasic.rtde.RTDE(robotModel)
+        self.DashboardClient = URBasic.dashboard.DashBoard(robotModel)
+        self.ForceTourqe = None
+        if hasForceTorque:
+            pass #self.ForceTourqe = URplus.forceTorqueSensor.
+        
+        logger = URBasic.dataLogging.DataLogging()        
+        name = logger.AddEventLogging(__name__)        
+        self.__logger = logger.__dict__[name]
+        self.__logger.info('Init done')
+
+
+    def close(self):
+        self.RTDE.close()
+        self.RealTimeClient.Disconnect()
+        self.DashboardClient.close()
 
