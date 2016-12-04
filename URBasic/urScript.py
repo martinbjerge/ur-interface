@@ -577,7 +577,7 @@ end
 '''
         programString = prg.format(**locals())
     
-        self.robotConnector.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.SendProgram(programString)
         self.waitRobotIdleOrStopFlag()
         return self.robotConnector.RobotModel.outputDoubleRegister[0]
 
