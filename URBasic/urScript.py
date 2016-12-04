@@ -21,24 +21,14 @@ Except as contained in this notice, the name of "Rope Robotics ApS" shall not be
 in advertising or otherwise to promote the sale, use or other dealings in this Software 
 without prior written authorization from "Rope Robotics ApS".
 '''
-import URplus
 import ctypes
 __author__ = "Martin Huus Bjerge"
 __copyright__ = "Copyright 2016, Rope Robotics ApS, Denmark"
 __license__ = "MIT License"
 
-import URBasic.dataLogging
-#import Locomotive.ropeRoboticsRobotModel
-#import Locomotive.distanceSensor
+import URBasic
 import numpy as np
 import time
-import sys
-import clr
-sys.path.append(r"C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\bin\Debug")
-clr.AddReference("UniversalRobotsConnect")
-from UniversalRobotsConnect import RobotConnector 
-#from UniversalRobotsConnect.Types import RobotStatus
-#from UniversalRobotsConnect.Types import SafetyStatus
 
 class UrScript(object):
     '''
@@ -72,17 +62,19 @@ class UrScript(object):
         logger = URBasic.dataLogging.DataLogging()        
         name = logger.AddEventLogging(__name__)        
         self.__logger = logger.__dict__[name]
-        self.robotConnector = RobotConnector(robotModel, host, hasForceTorque)
-        while(self.robotConnector.RobotModel.ActualTCPPose == None):      ## check på om vi er startet
+        self.robotConnector = URBasic.robotConnector.RobotConnector(robotModel, host, hasForceTorque)
+        while(self.robotConnector.RobotModel.ActualTCPPose() == None):      ## check på om vi er startet
             time.sleep(0.001)
         self.__logger.info('Init done')
 #############   Module motion   ###############
 
     def waitRobotIdleOrStopFlag(self):
     
-        while(self.robotConnector.RobotModel.RuntimeState != 1 and not self.robotConnector.RobotModel.StopRunningFlag):
+        while(self.robotConnector.RobotModel.RuntimeState() and not self.robotConnector.RobotModel.StopRunningFlag()):
             time.sleep(0.002)
 
+        if self.robotConnector.RobotModel.rtcProgramExecutionError:
+            raise NotImplementedError('Robot program execution error!!!')
         
     def movej(self, q=None, a=1.4, v =1.05, t =0, r =0, wait=True, pose=None):
         '''
@@ -336,6 +328,7 @@ end
         self.robotConnector.RealTimeClient.Send(programString)                      ##### ToDo - check if send or sendprogram
         if(wait):
             self.waitRobotIdleOrStopFlag()
+        time.sleep(0.05)
         
     def servoc(self, pose, a=1.2, v =0.25, r =0, wait=True):
         '''
@@ -475,6 +468,7 @@ end
         self.robotConnector.RealTimeClient.Send(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
+        time.sleep(0.05)
         
     def teach_mode(self, wait=True):
         '''
@@ -504,7 +498,7 @@ end
         self.robotConnector.RealTimeClient.Send(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
-    
+        time.sleep(0.05)
         
     def conveyor_pulse_decode(self, in_type, A, B, wait=True):
         '''
@@ -732,7 +726,7 @@ end
         '''
         if(wait):
             self.sync()
-        #return self.robotConnector.RobotModel.ActualQ 
+        return self.robotConnector.RobotModel.ActualQ() 
         c_pose = self.robotConnector.RobotModel.ActualQ
         
         pose = []
@@ -777,6 +771,7 @@ end
         '''
         if(wait):
             self.sync()
+        return self.robotConnector.RobotModel.ActualTCPPose()
         c_pose = self.robotConnector.RobotModel.ActualTCPPose
         
         pose = []
@@ -1145,7 +1140,7 @@ end
         self.robotConnector.RealTimeClient.Send(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
-        time.sleep(0.01)
+        time.sleep(0.05)
 
     def sleep(self, t):
         '''
@@ -1161,8 +1156,8 @@ end
         Uses up the remaining ”physical” time a thread has in the current
         frame/sample.
         '''
-        initialRobotTime = self.robotConnector.RobotModel.RobotTimestamp
-        while(self.robotConnector.RobotModel.RobotTimestamp == initialRobotTime):
+        initialRobotTime = self.robotConnector.RobotModel.RobotTimestamp()
+        while(self.robotConnector.RobotModel.RobotTimestamp() == initialRobotTime):
             time.sleep(0.001)
 
     
@@ -1298,16 +1293,9 @@ end
         boolean, The signal level.
         '''
         
-        if n == 0:
-            if(wait):
-                self.sync()
-            return self.robotConnector.RobotModel.StandardAnalogInput0
-        elif n == 1:
-            if(wait):
-                self.sync()
-            return self.robotConnector.RobotModel.StandardAnalogInput1
-        else:
-            raise KeyError('Index out of range')
+        if(wait):
+            self.sync()
+        return self.robotConnector.RobotModel.StandardAnalogInput(n)
     
     def get_standard_analog_out(self, n, wait=True):
         '''
@@ -1668,7 +1656,7 @@ end
         '''
         raise NotImplementedError('Function Not yet implemented')
     
-    def rpc_factory(self, type, url ):
+    def rpc_factory(self, rpcType, url ):
         '''
         Creates a new Remote Procedure Call (RPC) handle. Please read the
         subsection ef{Remote Procedure Call (RPC)} for a more detailed
@@ -1677,7 +1665,7 @@ end
         >>> proxy = rpc factory("xmlrpc", "http://127.0.0.1:8080/RPC2")
         
         Parameters
-        type: The type of RPC backed to use. Currently only the ”xmlrpc” protocol is available.
+        rpcType: The type of RPC backed to use. Currently only the ”xmlrpc” protocol is available.
         
         url: The URL to the RPC server. Currently two protocols are
         supported: pstream and http. The pstream URL looks
@@ -1731,7 +1719,7 @@ end
         '''
         raise NotImplementedError('Function Not yet implemented')
         
-    def set_analog_inputrange(self, port, range):
+    def set_analog_inputrange(self, port, inputRange):
         '''
         Deprecated: Set range of analog inputs
         
@@ -1739,9 +1727,9 @@ end
         
         Parameters:
         port: analog input port number, 0,1 = controller, 2,3 = tool
-        range: Controller analog input range 0: 0-5V (maps
+        inputRange: Controller analog input range 0: 0-5V (maps
         automatically onto range 2) and range 2: 0-10V.
-        range: Tool analog input range 0: 0-5V (maps
+        inputRange: Tool analog input range 0: 0-5V (maps
         automatically onto range 1), 1: 0-10V and 2:
         4-20mA.
         Deprecated: The set standard analog input domain and
@@ -1773,8 +1761,15 @@ end
         n: The number (id) of the output, integer: [0:7]
         b: The signal level. (boolean)
         '''
-        self.robotConnector.RTDE.SetConfigurableDigitalOutput(n, b)
-    
+        #self.robotConnector.RTDE.SetConfigurableDigitalOutput(n, b)
+        if b:
+            self.robotConnector.RTDE.set_rtde_data('configurable_digital_output_mask', 2**n)
+            self.robotConnector.RTDE.set_rtde_data('configurable_digital_output', 2**n)
+        else:
+            self.robotConnector.RTDE.set_rtde_data('configurable_digital_output_mask', 2**n)
+            self.robotConnector.RTDE.set_rtde_data('configurable_digital_output', 0)
+        self.robotConnector.RTDE.send_rtde_data()
+            
     def set_euromap_output(self, port_number, signal_value):
         '''
         Sets the value of a speciﬁc Euromap67 output signal. This means the
@@ -1928,7 +1923,16 @@ end
         n: The number (id) of the input, integer: [0:7]
         b: The signal level. (boolean)
         '''
-        self.robotConnector.RTDE.SetStandardDigitalOutput(n, b)
+        #self.robotConnector.RTDE.SetStandardDigitalOutput(n, b)
+        if b:
+            self.robotConnector.RTDE.set_rtde_data('standard_digital_output_mask', 2**n)
+            self.robotConnector.RTDE.set_rtde_data('standard_digital_output', 2**n)
+        else:
+            self.robotConnector.RTDE.set_rtde_data('standard_digital_output_mask', 2**n)
+            self.robotConnector.RTDE.set_rtde_data('standard_digital_output', 0)
+        self.robotConnector.RTDE.send_rtde_data()
+
+        
     
     def set_tool_analog_input_domain(self, port, domain):
         '''

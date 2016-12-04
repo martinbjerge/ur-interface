@@ -47,11 +47,12 @@ class RobotConnector(object):
         self.RobotModel.ipAddress = host
         self.RobotModel.hasForceTorqueSensor = hasForceTorque
         self.RealTimeClient = URBasic.realTimeClient.RealTimeClient(robotModel)
+        self.DataLog = URBasic.dataLog.DataLog(robotModel)
         self.RTDE = URBasic.rtde.RTDE(robotModel)
         self.DashboardClient = URBasic.dashboard.DashBoard(robotModel)
         self.ForceTourqe = None
         if hasForceTorque:
-            pass #self.ForceTourqe = URplus.forceTorqueSensor.
+            self.ForceTourqe = URplus.forceTorqueSensor.ForceTorqueSensor(robotModel)
         
         logger = URBasic.dataLogging.DataLogging()        
         name = logger.AddEventLogging(__name__)        
@@ -63,4 +64,5 @@ class RobotConnector(object):
         self.RTDE.close()
         self.RealTimeClient.Disconnect()
         self.DashboardClient.close()
+        self.DataLog.close()
 

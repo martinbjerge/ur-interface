@@ -74,7 +74,7 @@ class RealTimeClient(object):
         self.__robotModel = robotModel
 
         logger = URBasic.dataLogging.DataLogging()
-        name = logger.AddEventLogging(__name__, log2Consol=False)        
+        name = logger.AddEventLogging(__name__, log2Consol=False,level = URBasic.logging.INFO)        
         self.__logger = logger.__dict__[name]
         self.__robotModel.rtcConnectionState = ConnectionState.DISCONNECTED
         self.__reconnectTimeout = 60
@@ -175,6 +175,7 @@ class RealTimeClient(object):
         #Rest status bits
         self.__robotModel.stopRunningFlag = False
         self.__robotModel.rtcProgramRunning = True
+        self.__robotModel.rtcProgramExecutionError = False
         
         #Send and wait from program
         self.__sendPrg(self.__AddStatusBit2Prog(prg))        
@@ -213,6 +214,7 @@ class RealTimeClient(object):
         #Rest status bits
         self.__robotModel.stopRunningFlag = False
         self.__robotModel.rtcProgramRunning = True
+        self.__robotModel.rtcProgramExecutionError = False
         
         #Send
         self.__sendPrg(prg)      
@@ -275,6 +277,7 @@ class RealTimeClient(object):
         while not self.__robotModel.stopRunningFlag and self.__robotModel.rtcProgramRunning:            
             if self.__robotModel.SafetyStatus().StoppedDueToSafety:
                 self.__robotModel.rtcProgramRunning = False
+                self.__robotModel.rtcProgramExecutionError = True
                 self.__logger.error('SendProgram: Safety Stop')
             elif self.__robotModel.OutputBitRegister()[0] == False:
                 self.__logger.debug('sendProgram: Program not started')
@@ -286,7 +289,12 @@ class RealTimeClient(object):
                 self.__robotModel.rtcProgramRunning = False
                 self.__logger.info('sendProgram: Finished')
             elif self.__robotModel.OutputBitRegister()[0] == True:
-                self.__logger.debug('sendProgram: UR running')
+                if self.__robotModel.RobotStatus().ProgramRunning:
+                    self.__logger.debug('sendProgram: UR running')
+                else:
+                    self.__robotModel.rtcProgramRunning = False
+                    self.__robotModel.rtcProgramExecutionError = True
+                    self.__logger.error('SendProgram: Program Stopped but not finiched!!!')    
             else:
                 self.__robotModel.rtcProgramRunning = False
                 self.__logger.error('SendProgram: Unknown error')

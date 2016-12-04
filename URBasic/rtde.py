@@ -98,7 +98,6 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         self.__input_config = {}
         self.__buf = bytes()
         self.start()
-        self.__dataLogObj = RTDE_logger(self,logger)
         self.wait_rtde()
         self._logger.info('RTDE constructor done')
 
@@ -673,7 +672,7 @@ class RTDE(threading.Thread): #, metaclass=Singleton
             try:
                 self._data = self.__receive()
                 for tagname in self._data.keys():
-                    self.__robotModel.rtdeData[tagname] = self._data[tagname] 
+                    self.__robotModel.dataDir[tagname] = self._data[tagname] 
                 with self.__dataEvent:
                     self.__dataEvent.notifyAll()
                 t0 = time.time()
@@ -837,46 +836,3 @@ class DataObject(object):
              data_type == 'UINT8'):
             return int(data[offset])
         raise ValueError('unpack_field: unknown data type: ' + data_type)
-    
-    
-class RTDE_logger(RTDE, threading.Thread):
- 
-    def __init__(self, rtde_obj, logger = URBasic.dataLogging.DataLogging()):
-        threading.Thread.__init__(self)
-        name = logger.AddDataLogging(__name__)
-        self.__dataLogger = logger.__dict__[name]
-        self.__stop_event = True
-        self.__rtdeDemon = rtde_obj
-        self.start()
-        self.__rtdeDemon._logger.info('RTDE_logger constructor done')
-         
-    def logdata(self):
-        if self.__rtdeDemon.wait_rtde():        
-            for tagname in self.__rtdeDemon._data.keys():
-                if tagname != 'timestamp':
-                    tp = type(self.__rtdeDemon._data[tagname])
-                    if tp is np.ndarray:
-                        if 6==len(self.__rtdeDemon._data[tagname]):
-                            self.__dataLogger.info((tagname+';%s;%s;%s;%s;%s;%s;%s'), self.__rtdeDemon._data['timestamp'], *self.__rtdeDemon._data[tagname])
-                        elif 3==len(self.__rtdeDemon._data[tagname]):
-                            self.__dataLogger.info((tagname+';%s;%s;%s;%s'), self.__rtdeDemon._data['timestamp'], *self.__rtdeDemon._data[tagname])
-                        else:
-                            self.__rtdeDemon._logger.warning('Logger data unexpected type in rtde.py - class URRTDElogger - def logdata Type: ' + str(tp) + ' - Len: ' + str(len(self.__rtdeDemon._data[tagname])))
-                    elif tp is bool or tp is float or tp is int: 
-                        self.__dataLogger.info((tagname+';%s;%s'), self.__rtdeDemon._data['timestamp'], self.__rtdeDemon._data[tagname])
-                    else:
-                        self.__rtdeDemon._logger.warning('Logger data unexpected type in rtde.py - class URRTDElogger - def logdata Type: ' + str(tp))
-                    
-    def close(self):
-        if self.__stop_event is False:
-            self.__stop_event = True
-            self.join()
- 
-    def run(self):
-        self.__stop_event = False
-        while not self.__stop_event:
-            try:
-                self.logdata()
-            except:
-                self.__rtdeDemon._logger.warning("RTDE_logger error while running, but will retry")
-        self.__rtdeDemon._logger.info("RTDE_logger is stopped")

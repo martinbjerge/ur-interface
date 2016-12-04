@@ -21,15 +21,11 @@ Except as contained in this notice, the name of "Rope Robotics ApS" shall not be
 in advertising or otherwise to promote the sale, use or other dealings in this Software 
 without prior written authorization from "Rope Robotics ApS".
 '''
-import URplus
-import ctypes
 __author__ = "Martin Huus Bjerge"
 __copyright__ = "Copyright 2016, Rope Robotics ApS, Denmark"
 __license__ = "MIT License"
 
-import URBasic.dataLogging
-import numpy as np
-import time
+import URBasic
 
 class RobotModel(object):
     '''
@@ -53,7 +49,7 @@ class RobotModel(object):
         self.password = None
         self.ipAddress = None
         
-        self.rtdeData = {'timestamp':None,
+        self.dataDir = {'timestamp':None,
                          'target_q':None,
                          'target_q':None,
                          'target_qd':None,
@@ -153,18 +149,20 @@ class RobotModel(object):
                          'output_double_register_20':None,
                          'output_double_register_21':None,
                          'output_double_register_22':None,
-                         'output_double_register_23':None}
+                         'output_double_register_23':None,
+                         'urPlus_force_torque_sensor':None}
                             
         
         self.rtcConnectionState = None
         self.rtcProgramRunning = False
+        self.rtcProgramExecutionError = False
         self.stopRunningFlag = None
 
         # UR plus content
         self.hasForceTorqueSensor = False
         self.forceTourqe = None
         
-    def RobotTimestamp(self):return self.rtdeData['timestamp']
+    def RobotTimestamp(self):return self.dataDir['timestamp']
     def LastUpdateTimestamp(self):raise NotImplementedError('Function Not yet implemented')
     def RTDEConnectionState(self):raise NotImplementedError('Function Not yet implemented')
     def RuntimeState(self): return self.rtcProgramRunning
@@ -174,7 +172,7 @@ class RobotModel(object):
     def DigitalOutputBits(self):raise NotImplementedError('Function Not yet implemented')
     def ConfigurableOutputBits(self):raise NotImplementedError('Function Not yet implemented')
     def RTDEProtocolVersion(self):raise NotImplementedError('Function Not yet implemented')
-    def ActualTCPPose(self):return self.rtdeData['actual_TCP_pose']
+    def ActualTCPPose(self):return self.dataDir['actual_TCP_pose']
     def RobotModee(self):raise NotImplementedError('Function Not yet implemented')
     def SafetyMode(self):raise NotImplementedError('Function Not yet implemented')
     def TargetQ(self):raise NotImplementedError('Function Not yet implemented')
@@ -182,7 +180,7 @@ class RobotModel(object):
     def TargetQDD(self):raise NotImplementedError('Function Not yet implemented')
     def TargetCurrent(self):raise NotImplementedError('Function Not yet implemented')
     def TargetMoment(self):raise NotImplementedError('Function Not yet implemented')     
-    def ActualQ(self):return self.rtdeData['actual_q']
+    def ActualQ(self):return self.dataDir['actual_q']
     def ActualQD(self):raise NotImplementedError('Function Not yet implemented')
     def ActualCurrent(self):raise NotImplementedError('Function Not yet implemented')
     def JointControlOutput(self):raise NotImplementedError('Function Not yet implemented')
@@ -209,9 +207,9 @@ class RobotModel(object):
     def ToolOutputVoltage(self):raise NotImplementedError('Function Not yet implemented')
     def StandardAnalogInput(self,n):
         if n == 0:
-            return self.rtdeData['standard_analog_input0']
+            return self.dataDir['standard_analog_input0']
         elif n == 1:
-            return self.rtdeData['standard_analog_input1']
+            return self.dataDir['standard_analog_input1']
         else:
             raise KeyError('Index out of range')
 
@@ -222,10 +220,10 @@ class RobotModel(object):
         SafetyStatusBit class defined in the bottom of this file
         '''
         result = RobotStatusBit()
-        result.PowerOn            =  1&self.rtdeData['robot_status_bits']==1
-        result.ProgramRunningn    =  2&self.rtdeData['robot_status_bits']==2
-        result.TeachButtonPressed =  4&self.rtdeData['robot_status_bits']==4
-        result.PowerButtonPressed =  8&self.rtdeData['robot_status_bits']==8
+        result.PowerOn            =  1&self.dataDir['robot_status_bits']==1
+        result.ProgramRunning     =  2&self.dataDir['robot_status_bits']==2
+        result.TeachButtonPressed =  4&self.dataDir['robot_status_bits']==4
+        result.PowerButtonPressed =  8&self.dataDir['robot_status_bits']==8
         return result
     
     def SafetyStatus(self):
@@ -233,17 +231,17 @@ class RobotModel(object):
         SafetyStatusBit class defined in the bottom of this file
         '''
         result = SafetyStatusBit()
-        result.NormalMode             =     1&self.rtdeData['safety_status_bits']==1
-        result.ReducedMode            =     2&self.rtdeData['safety_status_bits']==2
-        result.ProtectiveStopped      =     4&self.rtdeData['safety_status_bits']==4
-        result.RecoveryMode           =     8&self.rtdeData['safety_status_bits']==8
-        result.SafeguardStopped       =    16&self.rtdeData['safety_status_bits']==16
-        result.SystemEmergencyStopped =    32&self.rtdeData['safety_status_bits']==32
-        result.RobotEmergencyStopped  =    64&self.rtdeData['safety_status_bits']==64
-        result.EmergencyStopped       =   128&self.rtdeData['safety_status_bits']==128
-        result.Violation              =   256&self.rtdeData['safety_status_bits']==256
-        result.Fault                  =   512&self.rtdeData['safety_status_bits']==512
-        result.StoppedDueToSafety     =  1024&self.rtdeData['safety_status_bits']==1024
+        result.NormalMode             =     1&self.dataDir['safety_status_bits']==1
+        result.ReducedMode            =     2&self.dataDir['safety_status_bits']==2
+        result.ProtectiveStopped      =     4&self.dataDir['safety_status_bits']==4
+        result.RecoveryMode           =     8&self.dataDir['safety_status_bits']==8
+        result.SafeguardStopped       =    16&self.dataDir['safety_status_bits']==16
+        result.SystemEmergencyStopped =    32&self.dataDir['safety_status_bits']==32
+        result.RobotEmergencyStopped  =    64&self.dataDir['safety_status_bits']==64
+        result.EmergencyStopped       =   128&self.dataDir['safety_status_bits']==128
+        result.Violation              =   256&self.dataDir['safety_status_bits']==256
+        result.Fault                  =   512&self.dataDir['safety_status_bits']==512
+        result.StoppedDueToSafety     =  1024&self.dataDir['safety_status_bits']==1024
         return result
     
     def TcpForceScalar(self):raise NotImplementedError('Function Not yet implemented')
@@ -251,10 +249,10 @@ class RobotModel(object):
     def OutputBitRegister(self):
         result = [None]*64
         for ii in range(64):
-            if ii<32 and self.rtdeData['output_bit_registers0_to_31'] is not None:
-                result[ii] = 2**(ii)&self.rtdeData['output_bit_registers0_to_31']==2**(ii)
-            elif ii>31 and self.rtdeData['output_bit_registers32_to_63'] is not None:
-                result[ii] = 2**(ii-32)&self.rtdeData['output_bit_registers32_to_63']==2**(ii-32)
+            if ii<32 and self.dataDir['output_bit_registers0_to_31'] is not None:
+                result[ii] = 2**(ii)&self.dataDir['output_bit_registers0_to_31']==2**(ii)
+            elif ii>31 and self.dataDir['output_bit_registers32_to_63'] is not None:
+                result[ii] = 2**(ii-32)&self.dataDir['output_bit_registers32_to_63']==2**(ii-32)
         return result
     
     def OutputDoubleRegister(self):raise NotImplementedError('Function Not yet implemented')
