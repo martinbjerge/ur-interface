@@ -61,8 +61,8 @@ class RobotConnector(object):
 
 
     def close(self):
+        self.DataLog.close()
         self.RTDE.close()
         self.RealTimeClient.Disconnect()
         self.DashboardClient.close()
-        self.DataLog.close()
 

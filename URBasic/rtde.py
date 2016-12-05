@@ -647,7 +647,6 @@ class RTDE(threading.Thread): #, metaclass=Singleton
 
     '''Threading Data receive'''
     def close(self):
-        self.__dataLogObj.close()
         if self.__stop_event is False:
             self.__stop_event = True
             self.wait_rtde()
