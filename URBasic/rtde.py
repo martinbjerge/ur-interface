@@ -25,7 +25,7 @@ __author__ = "Martin Huus Bjerge"
 __copyright__ = "Copyright 2016, Rope Robotics ApS, Denmark"
 __license__ = "MIT License"
 
-import URBasic.dataLogging
+import URBasic
 import threading
 import socket
 import struct
@@ -54,15 +54,6 @@ class ConnectionState:
     CONNECTED = 2
     PAUSED = 3
     STARTED = 4
-    
-
-class Singleton(type):
-    _instances = {}
-    def __call__(self, *args, **kwargs):
-        if self not in self._instances:
-            self._instances[self] = super(Singleton, self).__call__(*args, **kwargs)
-        return self._instances[self]
-
 
 class RTDE(threading.Thread): #, metaclass=Singleton
     '''
@@ -83,16 +74,18 @@ class RTDE(threading.Thread): #, metaclass=Singleton
     '''
 
 
-    def __init__(self, host='localhost', conf_filename='rtde_configuration.xml'):
+    def __init__(self, robotModel, conf_filename='rtde_configuration.xml'):
         '''
         Constructor see class description for more info.
         '''
+        if(False):
+            assert isinstance(robotModel, URBasic.robotModel.RobotModel)  ### This line is to get code completion for RobotModel
+        self.__robotModel = robotModel
+
         logger = URBasic.dataLogging.DataLogging()
         name = logger.AddEventLogging(__name__,log2Consol=False)        
         self._logger = logger.__dict__[name]
-        self.__host = host
         self.__reconnectTimeout = 60 #Seconds (while in run)
-        self._data = DataObject()
         self.__dataSend = DataObject()
         self.__conf_filename = conf_filename
         self.__stop_event = True
@@ -105,7 +98,6 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         self.__input_config = {}
         self.__buf = bytes()
         self.start()
-        self.__dataLogObj = RTDE_logger(self,logger)
         self.wait_rtde()
         self._logger.info('RTDE constructor done')
 
@@ -125,7 +117,7 @@ class RTDE(threading.Thread): #, metaclass=Singleton
             self.__sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)         
             self.__sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.__sock.settimeout(DEFAULT_TIMEOUT)
-            self.__sock.connect((self.__host, 30004))
+            self.__sock.connect((self.__robotModel.ipAddress, 30004))
             self.__conn_state = ConnectionState.CONNECTED
         except (socket.timeout, socket.error):
             self.__sock = None
@@ -304,7 +296,7 @@ class RTDE(threading.Thread): #, metaclass=Singleton
 
             #Setup data to be recived
             recive = root.find('receive')
-            variables = []
+            variables = ['timestamp']
             for child in recive:
                 variables.append(child.attrib['name'])
 
@@ -424,7 +416,7 @@ class RTDE(threading.Thread): #, metaclass=Singleton
                 if not self.wait_rtde():
                     return None
             if self.has_get_rtde_data_attr(variable_name):
-                return np.array(self._data.__dict__[variable_name])
+                return np.array(self._data[variable_name])
             self._logger.warning('"get_rtde_data" tried to access non existing data tag: ' + variable_name)
         return None
 
@@ -654,7 +646,7 @@ class RTDE(threading.Thread): #, metaclass=Singleton
 
 
     '''Threading Data receive'''
-    def close_rtde(self):
+    def close(self):
         self.__dataLogObj.close()
         if self.__stop_event is False:
             self.__stop_event = True
@@ -679,7 +671,8 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         while (not self.__stop_event) and (time.time()-t0<self.__reconnectTimeout):
             try:
                 self._data = self.__receive()
-                #self.__conn_state = ConnectionState.STARTED  #This line was removed to avoid log spamming when no connection to robot.
+                for tagname in self._data.keys():
+                    self.__robotModel.dataDir[tagname] = self._data[tagname] 
                 with self.__dataEvent:
                     self.__dataEvent.notifyAll()
                 t0 = time.time()
@@ -801,10 +794,10 @@ class DataObject(object):
     def unpack(data, names, types):
         if len(names) != len(types):
             raise ValueError('List sizes are not identical.')
-        obj = DataObject()
+        obj = dict()
         offset = 0
         for i in range(len(names)):
-            obj.__dict__[names[i]] = DataObject.unpack_field(data, offset, types[i])
+            obj[names[i]] = DataObject.unpack_field(data, offset, types[i]) 
             offset += DataObject.get_item_size(types[i])
         return obj
 
@@ -843,46 +836,3 @@ class DataObject(object):
              data_type == 'UINT8'):
             return int(data[offset])
         raise ValueError('unpack_field: unknown data type: ' + data_type)
-    
-    
-class RTDE_logger(RTDE, threading.Thread):
- 
-    def __init__(self, rtde_obj, logger = URBasic.dataLogging.DataLogging()):
-        threading.Thread.__init__(self)
-        name = logger.AddDataLogging(__name__)
-        self.__dataLogger = logger.__dict__[name]
-        self.__stop_event = True
-        self.__rtdeDemon = rtde_obj
-        self.start()
-        self.__rtdeDemon._logger.info('RTDE_logger constructor done')
-         
-    def logdata(self):
-        if self.__rtdeDemon.wait_rtde():        
-            for tagname in self.__rtdeDemon._data.__dict__.keys():
-                if tagname != 'timestamp':
-                    tp = type(self.__rtdeDemon._data.__dict__[tagname])
-                    if tp is np.ndarray:
-                        if 6==len(self.__rtdeDemon._data.__dict__[tagname]):
-                            self.__dataLogger.info((tagname+';%s;%s;%s;%s;%s;%s;%s'), self.__rtdeDemon._data.__dict__['timestamp'], *self.__rtdeDemon._data.__dict__[tagname])
-                        elif 3==len(self.__rtdeDemon._data.__dict__[tagname]):
-                            self.__dataLogger.info((tagname+';%s;%s;%s;%s'), self.__rtdeDemon._data.__dict__['timestamp'], *self.__rtdeDemon._data.__dict__[tagname])
-                        else:
-                            self.__rtdeDemon._logger.warning('Logger data unexpected type in rtde.py - class URRTDElogger - def logdata Type: ' + str(tp) + ' - Len: ' + str(len(self.__rtdeDemon._data.__dict__[tagname])))
-                    elif tp is bool or tp is float or tp is int: 
-                        self.__dataLogger.info((tagname+';%s;%s'), self.__rtdeDemon._data.__dict__['timestamp'], self.__rtdeDemon._data.__dict__[tagname])
-                    else:
-                        self.__rtdeDemon._logger.warning('Logger data unexpected type in rtde.py - class URRTDElogger - def logdata Type: ' + str(tp))
-                    
-    def close(self):
-        if self.__stop_event is False:
-            self.__stop_event = True
-            self.join()
- 
-    def run(self):
-        self.__stop_event = False
-        while not self.__stop_event:
-            try:
-                self.logdata()
-            except:
-                self.__rtdeDemon._logger.warning("RTDE_logger error while running, but will retry")
-        self.__rtdeDemon._logger.info("RTDE_logger is stopped")
