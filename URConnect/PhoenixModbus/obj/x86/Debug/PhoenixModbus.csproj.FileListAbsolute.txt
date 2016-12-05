@@ -1,0 +1,9 @@
+C:\SourceCode\ur-interface\URConnect\PhoenixModbus\bin\x86\Debug\PhoenixModbus.dll
+C:\SourceCode\ur-interface\URConnect\PhoenixModbus\bin\x86\Debug\PhoenixModbus.pdb
+C:\SourceCode\ur-interface\URConnect\PhoenixModbus\bin\x86\Debug\Common_FX46.dll
+C:\SourceCode\ur-interface\URConnect\PhoenixModbus\bin\x86\Debug\HFI_Library_FX46.dll
+C:\SourceCode\ur-interface\URConnect\PhoenixModbus\bin\x86\Debug\HFI_Visu_FX46.dll
+C:\SourceCode\ur-interface\URConnect\PhoenixModbus\bin\x86\Debug\PxC_Util.dll
+C:\SourceCode\ur-interface\URConnect\PhoenixModbus\bin\x86\Debug\IBSG4_Driver_FX46.dll
+C:\SourceCode\ur-interface\URConnect\PhoenixModbus\obj\x86\Debug\PhoenixModbus.dll
+C:\SourceCode\ur-interface\URConnect\PhoenixModbus\obj\x86\Debug\PhoenixModbus.pdb

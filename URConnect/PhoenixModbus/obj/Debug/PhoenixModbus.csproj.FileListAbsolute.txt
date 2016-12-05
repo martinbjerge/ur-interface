@@ -1,0 +1,10 @@
+C:\SourceCode\ur-interface\URConnect\PhoenixModbus\obj\Debug\PhoenixModbus.csprojResolveAssemblyReference.cache
+C:\SourceCode\ur-interface\URConnect\PhoenixModbus\bin\Debug\PhoenixModbus.dll
+C:\SourceCode\ur-interface\URConnect\PhoenixModbus\bin\Debug\PhoenixModbus.pdb
+C:\SourceCode\ur-interface\URConnect\PhoenixModbus\bin\Debug\Common_FX46.dll
+C:\SourceCode\ur-interface\URConnect\PhoenixModbus\bin\Debug\HFI_Library_FX46.dll
+C:\SourceCode\ur-interface\URConnect\PhoenixModbus\bin\Debug\HFI_Visu_FX46.dll
+C:\SourceCode\ur-interface\URConnect\PhoenixModbus\bin\Debug\PxC_Util.dll
+C:\SourceCode\ur-interface\URConnect\PhoenixModbus\bin\Debug\IBSG4_Driver_FX46.dll
+C:\SourceCode\ur-interface\URConnect\PhoenixModbus\obj\Debug\PhoenixModbus.dll
+C:\SourceCode\ur-interface\URConnect\PhoenixModbus\obj\Debug\PhoenixModbus.pdb
