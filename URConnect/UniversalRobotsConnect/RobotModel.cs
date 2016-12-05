@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using log4net;
 using UniversalRobotsConnect.Types;
@@ -114,9 +116,105 @@ namespace UniversalRobotsConnect
         private readonly DigitalBits _configurableInputbits = new DigitalBits();
         private readonly DigitalBits _digitalOutputbits = new DigitalBits();
         private readonly DigitalBits _configurableOutputBits = new DigitalBits();
-        
 
+        internal ConcurrentQueue<RobotModel> ModelUpdateQueue = new ConcurrentQueue<RobotModel>();
+        private Thread _modelUpdaterThread;
         #endregion
+
+        //public RobotModel()
+        //{
+        //    _modelUpdaterThread = new Thread(ProcessModelUpdates);
+        //    _modelUpdaterThread.Start();
+        //}
+
+
+        private void ProcessModelUpdates()
+        {
+            while (true)
+            {
+                RobotModel localRobotModel;
+                if (ModelUpdateQueue.Count > 0)
+                {
+                    bool success = ModelUpdateQueue.TryDequeue(out localRobotModel);
+                    if (success)
+                    {
+                        UpdateModel(localRobotModel);
+                    }
+                    if (ModelUpdateQueue.Count > 2)
+                    {
+                        //log.Debug($"Robotmodels in queue: {ModelUpdateQueue.Count}");
+                        Console.WriteLine($"Robotmodels in queue: {ModelUpdateQueue.Count}");
+                    }
+                }
+                Thread.Sleep(6);
+            }
+
+        }
+
+        private void UpdateModel(RobotModel localRobotModel)
+        {
+            DateTime startTime = DateTime.Now;
+            double delta = localRobotModel.RobotTimestamp - RobotTimestamp;
+            if (delta > 0.008001)
+            {
+                //log.Debug($"Too long since last robot timestamp {delta * 1000} milliseconds!!!!  WE LOST A PACKAGE!!!!!");
+                //Console.WriteLine($"Too long since last ROBOT TIMESTAMP {delta*1000} milliseconds!!!!  WE LOST A PACKAGE!!!!!");
+            }
+
+            ActualCurrent = localRobotModel.ActualCurrent;
+            ActualExecutionTime = localRobotModel.ActualExecutionTime;
+            ActualJointVoltage = localRobotModel.ActualJointVoltage;
+            ActualMainVoltage = localRobotModel.ActualMainVoltage;
+            ActualMomentum = localRobotModel.ActualMomentum;
+            ActualQ = localRobotModel.ActualQ;
+            ActualQD = localRobotModel.ActualQD;
+            ActualRobotCurrent = localRobotModel.ActualRobotCurrent;
+            ActualRobotVoltage = localRobotModel.ActualRobotVoltage;
+            ActualTCPForce = localRobotModel.ActualTCPForce;
+            ActualTCPPose = localRobotModel.ActualTCPPose;
+            ActualTCPSpeed = localRobotModel.ActualTCPSpeed;
+            ConfigurableInputBits.AllBits = localRobotModel.ConfigurableInputBits.AllBits;
+            ConfigurableOutputBits.AllBits = localRobotModel.ConfigurableOutputBits.AllBits;
+
+            DigitalInputbits.AllBits = localRobotModel.DigitalInputbits.AllBits;
+            DigitalOutputBits.AllBits = localRobotModel.DigitalInputbits.AllBits;
+
+            RuntimeState = localRobotModel.RuntimeState;
+            StandardAnalogInput0 = localRobotModel.StandardAnalogInput0;
+            StandardAnalogInput1 = localRobotModel.StandardAnalogInput1;
+            StandardAnalogOutput0 = localRobotModel.StandardAnalogOutput;
+            TargetMoment = localRobotModel.TargetMoment;
+            TargetQ = localRobotModel.TargetQ;
+            TargetQD = localRobotModel.TargetQD;
+            TargetQDD = localRobotModel.TargetQDD;
+            TargetSpeedFraction = localRobotModel.TargetSpeedFraction;
+            TargetTCPPose = localRobotModel.TargetTCPPose;
+            TargetTCPSpeed = localRobotModel.TargetTCPSpeed;
+            ToolAnalogInput0 = localRobotModel.ToolAnalogInput0;
+            ToolAnalogInput1 = localRobotModel.ToolAnalogInput1;
+            ToolOutputCurrent = localRobotModel.ToolOutputCurrent;
+            ToolOutputVoltage = localRobotModel.ToolOutputVoltage;
+
+            TimeSpan realDelta = DateTime.Now - LastUpdateTimestamp;
+            if (realDelta.TotalMilliseconds < 2)
+            {
+                Thread.Sleep(2);    //we want to allow time for clients to update 
+            }
+            if (realDelta.TotalMilliseconds > 32)
+            {
+                //log.Debug($"Realtime {realDelta.TotalMilliseconds} MS since last update - too slow");
+                //Console.WriteLine($"Realtime {realDelta.TotalMilliseconds} MS since last update - too slow");
+            }
+            LastUpdateTimestamp = DateTime.Now;
+            RobotTimestamp = localRobotModel.RobotTimestamp;
+            TimeSpan timespan = DateTime.Now - startTime;
+            if (timespan.TotalMilliseconds > 4)
+            {
+                //log.Debug($"Time to update model: {timespan.TotalMilliseconds}");
+                //Console.WriteLine($"Time to update model: {timespan.TotalMilliseconds}");
+            }
+
+        }
 
         public string Password { get; set; }
 

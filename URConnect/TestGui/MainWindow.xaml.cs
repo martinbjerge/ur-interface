@@ -17,6 +17,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
 using System.Xml.Serialization;
+using PhoenixModbus;
 using UniversalRobotsConnect;
 using UniversalRobotsConnect.IOs;
 using UniversalRobotsConnect.Types;
@@ -30,20 +31,24 @@ namespace TestGui
     public partial class MainWindow : Window
     {
         private RobotConnector _robotConnector;
+        private HFI _hfi;
         //private RobotModel _myRobotModel;
        
 
         public MainWindow()
         {
             InitializeComponent();
-            _robotConnector = new RobotConnector("172.16.74.129", false);
+            //_robotConnector = new RobotConnector("192.168.1.148", false);
+            //_robotConnector = new RobotConnector("172.16.74.129", false);
             //_robotConnector = new RobotConnector("192.168.0.3", false);
             //_myRobotModel = _robotConnector.RobotModel;
 
-            
+            _hfi = new HFI("192.168.1.50");
+
+            _hfi.SetDigitalOut(1, true);
             //_robotConnector.RealTimeClient.Send("set_tcp(p[0.023, 0.053, 0.15, 0.000, 0.000, 0.000])");
 
-            
+
 
             //_robotConnector.DashboardClient.PowerOff();
 

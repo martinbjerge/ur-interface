@@ -35,3 +35,9 @@ C:\SourceCode\ur-interface\URConnect\TestGui\obj\Debug\TestGui.exe
 C:\SourceCode\ur-interface\URConnect\TestGui\obj\Debug\TestGui.pdb
 C:\SourceCode\ur-interface\URConnect\TestGui\obj\Debug\TestGui.csprojResolveAssemblyReference.cache
 C:\SourceCode\ur-interface\URConnect\TestGui\bin\Debug\UniversalRobotsConnect.pdb
+C:\SourceCode\ur-interface\URConnect\TestGui\bin\Debug\PhoenixModbus.dll
+C:\SourceCode\ur-interface\URConnect\TestGui\bin\Debug\HFI_Library_FX46.dll
+C:\SourceCode\ur-interface\URConnect\TestGui\bin\Debug\PxC_Util.dll
+C:\SourceCode\ur-interface\URConnect\TestGui\bin\Debug\IBSG4_Driver_FX46.dll
+C:\SourceCode\ur-interface\URConnect\TestGui\bin\Debug\Common_FX46.dll
+C:\SourceCode\ur-interface\URConnect\TestGui\bin\Debug\PhoenixModbus.pdb
