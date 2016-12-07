@@ -373,6 +373,9 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         if not (self.__dataSend.recipe_id in self.__input_config):
             self._logger.error('Input configuration id not found: ' + str(self.__dataSend.recipe_id))
             return
+        if self.__robotModel.StopRunningFlag():
+            self._logger.info('"send_rtde_data" send ignored due to "stopRunningFlag" True')
+            return        
         config = self.__input_config[self.__dataSend.recipe_id]
         return self.__sendall(Command.RTDE_DATA_PACKAGE, config.pack(self.__dataSend))
 
