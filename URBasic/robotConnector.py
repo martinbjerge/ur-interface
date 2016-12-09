@@ -37,7 +37,7 @@ class RobotConnector(object):
     '''
 
 
-    def __init__(self,robotModel, host, hasForceTorque=False):
+    def __init__(self,robotModel, host, hasForceTorque=True):
         '''
         Constructor see class description for more info.
         '''
@@ -65,4 +65,5 @@ class RobotConnector(object):
         self.RTDE.close()
         self.RealTimeClient.Disconnect()
         self.DashboardClient.close()
-
+        if self.ForceTourqe is not None:
+            self.ForceTourqe.close()
