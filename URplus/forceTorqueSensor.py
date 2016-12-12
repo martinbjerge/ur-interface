@@ -101,11 +101,10 @@ class ForceTorqueSensor(threading.Thread):
             return False
         return True
 
-    def close_ft(self):
+    def close(self):
         '''
         Close the connection to the force torque sensor.
         '''
-        self.__dataLogObj.close_ftLog()
         self.__stop_event = True
         self.join()
         if self.__sock:
