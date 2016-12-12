@@ -22,7 +22,7 @@ class InputRange:
     ZeroTo5V = 327
     ZeroTo10V = 328
     PlusMinus20mA = 385
-    FourTo20mA = 4224
+    FourTo20mA = 384
     ZeroTo20mA = 4226
     
     
@@ -37,6 +37,7 @@ class ADAM6017(object):
         Constructor see class description for more info.
         '''
         self.__client = ModbusClient(host=host)
+        self.__inputRanges = self.__getAllInputRanges()
         connected = self.__client.connect()
         print(connected)
         
@@ -56,7 +57,7 @@ class ADAM6017(object):
     
     def getAnalogInput(self, inputNumber):
         result = self.__client.read_holding_registers(inputNumber, 1)
-        return result
+        return self.__getValueFromReading(reading=result.registers[0], inputRange=self.__inputRanges[inputNumber])
         
     def getInputRange(self, inputNumber):
         result = self.__client.read_holding_registers(200+inputNumber, 1)
@@ -64,4 +65,18 @@ class ADAM6017(object):
     
     def setInputRange(self, inputNumber, inputRange):
         result = self.__client.write_register(200+inputNumber, inputRange)
+        
+    def __getAllInputRanges(self):
+        result = self.__client.read_holding_registers(200, 8)
+        return result.registers
+    
+    def __getValueFromReading(self, reading, inputRange):
+        if(inputRange == InputRange.FourTo20mA):
+            if(reading == 0 or reading> 65500):
+                return None     #Reading out of range
+            value = 16/65535*reading
+            return value+4
+        else:
+            return None
+        
     #skal der være en def updateRopeRoboticsRobotModel der kører fast?
