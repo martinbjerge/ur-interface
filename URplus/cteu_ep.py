@@ -20,17 +20,20 @@ class CTEU_EP(object):
         connected = self.__client.connect()
         if(connected):
             print("Modbus connected to CTEU-EP")
+        else:
+            pass    #todo - nice error handling and reconnect
         
     def setValve(self, valveNumber, state):
-        #husk at lave input validering
-        valveNumber = valveNumber*2
-        result = self.__client.write_coil(valveNumber, state)    #Det ser ud som om registrene starter ved nul til 64
-        print(result)
+        #Valves are 0 to 11 - todo make input validation
+        #valveNumber = valveNumber*2
+        result = self.__client.write_coil(valveNumber, state)
+        if(result == None): #Just one retry
+            time.sleep(0.2)
+            result = self.__client.write_coil(valveNumber, state)
         
     def getValvePosition(self, valveNumber):
-        
-        
-        result = self.__client.read_coils(valveNumber*2, 1)
+        #Valves are 0 to 11 - todo make input validation
+        result = self.__client.read_coils(valveNumber, 1)
         if(result == None): #Just one retry
             time.sleep(0.2)
             result = self.__client.read_coils(valveNumber, 1)
@@ -38,3 +41,5 @@ class CTEU_EP(object):
             return result.bits[0]
         else:
             return None
+        
+        
