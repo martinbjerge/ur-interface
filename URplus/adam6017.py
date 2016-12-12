@@ -8,7 +8,7 @@ Created on Dec 8, 2016
 from pymodbus.client.sync import ModbusTcpClient as ModbusClient
 #from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 #from pymodbus.client.sync import ModbusUdpClient as ModbusClient
-from bitstring import Bits
+#from bitstring import Bits
 
 class InputRange:
     PlusMinus150mV = 259
@@ -34,7 +34,7 @@ class ADAM6017(object):
     '''
     def __init__(self, host):
         '''
-        Constructor see class description for more info.
+        Constructor takes the ip address off the ADAM6017 box
         '''
         self.__client = ModbusClient(host=host)
         self.__inputRanges = self.__getAllInputRanges()
@@ -42,30 +42,55 @@ class ADAM6017(object):
         print(connected)
         
     def setDigitalOutput(self, outputNumber, state):
+        '''
+        Set digital output True or False - two output 0 and 1 available
+        '''
         result = self.__client.write_coil(outputNumber+16, state)
         self.__inputRanges = self.__getAllInputRanges()
     
     def getDigitalOutputState(self, outputNumber):
+        '''
+        Get the state of digital output (0 and 1 available)
+        Returns True or False - or None if error
+        '''
         result = self.__client.read_coils(outputNumber+16,1)
         #result2 = self.__client.read_holding_registers(inputNumber, 2)
         return result.bits[0]
     
     def getAnalogInputs(self):
+        '''
+        Get the raw value of all the analog inputs at once in raw
+        registers and values
+        '''
         #Analog inputs return mA and V - only tested on 4-20 mA range
         result = self.__client.read_holding_registers(0, 8)
-        bit = Bits(uint=result.registers[0], length=16)
-        print(bit.int)
+        #bit = Bits(uint=result.registers[0], length=16)
+        #print(bit.int)
         return result.registers
     
     def getAnalogInput(self, inputNumber):
+        '''
+        Get the value of an analog input by input number 0 to 7
+        Returns a value in mA or V depening on InputRange set on port
+        note - currently only teset with range 4-20mA
+        '''
         result = self.__client.read_holding_registers(inputNumber, 1)
         return self.__getValueFromReading(reading=result.registers[0], inputRange=self.__inputRanges[inputNumber])
         
     def getInputRange(self, inputNumber):
+        '''
+        Get the input range  of an analog input by input number 0 to 7 configured in
+        the device. 
+        Returns a value in mA or V depening on InputRange set on port
+        '''
         result = self.__client.read_holding_registers(200+inputNumber, 1)
         return result
     
     def setInputRange(self, inputNumber, inputRange):
+        '''
+        Set the input range  of an analog input by input number 0 to 7. InputRange
+        is defined in InputRange Class
+        '''
         result = self.__client.write_register(200+inputNumber, inputRange)
         
     def __getAllInputRanges(self):
@@ -89,4 +114,3 @@ class ADAM6017(object):
         else:
             return None
         
-    #skal der være en def updateRopeRoboticsRobotModel der kører fast?

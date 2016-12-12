@@ -30,7 +30,7 @@ class MIS341(object):
     '''
     def __init__(self, comport, motorId):
         '''
-        Constructor see class description for more info.
+        Constructor - takes comport and the motorId configured in the motor
         '''
         logging.basicConfig()
         log = logging.getLogger()
@@ -42,10 +42,18 @@ class MIS341(object):
         
         
     def getOperationMode(self):
+        '''
+        Get the current Operation MOde of the motor 
+        Returns OperatingMode - see OperatingMode class for details
+        '''
         result = self.__client.read_holding_registers(40004,1, unit=self.__motorId)
         return result.registers[0]
     
     def setOperationMode(self, operationMode):
+        '''
+        Set the current Operation MOde of the motor 
+         - see OperatingMode class for details
+        '''
         commands = []
         commands.append(operationMode)
         result = self.__client.write_registers(40004, commands, unit=self.__motorId)
@@ -58,11 +66,18 @@ class MIS341(object):
         pass
     
     def getMaxVelocity(self):
+        '''
+        Get the currently configured MaxVelocity
+        returns RPM
+        '''
         result = self.__client.read_holding_registers(40010,2, unit=self.__motorId)
         return self.__getValueFromTwoRegisters(result)
         
     
     def setMaxVelocity(self, rpm):
+        '''
+        Set maxium velocity in RPM
+        '''
         commands = []
         if(rpm>=0):
             commands.append(int(rpm*100))
@@ -75,6 +90,10 @@ class MIS341(object):
         #print(result.function_code)
     
     def getActualVelocity(self):
+        '''
+        Get current actual velocity
+        returns RPM
+        '''
         result = self.__client.read_holding_registers(40024,2, unit=self.__motorId)
         return self.__getValueFromTwoRegisters(result)
         

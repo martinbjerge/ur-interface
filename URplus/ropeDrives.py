@@ -17,8 +17,15 @@ class RopeDrives(object):
         self.__motorLeft = MIS341(comport=comport, motorId=1)
         self.__motorRight = MIS341(comport=comport, motorId=2)
         
-    def robotUp(self):
+    def up(self):
         pass            
     
-    def robotDown(self):
+    def down(self):
         pass
+    
+    def turnClockwise(self):
+        pass
+    
+    def turnCounterClockwise(self):
+        pass
+    

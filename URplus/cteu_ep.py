@@ -14,7 +14,7 @@ class CTEU_EP(object):
     '''
     def __init__(self, host):
         '''
-        Constructor see class description for more info.
+        Constructor - takes ip address to the CTEU-EP box
         '''
         self.__client = ModbusClient(host=host)
         connected = self.__client.connect()
@@ -24,6 +24,9 @@ class CTEU_EP(object):
             pass    #todo - nice error handling and reconnect
         
     def setValve(self, valveNumber, state):
+        '''
+        Set a valve - 0 to 23 to True or False
+        '''
         #Valves are 0 to 11 - todo make input validation
         #valveNumber = valveNumber*2
         result = self.__client.write_coil(valveNumber, state)
@@ -32,6 +35,10 @@ class CTEU_EP(object):
             result = self.__client.write_coil(valveNumber, state)
         
     def getValvePosition(self, valveNumber):
+        '''
+        Get the state of a valve - 0 to 23
+        Returns True or False if valve is set or not - None if error
+        '''
         #Valves are 0 to 11 - todo make input validation
         result = self.__client.read_coils(valveNumber, 1)
         if(result == None): #Just one retry
