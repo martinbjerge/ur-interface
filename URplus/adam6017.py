@@ -23,7 +23,7 @@ class InputRange:
     ZeroTo10V = 328
     PlusMinus20mA = 385
     FourTo20mA = 384
-    ZeroTo20mA = 4226
+    ZeroTo20mA = 386
     
     
 
@@ -43,6 +43,7 @@ class ADAM6017(object):
         
     def setDigitalOutput(self, outputNumber, state):
         result = self.__client.write_coil(outputNumber+16, state)
+        self.__inputRanges = self.__getAllInputRanges()
     
     def getDigitalOutputState(self, outputNumber):
         result = self.__client.read_coils(outputNumber+16,1)
@@ -50,6 +51,7 @@ class ADAM6017(object):
         return result.bits[0]
     
     def getAnalogInputs(self):
+        #Analog inputs return mA and V - only tested on 4-20 mA range
         result = self.__client.read_holding_registers(0, 8)
         bit = Bits(uint=result.registers[0], length=16)
         print(bit.int)
@@ -76,6 +78,14 @@ class ADAM6017(object):
                 return None     #Reading out of range
             value = 16/65535*reading
             return value+4
+        if(inputRange == inputRange.ZeroTo20mA):
+            if(reading > 65500):
+                return None     #Reading out of range
+            return 20/65535*reading
+        if(inputRange == InputRange.ZeroTo10V):
+            if(reading>65500):
+                return None     #Reading out of range
+            return 10/65535*reading
         else:
             return None
         
