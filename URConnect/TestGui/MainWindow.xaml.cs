@@ -45,7 +45,12 @@ namespace TestGui
 
             _hfi = new HFI("192.168.1.50");
 
+            _hfi.SetDigitalOut(0, true);
             _hfi.SetDigitalOut(1, true);
+            _hfi.SetDigitalOut(2, true);
+            _hfi.SetDigitalOut(3, true);
+            
+            
             //_robotConnector.RealTimeClient.Send("set_tcp(p[0.023, 0.053, 0.15, 0.000, 0.000, 0.000])");
 
 
