@@ -12,6 +12,8 @@ from pymodbus.payload import BinaryPayloadBuilder
 import logging
 import time
 import struct
+from bitstring import Bits
+from bitstring import BitArray
 
 class OperatingMode:
     Passive = 0
@@ -78,14 +80,22 @@ class MIS341(object):
         '''
         Set maxium velocity in RPM
         '''
-        commands = []
-        if(rpm>=0):
-            commands.append(int(rpm*100))
-            commands.append(int(0))
-        else:
-            commands.append(int(65535-(rpm*100*-1)))
-            commands.append(int(65535))
+        if(rpm < -3000 or rpm > 3000):
+            raise ValueError('Overspeed on motor - outside specs')
         
+        commands = []
+        #if(rpm>=0):
+        #    commands.append(int(rpm*100))
+        #    commands.append(int(0))
+        #else:
+        #    commands.append(int(65535-(rpm*100*-1)))
+        #    commands.append(int(65535))
+        
+        fullRegister = Bits(int=rpm*100, length=32)
+        highWord = Bits(bin = fullRegister[0:16].bin)
+        lowWord = Bits(bin = fullRegister[16:32].bin)
+        commands.append(lowWord.uint)
+        commands.append(highWord.uint)
         result = self.__client.write_registers(40010, commands, unit=self.__motorId)
         #print(result.function_code)
     

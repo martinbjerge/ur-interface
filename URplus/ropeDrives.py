@@ -19,13 +19,15 @@ class RopeDrives(object):
         
     def up(self, velocity):
         '''
-        Move the entire robot up at a given velocity - velocity is meters/second 
+        Move the entire robot up at a given velocity - velocity is meters/second
+        note - max velocity is 0.5 m/s - be careful - thats quick 
         '''
         pass            
     
     def down(self, velocity):
         '''
-        Move the entire robot down at a given velocity - velocity is meters/second 
+        Move the entire robot down at a given velocity - velocity is meters/second
+        note - max velocity is 0.5 m/s - be careful - thats quick  
         '''
         pass
     
@@ -40,7 +42,8 @@ class RopeDrives(object):
     def leftUp(self, velocity):
         '''
         Rotate the entire robot by lifting the lefthand side up at a given velocity
-        while the righthand side is stationary - velocity is meters/second 
+        while the righthand side is stationary - velocity is meters/second
+        note - max velocity is 0.5 m/s - be careful - thats quick  
         '''
         #Test moment styring
         pass
@@ -49,6 +52,7 @@ class RopeDrives(object):
         '''
         Rotate the entire robot by lifting the righthand side up at a given velocity
         while the lefthand side is stationary - velocity is meters/second 
+        note - max velocity is 0.5 m/s - be careful - thats quick 
         '''
         #Test moment styring
         pass
@@ -57,6 +61,7 @@ class RopeDrives(object):
         '''
         Rotate the entire robot by lowering the lefthand side at a given velocity
         while the righthand side is stationary - velocity is meters/second 
+        note - max velocity is 0.5 m/s - be careful - thats quick 
         '''
         #Test moment styring
         pass
@@ -65,6 +70,7 @@ class RopeDrives(object):
         '''
         Rotate the entire robot by lowering the righthand side at a given velocity
         while the lefthand side is stationary - velocity is meters/second 
+        note - max velocity is 0.5 m/s - be careful - thats quick 
         '''
         #Test moment styring
         pass
