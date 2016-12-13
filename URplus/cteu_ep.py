@@ -16,6 +16,8 @@ class CTEU_EP(object):
         '''
         Constructor - takes ip address to the CTEU-EP box
         '''
+        if host is None:
+            return
         self.__client = ModbusClient(host=host)
         connected = self.__client.connect()
         if(connected):
@@ -29,6 +31,7 @@ class CTEU_EP(object):
         '''
         #Valves are 0 to 11 - todo make input validation
         #valveNumber = valveNumber*2
+        
         result = self.__client.write_coil(valveNumber, state)
         if(result == None): #Just one retry
             time.sleep(0.2)
