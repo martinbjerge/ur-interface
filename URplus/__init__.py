@@ -26,3 +26,4 @@ __copyright__ = "Copyright 2016, Rope Robotics ApS, Denmark"
 __license__ = "MIT License"
 
 from URplus.forceTorqueSensor import ForceTorqueSensor
+from URplus.cteu_ep import CTEU_EP
