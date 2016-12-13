@@ -4,7 +4,7 @@ Created on Dec 8, 2016
 @author: MartinHuusBjerge
 '''
 import time
-
+import URBasic
 from pymodbus.client.sync import ModbusTcpClient as ModbusClient
 
 class CTEU_EP(object):
@@ -12,10 +12,14 @@ class CTEU_EP(object):
     Controlling the Pneumatics on the robot via a FESTO CTEU-EP that
     is controlling a valveblock - this is via Modbus over TCP
     '''
-    def __init__(self, host):
+    def __init__(self, host, robotModel):
         '''
         Constructor - takes ip address to the CTEU-EP box
         '''
+        if(False):
+            assert isinstance(robotModel, URBasic.robotModel.RobotModel)  ### This line is to get code completion for RobotModel
+        self.__robotModel = robotModel
+        
         if host is None:
             return
         self.__client = ModbusClient(host=host)
@@ -31,7 +35,8 @@ class CTEU_EP(object):
         '''
         #Valves are 0 to 11 - todo make input validation
         #valveNumber = valveNumber*2
-        
+        if self.__robotModel.StopRunningFlag():
+            return
         result = self.__client.write_coil(valveNumber, state)
         if(result == None): #Just one retry
             time.sleep(0.2)
