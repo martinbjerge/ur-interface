@@ -3,8 +3,8 @@ Created on Dec 8, 2016
 
 @author: MartinHuusBjerge
 '''
-#from pymodbus.client.sync import ModbusTcpClient as ModbusClient
-from pymodbus.client.sync import ModbusSerialClient as ModbusClient
+from pymodbus.client.sync import ModbusTcpClient as ModbusClient
+#from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 #from pymodbus.client.sync import ModbusUdpClient as ModbusClient
 
 from pymodbus.constants import Endian
@@ -14,6 +14,7 @@ import time
 import struct
 from bitstring import Bits
 from bitstring import BitArray
+import threading
 
 class OperatingMode:
     Passive = 0
@@ -30,25 +31,49 @@ class MIS341(object):
     This class is running a MIS341 motor via Modbus RTU over serial
     In the future we expect to change this over to TCP
     '''
-    def __init__(self, comport, motorId):
+    def __init__(self, host, motorId=1, reversed=False):
         '''
         Constructor - takes comport and the motorId configured in the motor
         '''
         logging.basicConfig()
         log = logging.getLogger()
-        log.setLevel(logging.ERROR)
-        
+        log.setLevel(logging.DEBUG)
         self.__motorId = motorId
-        #self.__client = ModbusClient(host='192.168.0.23')
-        self.__client = ModbusClient(method='rtu', port=comport, baudrate=19200, databits=8, bytesize=8, parity='E', stopbits=1)
+        self.__client = ModbusClient(host=host)
+        #self.__client = ModbusClient(method='rtu', port=comport, baudrate=19200, databits=8, bytesize=8, parity='E', stopbits=1)
+        self.__reversed = reversed
+        self.__miniumPollTime = 0.004  # see 7.2.5 in ethernet user guide for motor
+        self.__clearToSend = True
+        self.__minimumPollTimer = threading.Timer(interval=self.__miniumPollTime, function=self.__resetClearToSend)
         
+        
+    def __safeReadHoldingRegisters(self, registerNumber, length):
+        while(not self.__clearToSend):
+            pass
+        self.__clearToSend=False
+        result = self.__client.read_holding_registers(registerNumber,length, unit=self.__motorId)
+        self.__minimumPollTimer.start()
+        return result
+    
+    def __safeWriteRegisters(self, registerNumber, commands):
+        while(not self.__clearToSend):
+            pass
+        self.__clearToSend=False
+        result = self.__client.write_registers(registerNumber, commands, unit=self.__motorId)
+        self.__minimumPollTimer.start()
+        return result
         
     def getOperationMode(self):
         '''
         Get the current Operation MOde of the motor 
         Returns OperatingMode - see OperatingMode class for details
         '''
-        result = self.__client.read_holding_registers(40004,1, unit=self.__motorId)
+        #while(not self.__clearToSend):
+        #    pass
+        #self.__clearToSend=False
+        #result = self.__client.read_holding_registers(4,1, unit=self.__motorId)
+        #self.__minimumPollTimer.start()
+        result = self.__safeReadHoldingRegisters(4, 2)
         return result.registers[0]
     
     def setOperationMode(self, operationMode):
@@ -58,8 +83,15 @@ class MIS341(object):
         '''
         commands = []
         commands.append(operationMode)
-        result = self.__client.write_registers(40004, commands, unit=self.__motorId)
-        #print(result.function_code)
+        commands.append(0)
+        #while(not self.__clearToSend):
+        #    pass
+        #self.__clearToSend=False
+        #result = self.__client.write_registers(4, commands, unit=self.__motorId)
+        #self.__minimumPollTimer.start()
+        
+        result = self.__safeWriteRegisters(4, commands)
+        print(result.function_code)
     
     def getDesiredPosition(self):
         pass
@@ -72,7 +104,12 @@ class MIS341(object):
         Get the currently configured MaxVelocity
         returns RPM
         '''
-        result = self.__client.read_holding_registers(40010,2, unit=self.__motorId)
+        #while(not self.__clearToSend):
+        #    pass
+        #self.__clearToSend=False
+        #result = self.__client.read_holding_registers(10,2, unit=self.__motorId)
+        #self.__minimumPollTimer.start()
+        result = self.__safeReadHoldingRegisters(10, 2)
         return self.__getValueFromTwoRegisters(result)
         
     
@@ -80,33 +117,138 @@ class MIS341(object):
         '''
         Set maxium velocity in RPM
         '''
-        if(rpm < -3000 or rpm > 3000):
+        if(rpm < -2100 or rpm > 2100):
             raise ValueError('Overspeed on motor - outside specs')
         
-        commands = []
-        #if(rpm>=0):
-        #    commands.append(int(rpm*100))
-        #    commands.append(int(0))
-        #else:
-        #    commands.append(int(65535-(rpm*100*-1)))
-        #    commands.append(int(65535))
+        if(self.__reversed):
+            rpm = rpm*(-1)
         
-        fullRegister = Bits(int=rpm*100, length=32)
+        fullRegister = Bits(int=int(rpm*100), length=32)
         highWord = Bits(bin = fullRegister[0:16].bin)
         lowWord = Bits(bin = fullRegister[16:32].bin)
+        commands = []
         commands.append(lowWord.uint)
         commands.append(highWord.uint)
-        result = self.__client.write_registers(40010, commands, unit=self.__motorId)
-        #print(result.function_code)
+        #while(not self.__clearToSend):
+        #    pass
+        #self.__clearToSend=False
+        #result = self.__client.write_registers(10, commands, unit=self.__motorId)
+        #self.__minimumPollTimer.start()
+        result = self.__safeWriteRegisters(10, commands)
     
     def getActualVelocity(self):
         '''
         Get current actual velocity
         returns RPM
         '''
-        result = self.__client.read_holding_registers(40024,2, unit=self.__motorId)
+        #while(not self.__clearToSend):
+        #    pass
+        #self.__clearToSend=False
+        #result = self.__client.read_holding_registers(24,2, unit=self.__motorId)
+        #self.__minimumPollTimer.start()
+        result = self.__safeReadHoldingRegisters(24, 2)
         return self.__getValueFromTwoRegisters(result)
+    
+    def getTemperature(self):
+        '''
+        Gets the current temperature in the motor electronics in Celcius
+        '''
+        #while(not self.__clearToSend):
+        #    pass
+        #self.__clearToSend=False
+        #result = self.__client.read_holding_registers(52,2, unit=self.__motorId)
+        #self.__minimumPollTimer.start()
+        result = self.__safeReadHoldingRegisters(52, 2)
+        return result.registers[0]*2.27
+    
+    def __setSubnet(self):
+        #while(not self.__clearToSend):
+        #    pass
+        #self.__clearToSend=False
+        #oldSubnet = self.__client.read_holding_registers(32776,2, unit=self.__motorId)
+        #self.__minimumPollTimer.start()
+        oldSubnet = self.__safeReadHoldingRegisters(32776, 2)
+        firstOctet = Bits(uint=255, length=8)
+        secondOctet = Bits(uint=255, length=8)
+        thirdOctet = Bits(uint=255, length=8)
+        fourthOctet = Bits(uint=0, length=8)
+    
+        firstWord = BitArray(secondOctet)
+        firstWord.insert(firstOctet, 0)
+    
+        secondWord = BitArray(fourthOctet)
+        secondWord.insert(thirdOctet, 0)
+        #print(secondWord.bin)
+        commands = []
+        commands.append(secondWord.uint)
+        commands.append(firstWord.uint)
+        #while(not self.__clearToSend):
+        #    pass
+        #self.__clearToSend=False
+        #self.__client.write_registers(32776, commands, unit=self.__motorId)
+        #self.__minimumPollTimer.start()
+        self.__safeWriteRegisters(32776, commands)
         
+    def __setAddress(self):
+        #while(not self.__clearToSend):
+        #    pass
+        #self.__clearToSend=False
+        #oldAddress = self.__client.read_holding_registers(32774,2, unit=self.__motorId)
+        #self.__minimumPollTimer.start()
+        oldAddress = self.__safeReadHoldingRegisters(32774,2)
+        firstOctet = Bits(uint=192, length=8)
+        secondOctet = Bits(uint=168, length=8)
+        thirdOctet = Bits(uint=0, length=8)
+        fourthOctet = Bits(uint=12, length=8)
+    
+        firstWord = BitArray(secondOctet)
+        firstWord.insert(firstOctet, 0)
+    
+        secondWord = BitArray(fourthOctet)
+        secondWord.insert(thirdOctet, 0)
+        
+        commands = []
+        commands.append(secondWord.uint)
+        commands.append(firstWord.uint)
+        #while(not self.__clearToSend):
+        #    pass
+        #self.__clearToSend=False
+        #self.__client.write_registers(32774, commands, unit=self.__motorId)
+        #self.__minimumPollTimer.start()
+        self.__safeWriteRegisters(32774, commands)
+        #newAddress = self.__client.read_holding_registers(32774,2, unit=self.__motorId)
+        newAddress = self.__safeReadHoldingRegisters(32774, 2)
+        
+    def resetModule(self):
+        '''
+        Reset electronics module - needs to be tested in an actual error condition
+        '''
+        commands = []
+        commands.append(1)
+        commands.append(0)
+        #while(not self.__clearToSend):
+        #    pass
+        #self.__clearToSend=False
+        #self.__client.write_registers(32798, commnd, unit=self.__motorId)      
+        #self.__minimumPollTimer.start()
+        self.__safeWriteRegisters(32798, commands)
+        
+    def __saveToFlash(self):
+        commands = []
+        commands.append(16)
+        commands.append(0)
+        #while(not self.__clearToSend):
+        #    pass
+        #self.__clearToSend=False
+        #self.__client.write_registers(32798, commnd, unit=self.__motorId)  
+        #self.__minimumPollTimer.start()
+        self.__safeWriteRegisters(32798, commands)
+        
+    def __resetClearToSend(self):
+        #print("Clear To send")
+        self.__clearToSend = True
+        self.__minimumPollTimer = threading.Timer(interval=self.__miniumPollTime, function=self.__resetClearToSend)
+          
         
     def __getValueFromTwoRegisters(self, registers):
         if(registers.registers[1]==65535):
