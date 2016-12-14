@@ -37,7 +37,7 @@ class MIS341(object):
         '''
         logging.basicConfig()
         log = logging.getLogger()
-        log.setLevel(logging.DEBUG)
+        log.setLevel(logging.ERROR)
         self.__motorId = motorId
         self.__client = ModbusClient(host=host)
         #self.__client = ModbusClient(method='rtu', port=comport, baudrate=19200, databits=8, bytesize=8, parity='E', stopbits=1)
@@ -80,7 +80,7 @@ class MIS341(object):
         commands.append(operationMode)
         commands.append(0)
         result = self.__safeWriteRegisters(4, commands)
-        print(result.function_code)
+        #print(result.function_code)
     
     def getDesiredPosition(self):
         pass
