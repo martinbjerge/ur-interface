@@ -68,11 +68,6 @@ class MIS341(object):
         Get the current Operation MOde of the motor 
         Returns OperatingMode - see OperatingMode class for details
         '''
-        #while(not self.__clearToSend):
-        #    pass
-        #self.__clearToSend=False
-        #result = self.__client.read_holding_registers(4,1, unit=self.__motorId)
-        #self.__minimumPollTimer.start()
         result = self.__safeReadHoldingRegisters(4, 2)
         return result.registers[0]
     
@@ -84,12 +79,6 @@ class MIS341(object):
         commands = []
         commands.append(operationMode)
         commands.append(0)
-        #while(not self.__clearToSend):
-        #    pass
-        #self.__clearToSend=False
-        #result = self.__client.write_registers(4, commands, unit=self.__motorId)
-        #self.__minimumPollTimer.start()
-        
         result = self.__safeWriteRegisters(4, commands)
         print(result.function_code)
     
@@ -104,11 +93,6 @@ class MIS341(object):
         Get the currently configured MaxVelocity
         returns RPM
         '''
-        #while(not self.__clearToSend):
-        #    pass
-        #self.__clearToSend=False
-        #result = self.__client.read_holding_registers(10,2, unit=self.__motorId)
-        #self.__minimumPollTimer.start()
         result = self.__safeReadHoldingRegisters(10, 2)
         return self.__getValueFromTwoRegisters(result)
         
@@ -129,11 +113,6 @@ class MIS341(object):
         commands = []
         commands.append(lowWord.uint)
         commands.append(highWord.uint)
-        #while(not self.__clearToSend):
-        #    pass
-        #self.__clearToSend=False
-        #result = self.__client.write_registers(10, commands, unit=self.__motorId)
-        #self.__minimumPollTimer.start()
         result = self.__safeWriteRegisters(10, commands)
     
     def getActualVelocity(self):
@@ -141,11 +120,6 @@ class MIS341(object):
         Get current actual velocity
         returns RPM
         '''
-        #while(not self.__clearToSend):
-        #    pass
-        #self.__clearToSend=False
-        #result = self.__client.read_holding_registers(24,2, unit=self.__motorId)
-        #self.__minimumPollTimer.start()
         result = self.__safeReadHoldingRegisters(24, 2)
         return self.__getValueFromTwoRegisters(result)
     
@@ -153,20 +127,10 @@ class MIS341(object):
         '''
         Gets the current temperature in the motor electronics in Celcius
         '''
-        #while(not self.__clearToSend):
-        #    pass
-        #self.__clearToSend=False
-        #result = self.__client.read_holding_registers(52,2, unit=self.__motorId)
-        #self.__minimumPollTimer.start()
         result = self.__safeReadHoldingRegisters(52, 2)
         return result.registers[0]*2.27
     
     def __setSubnet(self):
-        #while(not self.__clearToSend):
-        #    pass
-        #self.__clearToSend=False
-        #oldSubnet = self.__client.read_holding_registers(32776,2, unit=self.__motorId)
-        #self.__minimumPollTimer.start()
         oldSubnet = self.__safeReadHoldingRegisters(32776, 2)
         firstOctet = Bits(uint=255, length=8)
         secondOctet = Bits(uint=255, length=8)
@@ -182,19 +146,9 @@ class MIS341(object):
         commands = []
         commands.append(secondWord.uint)
         commands.append(firstWord.uint)
-        #while(not self.__clearToSend):
-        #    pass
-        #self.__clearToSend=False
-        #self.__client.write_registers(32776, commands, unit=self.__motorId)
-        #self.__minimumPollTimer.start()
         self.__safeWriteRegisters(32776, commands)
         
     def __setAddress(self):
-        #while(not self.__clearToSend):
-        #    pass
-        #self.__clearToSend=False
-        #oldAddress = self.__client.read_holding_registers(32774,2, unit=self.__motorId)
-        #self.__minimumPollTimer.start()
         oldAddress = self.__safeReadHoldingRegisters(32774,2)
         firstOctet = Bits(uint=192, length=8)
         secondOctet = Bits(uint=168, length=8)
@@ -210,13 +164,7 @@ class MIS341(object):
         commands = []
         commands.append(secondWord.uint)
         commands.append(firstWord.uint)
-        #while(not self.__clearToSend):
-        #    pass
-        #self.__clearToSend=False
-        #self.__client.write_registers(32774, commands, unit=self.__motorId)
-        #self.__minimumPollTimer.start()
         self.__safeWriteRegisters(32774, commands)
-        #newAddress = self.__client.read_holding_registers(32774,2, unit=self.__motorId)
         newAddress = self.__safeReadHoldingRegisters(32774, 2)
         
     def resetModule(self):
@@ -226,26 +174,15 @@ class MIS341(object):
         commands = []
         commands.append(1)
         commands.append(0)
-        #while(not self.__clearToSend):
-        #    pass
-        #self.__clearToSend=False
-        #self.__client.write_registers(32798, commnd, unit=self.__motorId)      
-        #self.__minimumPollTimer.start()
         self.__safeWriteRegisters(32798, commands)
         
     def __saveToFlash(self):
         commands = []
         commands.append(16)
         commands.append(0)
-        #while(not self.__clearToSend):
-        #    pass
-        #self.__clearToSend=False
-        #self.__client.write_registers(32798, commnd, unit=self.__motorId)  
-        #self.__minimumPollTimer.start()
         self.__safeWriteRegisters(32798, commands)
         
     def __resetClearToSend(self):
-        #print("Clear To send")
         self.__clearToSend = True
         self.__minimumPollTimer = threading.Timer(interval=self.__miniumPollTime, function=self.__resetClearToSend)
           
