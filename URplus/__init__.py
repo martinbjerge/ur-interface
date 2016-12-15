@@ -27,7 +27,6 @@ __license__ = "MIT License"
 
 from URplus.forceTorqueSensor import ForceTorqueSensor
 from URplus.cteu_ep import CTEU_EP
-from URplus.ropeDrives import RopeDrives
 from URplus.adam6017 import ADAM6017
 from URplus.mis341 import MIS341
 
