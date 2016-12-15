@@ -9,12 +9,12 @@ from pymodbus.client.sync import ModbusTcpClient as ModbusClient
 
 from pymodbus.constants import Endian
 from pymodbus.payload import BinaryPayloadBuilder
-import logging
 import time
 import struct
 from bitstring import Bits
 from bitstring import BitArray
 import threading
+import URBasic
 
 class OperatingMode:
     Passive = 0
@@ -35,9 +35,9 @@ class MIS341(object):
         '''
         Constructor - takes comport and the motorId configured in the motor
         '''
-        logging.basicConfig()
-        log = logging.getLogger()
-        log.setLevel(logging.ERROR)
+        logger = URBasic.dataLogging.DataLogging()
+        name = logger.AddEventLogging(__name__,log2Consol=False)        
+        self.__logger = logger.__dict__[name]
         self.__motorId = motorId
         self.__client = ModbusClient(host=host)
         #self.__client = ModbusClient(method='rtu', port=comport, baudrate=19200, databits=8, bytesize=8, parity='E', stopbits=1)
