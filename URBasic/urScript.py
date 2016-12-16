@@ -424,7 +424,7 @@ end
         if(wait):
             self.waitRobotIdleOrStopFlag()
 
-    def stopl(self, a, aRot ='a', wait=True):
+    def stopl(self, a=0.5, aRot=None, wait=True):
         '''
         Stop (linear in tool space)
         Decellerate tool speed to zero
@@ -432,6 +432,8 @@ end
         a:    tool accleration [m/sˆ2]
         aRot: tool acceleration [rad/sˆ2] (optional), if not deﬁned a, position acceleration, is used
         '''
+        if aRot is None:
+            aRot=a
         prg = 'stopl({a}, {aRot})\n'
         programString = prg.format(**locals())
         
