@@ -404,7 +404,7 @@ end
         if(wait):
             self.waitRobotIdleOrStopFlag()    
         
-    def speedl(self, xd, a, t, aRot='a', wait=True):
+    def speedl(self, xd, a=1.4, t=0, aRot=None, wait=True):
         '''
         Tool speed
         Accelerate linearly in Cartesian space and continue with constant tool
@@ -417,10 +417,21 @@ end
         t:    time [s] before function returns (optional)
         aRot: tool acceleration [rad/sˆ2] (optional), if not deﬁned a, position acceleration, is used
         '''
-        prg = 'speedl({xd}, {a}, {t}, {aRot})\n'
+        if aRot is None:
+            aRot=a
+        prg = '''def ur_speedl():
+    while(True):
+        speedl({xd}, {a}, {t}, {aRot})
+    end
+end
+'''
         programString = prg.format(**locals())
         
-        self.robotConnector.RealTimeClient.Send(programString)
+        self.robotConnector.RealTimeClient.SendProgram(programString)
+#         prg = 'speedl({xd}, {a}, {t}, {aRot})\n'
+#         programString = prg.format(**locals())
+#         
+#         self.robotConnector.RealTimeClient.Send(programString)
         if(wait):
             self.waitRobotIdleOrStopFlag()
 
