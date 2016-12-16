@@ -53,6 +53,7 @@ class CTEU_EP(object):
             pass    #todo - nice error handling and reconnect
         
     def setValve(self, valveNumber, state):
+        
         '''
         Set a valve - 0 to 23 to True or False
         '''
