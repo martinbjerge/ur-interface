@@ -144,7 +144,7 @@ class MIS341(object):
     
     def stopInPosition(self):
         self.setMaxVelocity(0)
-        #time.sleep(1)
+    
         actualPosition = self.getActualPosition()
         self.setDesiredPosition(actualPosition)
         self.setOperationMode(OperatingMode.Position)
@@ -154,57 +154,78 @@ class MIS341(object):
         result = self.__safeReadHoldingRegisters(MIS341.STATUSBITS*2, 2)
         bitArray = BitArray(uint = result.registers[0], length=16)
         if(bitArray[14]):
-            print("Status - Motor " + str(self.__motorId) + " Auto Correction Active")
+            pass
+            #print("Status - Motor " + str(self.__motorId) + " Auto Correction Active")
         if(bitArray[13]):
-            print("Status - Motor " + str(self.__motorId) + " In Physical Position")
+            pass
+            #print("Status - Motor " + str(self.__motorId) + " In Physical Position")
         if(bitArray[12]):
-            print("Status - Motor " + str(self.__motorId) + " At velocity")
+            pass
+            #print("Status - Motor " + str(self.__motorId) + " At velocity")
         if(bitArray[11]):
-            print("Status - Motor " + str(self.__motorId) + " In Position")
+            pass
+            #print("Status - Motor " + str(self.__motorId) + " In Position")
         if(bitArray[10]):
-            print("Status - Motor " + str(self.__motorId) + " Accelerating")
+            pass
+            #print("Status - Motor " + str(self.__motorId) + " Accelerating")
         if(bitArray[9]):
-            print("Status - Motor " + str(self.__motorId) + " Decelerating")
+            pass
+            #print("Status - Motor " + str(self.__motorId) + " Decelerating")
         if(bitArray[12]):
-            print("Status - Motor " + str(self.__motorId) + " General Error")
+            pass
+            #print("Status - Motor " + str(self.__motorId) + " General Error")
         
     
     def getWarnings(self):
         result = self.__safeReadHoldingRegisters(MIS341.WARN_BITS*2, 2)
         bitArray = BitArray(uint = result.registers[0], length=16)
         if(bitArray[15]):
-            print("Warning - Motor " + str(self.__motorId) + " Positive limit Active")
+            pass
+            #print("Warning - Motor " + str(self.__motorId) + " Positive limit Active")
         if(bitArray[14]):
-            print("Warning - Motor " + str(self.__motorId) + " Negative limit Active")
+            pass
+            #print("Warning - Motor " + str(self.__motorId) + " Negative limit Active")
         if(bitArray[13]):
-            print("Warning - Motor " + str(self.__motorId) + " Positive limit has been Active")
+            pass
+            #print("Warning - Motor " + str(self.__motorId) + " Positive limit has been Active")
         if(bitArray[12]):
-            print("Warning - Motor " + str(self.__motorId) + " Negative limit has been Active")
+            pass
+            #print("Warning - Motor " + str(self.__motorId) + " Negative limit has been Active")
         if(bitArray[11]):
-            print("Warning - Motor " + str(self.__motorId) + " Low Bus Voltage")
+            pass
+            #print("Warning - Motor " + str(self.__motorId) + " Low Bus Voltage")
         if(bitArray[14]):
-            print("Warning - Motor " + str(self.__motorId) + " Temperature has been above 80C")
+            pass
+            #print("Warning - Motor " + str(self.__motorId) + " Temperature has been above 80C")
     
     
     def getErrors(self):
         result = self.__safeReadHoldingRegisters(MIS341.ERR_BITS*2, 2)
         bitArray = BitArray(uint = result.registers[0], length=16)
         if(bitArray[15]):
-            print("Error - Motor " + str(self.__motorId) + " General Error")
+            pass
+            #print("Error - Motor " + str(self.__motorId) + " General Error")
         if(bitArray[13]):
-            print("Error - Motor " + str(self.__motorId) + " Output driver Error - Output is short circuited")
+            pass
+            #print("Error - Motor " + str(self.__motorId) + " Output driver Error - Output is short circuited")
         if(bitArray[12]):
-            print("Error - Motor " + str(self.__motorId) + " Position Limit Error")
+            pass
+            #print("Error - Motor " + str(self.__motorId) + " Position Limit Error")
         if(bitArray[11]):
-            print("Error - Motor " + str(self.__motorId) + " Low bus voltage Error")
+            pass
+            #print("Error - Motor " + str(self.__motorId) + " Low bus voltage Error")
         if(bitArray[10]):
-            print("Error - Motor " + str(self.__motorId) + " Over voltage Error")
+            pass
+            #print("Error - Motor " + str(self.__motorId) + " Over voltage Error")
         if(bitArray[9]):
-            print("Error - Motor " + str(self.__motorId) + " Temperature too high (above 90C)")
+            pass
+            #print("Error - Motor " + str(self.__motorId) + " Temperature too high (above 90C)")
         if(bitArray[8]):
-            print("Error - Motor " + str(self.__motorId) + " Internal Error")
+            pass
+            #print("Error - Motor " + str(self.__motorId) + " Internal Error")
         if(bitArray[7]):
-            print("Error - Motor " + str(self.__motorId) + " Encoder Lost position")
+            pass
+            #print("Error - Motor " + str(self.__motorId) + " Encoder Lost position")
     
     
     def getActualVelocity(self):
@@ -246,9 +267,16 @@ class MIS341(object):
     def __setStartMode(self):
         pass
     
-    def setStandbyCurrent(self):
+    def setStandbyCurrent(self, current):
+        '''
+        Set the StandbyCurrent for the motor - this will reflect in the holding power 
+        when the motor is stopped in position
+        '''
+        value = current/5.87*1000
+        if(value > 511):
+            raise ValueError("Current out of range")
         commands = []
-        commands.append(300)
+        commands.append(int(value))
         commands.append(0)
         result = self.__safeWriteRegisters(MIS341.STANDBY_CURRENT*2, commands)
     
