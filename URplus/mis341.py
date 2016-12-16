@@ -142,7 +142,7 @@ class MIS341(object):
         result = self.__safeWriteRegisters(MIS341.V_SOLL*2, commands)
     
     def stopInPosition(self):
-        self.setMaxVelocity(0)
+        self.setMaxVelocity(100)
         actualPosition = self.getActualPosition()
         self.setDesiredPosition(actualPosition)
         self.setOperationMode(OperatingMode.Position)
