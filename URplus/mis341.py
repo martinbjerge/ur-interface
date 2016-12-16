@@ -78,7 +78,6 @@ class MIS341(object):
         self.__logger = logger.__dict__[name]
         self.__motorId = motorId
         self.__client = ModbusClient(host=host)
-        #self.__client = ModbusClient(method='rtu', port=comport, baudrate=19200, databits=8, bytesize=8, parity='E', stopbits=1)
         self.__reversed = reversed
         self.__miniumPollTime = 0.004  # see 7.2.5 in ethernet user guide for motor
         self.__clearToSend = True
@@ -142,10 +141,69 @@ class MIS341(object):
         result = self.__safeWriteRegisters(MIS341.V_SOLL*2, commands)
     
     def stopInPosition(self):
-        self.setMaxVelocity(100)
+        self.setMaxVelocity(0)
+        time.sleep(1)
         actualPosition = self.getActualPosition()
         self.setDesiredPosition(actualPosition)
         self.setOperationMode(OperatingMode.Position)
+        self.setMaxVelocity(50)
+    
+    def getStatus(self):
+        result = self.__safeReadHoldingRegisters(MIS341.STATUSBITS*2, 2)
+        bitArray = BitArray(uint = result.registers[0], length=16)
+        if(bitArray[14]):
+            print("Status - Motor " + str(self.__motorId) + " Auto Correction Active")
+        if(bitArray[13]):
+            print("Status - Motor " + str(self.__motorId) + " In Physical Position")
+        if(bitArray[12]):
+            print("Status - Motor " + str(self.__motorId) + " At velocity")
+        if(bitArray[11]):
+            print("Status - Motor " + str(self.__motorId) + " In Position")
+        if(bitArray[10]):
+            print("Status - Motor " + str(self.__motorId) + " Accelerating")
+        if(bitArray[9]):
+            print("Status - Motor " + str(self.__motorId) + " Decelerating")
+        if(bitArray[12]):
+            print("Status - Motor " + str(self.__motorId) + " General Error")
+        
+    
+    def getWarnings(self):
+        result = self.__safeReadHoldingRegisters(MIS341.WARN_BITS*2, 2)
+        bitArray = BitArray(uint = result.registers[0], length=16)
+        if(bitArray[15]):
+            print("Warning - Motor " + str(self.__motorId) + " Positive limit Active")
+        if(bitArray[14]):
+            print("Warning - Motor " + str(self.__motorId) + " Negative limit Active")
+        if(bitArray[13]):
+            print("Warning - Motor " + str(self.__motorId) + " Positive limit has been Active")
+        if(bitArray[12]):
+            print("Warning - Motor " + str(self.__motorId) + " Negative limit has been Active")
+        if(bitArray[11]):
+            print("Warning - Motor " + str(self.__motorId) + " Low Bus Voltage")
+        if(bitArray[14]):
+            print("Warning - Motor " + str(self.__motorId) + " Temperature has been above 80C")
+    
+    
+    def getErrors(self):
+        result = self.__safeReadHoldingRegisters(MIS341.ERR_BITS*2, 2)
+        bitArray = BitArray(uint = result.registers[0], length=16)
+        if(bitArray[15]):
+            print("Error - Motor " + str(self.__motorId) + " General Error")
+        if(bitArray[13]):
+            print("Error - Motor " + str(self.__motorId) + " Output driver Error - Output is short circuited")
+        if(bitArray[12]):
+            print("Error - Motor " + str(self.__motorId) + " Position Limit Error")
+        if(bitArray[11]):
+            print("Error - Motor " + str(self.__motorId) + " Low bus voltage Error")
+        if(bitArray[10]):
+            print("Error - Motor " + str(self.__motorId) + " Over voltage Error")
+        if(bitArray[9]):
+            print("Error - Motor " + str(self.__motorId) + " Temperature too high (above 90C)")
+        if(bitArray[8]):
+            print("Error - Motor " + str(self.__motorId) + " Internal Error")
+        if(bitArray[7]):
+            print("Error - Motor " + str(self.__motorId) + " Encoder Lost position")
+    
     
     def getActualVelocity(self):
         '''
