@@ -57,6 +57,7 @@ class MIS341(object):
     Mode_Reg = 2
     P_SOLL = 3
     V_SOLL = 5
+    STANDBY_CURRENT = 9
     P_IST = 10
     V_IST = 12
     STATUSBITS = 25
@@ -80,6 +81,7 @@ class MIS341(object):
         self.__client = ModbusClient(host=host)
         self.__reversed = reversed
         self.__miniumPollTime = 0.004  # see 7.2.5 in ethernet user guide for motor
+        
         self.__clearToSend = True
         self.__minimumPollTimer = threading.Timer(interval=self.__miniumPollTime, function=self.__resetClearToSend)
         
@@ -142,7 +144,7 @@ class MIS341(object):
     
     def stopInPosition(self):
         self.setMaxVelocity(0)
-        time.sleep(1)
+        #time.sleep(1)
         actualPosition = self.getActualPosition()
         self.setDesiredPosition(actualPosition)
         self.setOperationMode(OperatingMode.Position)
@@ -243,6 +245,12 @@ class MIS341(object):
     
     def __setStartMode(self):
         pass
+    
+    def setStandbyCurrent(self):
+        commands = []
+        commands.append(300)
+        commands.append(0)
+        result = self.__safeWriteRegisters(MIS341.STANDBY_CURRENT*2, commands)
     
     def getActualPosition(self):
         result = self.__safeReadHoldingRegisters(MIS341.P_IST*2, 2)
