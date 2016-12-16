@@ -16,6 +16,7 @@ from bitstring import BitArray
 import threading
 import URBasic
 
+
 class OperatingMode:
     Passive = 0
     Velocity = 1
@@ -28,9 +29,23 @@ class OperatingMode:
 
 class MIS341(object):
     '''
-    This class is running a MIS341 motor via Modbus RTU over serial
-    In the future we expect to change this over to TCP
+    This class is running a MIS341 motor via Modbus over to TCP
     '''
+    Mode_Reg = 2
+    P_SOLL = 3
+    V_SOLL = 5
+    P_IST = 10
+    V_IST = 12
+    STATUSBITS = 25
+    TEMP = 26
+    ERR_BITS = 35
+    WARN_BITS = 36
+    STARTMODE = 37
+    
+    SETUP_BITS = 124    #Direction can be inversed here
+    
+    
+    
     def __init__(self, host, motorId=1, reversed=False):
         '''
         Constructor - takes comport and the motorId configured in the motor
@@ -47,28 +62,14 @@ class MIS341(object):
         self.__minimumPollTimer = threading.Timer(interval=self.__miniumPollTime, function=self.__resetClearToSend)
         
         
-    def __safeReadHoldingRegisters(self, registerNumber, length):
-        while(not self.__clearToSend):
-            pass
-        self.__clearToSend=False
-        result = self.__client.read_holding_registers(registerNumber,length, unit=self.__motorId)
-        self.__minimumPollTimer.start()
-        return result
     
-    def __safeWriteRegisters(self, registerNumber, commands):
-        while(not self.__clearToSend):
-            pass
-        self.__clearToSend=False
-        result = self.__client.write_registers(registerNumber, commands, unit=self.__motorId)
-        self.__minimumPollTimer.start()
-        return result
         
     def getOperationMode(self):
         '''
         Get the current Operation MOde of the motor 
         Returns OperatingMode - see OperatingMode class for details
         '''
-        result = self.__safeReadHoldingRegisters(4, 2)
+        result = self.__safeReadHoldingRegisters(MIS341.Mode_Reg*2, 2)
         return result.registers[0]
     
     def setOperationMode(self, operationMode):
@@ -79,22 +80,24 @@ class MIS341(object):
         commands = []
         commands.append(operationMode)
         commands.append(0)
-        result = self.__safeWriteRegisters(4, commands)
+        result = self.__safeWriteRegisters(MIS341.Mode_Reg*2, commands)
         #print(result.function_code)
     
     def getDesiredPosition(self):
-        pass
+        result = self.__safeReadHoldingRegisters(MIS341.P_SOLL*2, 2)
+        return self.__getValueFromTwoRegisters(result.registers)
     
     def setDesiredPosition(self, position):
-        pass
+        commands = self.__getTwoRegistersFromValue(position)
+        result = self.__safeWriteRegisters(MIS341.P_SOLL*2, commands)
     
     def getMaxVelocity(self):
         '''
         Get the currently configured MaxVelocity
         returns RPM
         '''
-        result = self.__safeReadHoldingRegisters(10, 2)
-        return self.__getValueFromTwoRegisters(result)
+        result = self.__safeReadHoldingRegisters(MIS341.V_SOLL*2, 2)
+        return self.__getValueFromTwoRegisters(result)/100
         
     
     def setMaxVelocity(self, rpm):
@@ -113,22 +116,93 @@ class MIS341(object):
         commands = []
         commands.append(lowWord.uint)
         commands.append(highWord.uint)
-        result = self.__safeWriteRegisters(10, commands)
+        result = self.__safeWriteRegisters(MIS341.V_SOLL*2, commands)
+    
+    def stopInPosition(self):
+        self.setMaxVelocity(0)
+        actualPosition = self.getActualPosition()
+        self.setDesiredPosition(actualPosition)
+        self.setOperationMode(OperatingMode.Position)
     
     def getActualVelocity(self):
         '''
         Get current actual velocity
         returns RPM
         '''
-        result = self.__safeReadHoldingRegisters(24, 2)
-        return self.__getValueFromTwoRegisters(result)
+        result = self.__safeReadHoldingRegisters(MIS341.V_IST*2, 2)
+        return self.__getValueFromTwoRegisters(result)/100
     
     def getTemperature(self):
         '''
         Gets the current temperature in the motor electronics in Celcius
         '''
-        result = self.__safeReadHoldingRegisters(52, 2)
+        result = self.__safeReadHoldingRegisters(MIS341.TEMP*2, 2)
         return result.registers[0]*2.27
+    
+    def resetControlModule(self):
+        '''
+        Reset electronics module - needs to be tested in an actual error condition
+        '''
+        commands = []
+        commands.append(1)
+        commands.append(0)
+        self.__safeWriteRegisters(32798, commands)
+    
+    def resetMotorAndControlModule(self):
+        '''
+        Reset both motor and electronics module in one call - needs to be tested in an actual error condition
+        '''
+        commands = []
+        commands.append(257)
+        commands.append(0)
+        self.__safeWriteRegisters(32798, commands)
+    
+    def __getStartMode(self):
+        pass
+    
+    def __setStartMode(self):
+        pass
+    
+    def getActualPosition(self):
+        result = self.__safeReadHoldingRegisters(MIS341.P_IST*2, 2)
+        return self.__getValueFromTwoRegisters(result.registers)
+    
+    '''
+    def __getTargetPosition(self):
+        result = self.__safeReadHoldingRegisters(MIS341.P_SOLL*2, 2)
+        return self.__getValueFromTwoRegisters(result.registers)
+    
+    def __setTargetPosition(self, position):
+        commands = []
+        commands.append(position)   #todo - must fix two registers
+        commands.append(0)
+        self.__safeWriteRegisters(MIS341.P_SOLL*2, commands)
+    '''
+    
+    def __reverseDirection(self):
+        pass
+        
+        
+        
+    def __safeReadHoldingRegisters(self, registerNumber, length):
+        while(not self.__clearToSend):
+            pass
+        self.__clearToSend=False
+        result = self.__client.read_holding_registers(registerNumber,length, unit=self.__motorId)
+        self.__minimumPollTimer.start()
+        return result
+    
+    
+    
+    def __safeWriteRegisters(self, registerNumber, commands):
+        while(not self.__clearToSend):
+            pass
+        self.__clearToSend=False
+        result = self.__client.write_registers(registerNumber, commands, unit=self.__motorId)
+        self.__minimumPollTimer.start()
+        return result
+    
+    
     
     def __setSubnet(self):
         oldSubnet = self.__safeReadHoldingRegisters(32776, 2)
@@ -167,14 +241,7 @@ class MIS341(object):
         self.__safeWriteRegisters(32774, commands)
         newAddress = self.__safeReadHoldingRegisters(32774, 2)
         
-    def resetModule(self):
-        '''
-        Reset electronics module - needs to be tested in an actual error condition
-        '''
-        commands = []
-        commands.append(1)
-        commands.append(0)
-        self.__safeWriteRegisters(32798, commands)
+    
         
     def __saveToFlash(self):
         commands = []
@@ -185,12 +252,28 @@ class MIS341(object):
     def __resetClearToSend(self):
         self.__clearToSend = True
         self.__minimumPollTimer = threading.Timer(interval=self.__miniumPollTime, function=self.__resetClearToSend)
-          
+    
+    def __getTwoRegistersFromValue(self, value):
+        commands = []
+        value = int(value)
+        b = Bits(int=value, length=32)
+        
+        lowWord = Bits(bin = b[16:32].bin)
+        commands.append(lowWord.uint)
+        
+        highWord = Bits(bin = b[0:16].bin)
+        commands.append(highWord.uint) 
+        return commands      
         
     def __getValueFromTwoRegisters(self, registers):
-        if(registers.registers[1]==65535):
-            temp = 65535-registers.registers[0]
-            return (temp)*-1/100
-        else: 
-            return registers.registers[0]/100
+        #if(registers.registers[1]==65535):
+        #    temp = 65535-registers.registers[0]
+        #    return (temp)*-1/100
+        #else: 
+        #    return registers.registers[0]/100
+        lowWord = BitArray(uint=registers[0], length=16)
+        highWord = BitArray(uint=registers[1], length=16)
+        total = BitArray(lowWord)
+        total.insert(highWord, 0)
+        return total.int
             

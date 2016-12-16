@@ -21,8 +21,8 @@ class   RopeDrives(object):
         self.__motorRight = MIS341(host='192.168.0.12', motorId=1, reversed=False)
         self.__motorLeft.setMaxVelocity(0)
         self.__motorRight.setMaxVelocity(0)
-        self.__motorLeft.setOperationMode(OperatingMode.Velocity)
-        self.__motorRight.setOperationMode(OperatingMode.Velocity)
+        self.__motorLeft.setOperationMode(OperatingMode.Position)
+        self.__motorRight.setOperationMode(OperatingMode.Position)
         self.__drumRadius = 0.08
         self.__gearRatio = 50
         
@@ -36,7 +36,9 @@ class   RopeDrives(object):
         
         self.__motorLeft.setMaxVelocity(self.__getMotorRPMFromVelocity(velocity))
         self.__motorRight.setMaxVelocity(self.__getMotorRPMFromVelocity(velocity))
-        time.sleep(0.1)
+        self.__motorLeft.setOperationMode(OperatingMode.Velocity)
+        self.__motorRight.setOperationMode(OperatingMode.Velocity)
+        
                 
     
     def down(self, velocity):
@@ -49,7 +51,8 @@ class   RopeDrives(object):
         
         self.__motorLeft.setMaxVelocity(self.__getMotorRPMFromVelocity(velocity)*(-1))
         self.__motorRight.setMaxVelocity(self.__getMotorRPMFromVelocity(velocity)*(-1))
-        time.sleep(0.1)
+        self.__motorLeft.setOperationMode(OperatingMode.Velocity)
+        self.__motorRight.setOperationMode(OperatingMode.Velocity)
     
     '''
     def turnClockwise(self):
@@ -69,7 +72,8 @@ class   RopeDrives(object):
             raise ValueError('Velocity not allowed')
         
         self.__motorLeft.setMaxVelocity(self.__getMotorRPMFromVelocity(velocity))
-        self.__motorRight.setMaxVelocity(0)
+        self.__motorLeft.setOperationMode(OperatingMode.Velocity)
+        #self.__motorRight.setMaxVelocity(0)
         
     
     def rightUp(self, velocity):
@@ -81,8 +85,9 @@ class   RopeDrives(object):
         if(velocity>0.35 or velocity < 0):
             raise ValueError('Velocity not allowed')
         
-        self.__motorLeft.setMaxVelocity(0)
+        #self.__motorLeft.setMaxVelocity(0)
         self.__motorRight.setMaxVelocity(self.__getMotorRPMFromVelocity(velocity))
+        self.__motorRight.setOperationMode(OperatingMode.Velocity)
     
     def leftDown(self, velocity):
         '''
@@ -94,7 +99,8 @@ class   RopeDrives(object):
             raise ValueError('Velocity not allowed')
         
         self.__motorLeft.setMaxVelocity(self.__getMotorRPMFromVelocity(velocity)*(-1))
-        self.__motorRight.setMaxVelocity(0)
+        self.__motorLeft.setOperationMode(OperatingMode.Velocity)
+        #self.__motorRight.setMaxVelocity(0)
     
     def rightDown(self, velocity):
         '''
@@ -105,16 +111,16 @@ class   RopeDrives(object):
         if(velocity>0.35 or velocity < 0):
             raise ValueError('Velocity not allowed')
         
-        self.__motorLeft.setMaxVelocity(0)
+        #self.__motorLeft.setMaxVelocity(0)
         self.__motorRight.setMaxVelocity(self.__getMotorRPMFromVelocity(velocity)*(-1))
+        self.__motorRight.setOperationMode(OperatingMode.Velocity)
     
     def stop(self):
         '''
         Stop the robot
         '''
-        self.__motorLeft.setMaxVelocity(0)
-        self.__motorRight.setMaxVelocity(0)
-        time.sleep(0.1)
+        self.__motorLeft.stopInPosition()
+        self.__motorRight.stopInPosition()
         
     def __getMotorRPMFromVelocity(self, velocity):
         drumRPM = (velocity*60) / ( 2*np.pi*self.__drumRadius)
