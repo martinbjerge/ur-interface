@@ -84,8 +84,10 @@ class MIS341(object):
         
         self.__clearToSend = True
         self.__minimumPollTimer = threading.Timer(interval=self.__miniumPollTime, function=self.__resetClearToSend)
+        self.__stopRunningFlag = False
         
-        
+    def close(self):
+        self.__stopRunningFlag = True
     
         
     def getOperationMode(self):
@@ -152,80 +154,20 @@ class MIS341(object):
     
     def getStatus(self):
         result = self.__safeReadHoldingRegisters(MIS341.STATUSBITS*2, 2)
-        bitArray = BitArray(uint = result.registers[0], length=16)
-        if(bitArray[14]):
-            pass
-            #print("Status - Motor " + str(self.__motorId) + " Auto Correction Active")
-        if(bitArray[13]):
-            pass
-            #print("Status - Motor " + str(self.__motorId) + " In Physical Position")
-        if(bitArray[12]):
-            pass
-            #print("Status - Motor " + str(self.__motorId) + " At velocity")
-        if(bitArray[11]):
-            pass
-            #print("Status - Motor " + str(self.__motorId) + " In Position")
-        if(bitArray[10]):
-            pass
-            #print("Status - Motor " + str(self.__motorId) + " Accelerating")
-        if(bitArray[9]):
-            pass
-            #print("Status - Motor " + str(self.__motorId) + " Decelerating")
-        if(bitArray[12]):
-            pass
-            #print("Status - Motor " + str(self.__motorId) + " General Error")
+        return result
+        
+        
         
     
     def getWarnings(self):
         result = self.__safeReadHoldingRegisters(MIS341.WARN_BITS*2, 2)
-        bitArray = BitArray(uint = result.registers[0], length=16)
-        if(bitArray[15]):
-            pass
-            #print("Warning - Motor " + str(self.__motorId) + " Positive limit Active")
-        if(bitArray[14]):
-            pass
-            #print("Warning - Motor " + str(self.__motorId) + " Negative limit Active")
-        if(bitArray[13]):
-            pass
-            #print("Warning - Motor " + str(self.__motorId) + " Positive limit has been Active")
-        if(bitArray[12]):
-            pass
-            #print("Warning - Motor " + str(self.__motorId) + " Negative limit has been Active")
-        if(bitArray[11]):
-            pass
-            #print("Warning - Motor " + str(self.__motorId) + " Low Bus Voltage")
-        if(bitArray[14]):
-            pass
-            #print("Warning - Motor " + str(self.__motorId) + " Temperature has been above 80C")
-    
+        return result
+        
     
     def getErrors(self):
         result = self.__safeReadHoldingRegisters(MIS341.ERR_BITS*2, 2)
-        bitArray = BitArray(uint = result.registers[0], length=16)
-        if(bitArray[15]):
-            pass
-            #print("Error - Motor " + str(self.__motorId) + " General Error")
-        if(bitArray[13]):
-            pass
-            #print("Error - Motor " + str(self.__motorId) + " Output driver Error - Output is short circuited")
-        if(bitArray[12]):
-            pass
-            #print("Error - Motor " + str(self.__motorId) + " Position Limit Error")
-        if(bitArray[11]):
-            pass
-            #print("Error - Motor " + str(self.__motorId) + " Low bus voltage Error")
-        if(bitArray[10]):
-            pass
-            #print("Error - Motor " + str(self.__motorId) + " Over voltage Error")
-        if(bitArray[9]):
-            pass
-            #print("Error - Motor " + str(self.__motorId) + " Temperature too high (above 90C)")
-        if(bitArray[8]):
-            pass
-            #print("Error - Motor " + str(self.__motorId) + " Internal Error")
-        if(bitArray[7]):
-            pass
-            #print("Error - Motor " + str(self.__motorId) + " Encoder Lost position")
+        return result
+        
     
     
     def getActualVelocity(self):
@@ -306,7 +248,8 @@ class MIS341(object):
             pass
         self.__clearToSend=False
         result = self.__client.read_holding_registers(registerNumber,length, unit=self.__motorId)
-        self.__minimumPollTimer.start()
+        if(not self.__stopRunningFlag): 
+            self.__minimumPollTimer.start()
         return result
     
     
@@ -368,7 +311,8 @@ class MIS341(object):
         
     def __resetClearToSend(self):
         self.__clearToSend = True
-        self.__minimumPollTimer = threading.Timer(interval=self.__miniumPollTime, function=self.__resetClearToSend)
+        if(not self.__stopRunningFlag):
+            self.__minimumPollTimer = threading.Timer(interval=self.__miniumPollTime, function=self.__resetClearToSend)
     
     def __getTwoRegistersFromValue(self, value):
         commands = []
