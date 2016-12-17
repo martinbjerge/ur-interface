@@ -150,7 +150,14 @@ class RobotModel(object):
                          'output_double_register_21':None,
                          'output_double_register_22':None,
                          'output_double_register_23':None,
-                         'urPlus_force_torque_sensor':None}
+                         'urPlus_force_torque_sensor':None,
+                         'urPlus_motor_left_temperature':None,
+                         'urPlus_motor_right_temperature':None,
+                         'urPlus_motor_left_position':None,
+                         'urPlus_motor_right_position':None,
+                         'urPlus_motor_left_speed':None,
+                         'urPlus_motor_right_speed':None
+                         }
                             
         
         self.rtcConnectionState = None
