@@ -250,7 +250,8 @@ class RealTimeClient(object):
         '''
         Sending program str via socket
         '''
-        programSend = False        
+        programSend = False      
+        self.__robotModel.forceRemoteActiveFlag = False
         while not self.__robotModel.stopRunningFlag and not programSend:
             try:
                 (_, writable, _) = select.select([], [self.__sock], [], DEFAULT_TIMEOUT)

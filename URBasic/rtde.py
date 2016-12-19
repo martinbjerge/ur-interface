@@ -543,7 +543,8 @@ class RTDE(threading.Thread): #, metaclass=Singleton
                     if command == command and len(self.__buf) == 0:
                         return data
                     if command == command and len(self.__buf) != 0:
-                        self._logger.warning('skipping package')
+                        pass
+                        #self._logger.warning('skipping package')
                 else:
                     break
         return None

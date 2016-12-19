@@ -74,7 +74,7 @@ class UrScript(object):
             time.sleep(0.002)
 
         if self.robotConnector.RobotModel.rtcProgramExecutionError:
-            raise NotImplementedError('Robot program execution error!!!')
+            raise RuntimeError('Robot program execution error!!!')
         
     def movej(self, q=None, a=1.4, v =1.05, t =0, r =0, wait=True, pose=None):
         '''

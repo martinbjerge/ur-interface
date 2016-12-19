@@ -64,7 +64,6 @@ class UrScriptExt(URBasic.urScript.UrScript):
         logger = URBasic.dataLogging.DataLogging()
         name = logger.AddEventLogging(__name__)        
         self.__logger = logger.__dict__[name]
-        self.__force_remote_set=False
         self.print_actual_tcp_pose()
         self.print_actual_joint_positions()
         self.__logger.info('Init done')
@@ -282,8 +281,7 @@ class UrScriptExt(URBasic.urScript.UrScript):
 end
 '''
         self.robotConnector.RealTimeClient.SendProgram(prog.format(**locals()))
-        self.__force_remote_set=True
-        return True
+        self.robotConnector.RobotModel.forceRemoteActiveFlag=True
     
     def set_force_remote(self, task_frame=[0.0, 0.0, 0.0,  0.0, 0.0, 0.0], selection_vector=[0, 0, 0,  0, 0, 0], wrench=[0.0, 0.0, 0.0,  0.0, 0.0, 0.0], limits=[0.1, 0.1, 0.1,  0.1, 0.1, 0.1],f_type=2):
         '''
@@ -322,9 +320,10 @@ end
         Return Value:
         Status (bool): Status, True if parameters successfully updated.
         '''
+        if not self.robotConnector.RobotModel.forceRemoteActiveFlag:
+            self.set_force_remote(task_frame, selection_vector, wrench, limits, f_type)
         
-        
-        if self.robotConnector.RTDE.rtde_is_running() and self.__force_remote_set:
+        if self.robotConnector.RTDE.rtde_is_running() and self.robotConnector.RobotModel.forceRemoteActiveFlag:
             self.robotConnector.RTDE.set_rtde_data('input_int_register_0', selection_vector[0])
             self.robotConnector.RTDE.set_rtde_data('input_int_register_1', selection_vector[1])
             self.robotConnector.RTDE.set_rtde_data('input_int_register_2', selection_vector[2])
@@ -359,7 +358,7 @@ end
             return True
             
         else:
-            if not self.__force_remote_set:
+            if not self.robotConnector.RobotModel.forceRemoteActiveFlag:
                 self.__logger.warning('Force Remote not initialized')
             else:
                 self.__logger.warning('RTDE is not running')
