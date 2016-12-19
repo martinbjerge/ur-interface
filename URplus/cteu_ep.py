@@ -39,6 +39,10 @@ class CTEU_EP(object):
         '''
         Constructor - takes ip address to the CTEU-EP box
         '''
+        logger = URBasic.dataLogging.DataLogging()        
+        name = logger.AddEventLogging(__name__)        
+        self.__logger = logger.__dict__[name]
+
         if(False):
             assert isinstance(robotModel, URBasic.robotModel.RobotModel)  ### This line is to get code completion for RobotModel
         self.__robotModel = robotModel
@@ -48,7 +52,7 @@ class CTEU_EP(object):
         self.__client = ModbusClient(host=host)
         connected = self.__client.connect()
         if(connected):
-            print("Modbus connected to CTEU-EP")
+            self.__logger.info("Modbus connected to CTEU-EP")
         else:
             pass    #todo - nice error handling and reconnect
         
