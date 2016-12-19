@@ -359,7 +359,7 @@ end
             return True
             
         else:
-            if self.__force_remote_set:
+            if not self.__force_remote_set:
                 self.__logger.warning('Force Remote not initialized')
             else:
                 self.__logger.warning('RTDE is not running')
