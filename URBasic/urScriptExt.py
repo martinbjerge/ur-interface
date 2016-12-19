@@ -321,7 +321,7 @@ end
         Status (bool): Status, True if parameters successfully updated.
         '''
         if not self.robotConnector.RobotModel.forceRemoteActiveFlag:
-            self.set_force_remote(task_frame, selection_vector, wrench, limits, f_type)
+            self.init_force_remote(task_frame, f_type)
         
         if self.robotConnector.RTDE.rtde_is_running() and self.robotConnector.RobotModel.forceRemoteActiveFlag:
             self.robotConnector.RTDE.set_rtde_data('input_int_register_0', selection_vector[0])
@@ -424,7 +424,6 @@ end
         timeoutcnt = 125*timeout
         wrench = np.array(wrench)
         wrench_gain = np.array(wrench_gain)
-        self.init_force_remote(task_frame, f_type)
         self.set_force_remote(task_frame, selection_vector, wrench, limits, f_type)
         
         dist = np.array(range(60),float)
