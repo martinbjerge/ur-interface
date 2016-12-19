@@ -317,7 +317,7 @@ end
         if(wait):
             self.waitRobotIdleOrStopFlag()
  
-    def end_force_mode(self, wait=True):
+    def end_force_mode(self, wait=False):
         '''
         Resets the robot mode from force mode to normal operation.
         This is also done when a program stops.
