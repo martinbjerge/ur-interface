@@ -327,11 +327,6 @@ class MIS341(object):
         return commands      
         
     def __getValueFromTwoRegisters(self, registers):
-        #if(registers.registers[1]==65535):
-        #    temp = 65535-registers.registers[0]
-        #    return (temp)*-1/100
-        #else: 
-        #    return registers.registers[0]/100
         lowWord = BitArray(uint=registers[0], length=16)
         highWord = BitArray(uint=registers[1], length=16)
         total = BitArray(lowWord)
