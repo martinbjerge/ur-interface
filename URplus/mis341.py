@@ -57,6 +57,7 @@ class MIS341(object):
     Mode_Reg = 2
     P_SOLL = 3
     V_SOLL = 5
+    RUN_CURREMT = 7
     STANDBY_CURRENT = 9
     P_IST = 10
     V_IST = 12
@@ -176,8 +177,12 @@ class MIS341(object):
         returns RPM
         '''
         result = self.__safeReadHoldingRegisters(MIS341.V_IST*2, 2)
-        return self.__getValueFromTwoRegisters(result)/100
-    
+        return self.__getValueFromTwoRegisters(result.registers)/100
+
+    def getActualPosition(self):
+        result = self.__safeReadHoldingRegisters(MIS341.P_IST*2, 2)
+        return self.__getValueFromTwoRegisters(result.registers)
+   
     def getTemperature(self):
         '''
         Gets the current temperature in the motor electronics in Celcius
@@ -222,9 +227,18 @@ class MIS341(object):
         commands.append(0)
         result = self.__safeWriteRegisters(MIS341.STANDBY_CURRENT*2, commands)
     
-    def getActualPosition(self):
-        result = self.__safeReadHoldingRegisters(MIS341.P_IST*2, 2)
-        return self.__getValueFromTwoRegisters(result.registers)
+    def setRunCurrent(self, current):
+        '''
+        Set the StandbyCurrent for the motor - this will reflect in the holding power 
+        when the motor is stopped in position
+        '''
+        value = current/5.87*1000
+        if(value > 511):
+            raise ValueError("Current out of range")
+        commands = []
+        commands.append(int(value))
+        commands.append(0)
+        result = self.__safeWriteRegisters(MIS341.RUN_CURREMT*2, commands)
     
     '''
     def __getTargetPosition(self):

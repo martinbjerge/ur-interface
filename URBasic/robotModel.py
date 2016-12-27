@@ -164,6 +164,7 @@ class RobotModel(object):
         self.rtcProgramRunning = False
         self.rtcProgramExecutionError = False
         self.stopRunningFlag = False
+        self.forceRemoteActiveFlag = False 
 
         # UR plus content
         self.hasForceTorqueSensor = False

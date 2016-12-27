@@ -59,11 +59,11 @@ class ADAM6017(object):
         Constructor takes the ip address off the ADAM6017 box
         '''
         if host is None: #Only for enable code completion
+            self.connected = False
             return 
         self.__client = ModbusClient(host=host)
         self.__inputRanges = self.__getAllInputRanges()
-        connected = self.__client.connect()
-        print(connected)
+        self.connected = self.__client.connect()
         
     def setDigitalOutput(self, outputNumber, state):
         '''

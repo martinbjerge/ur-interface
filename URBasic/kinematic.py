@@ -513,6 +513,7 @@ def Vektor_from_Base_to_TCP(vectorBase,axisangle):
     # Defining the unit rotation angle
     eRot=axisangle/angle
     # calculation of the tcp vector using Rodrigues' rotation formula
+    vectorBase = np.array(vectorBase)
     vectorTCP= np.cos(angle)*vectorBase+np.sin(angle)*np.cross(eRot,vectorBase)+(1-np.cos(angle))*np.dot(eRot,vectorBase)*eRot
     return vectorTCP
     
