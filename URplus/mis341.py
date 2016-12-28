@@ -233,7 +233,7 @@ class MIS341(object):
         when the motor is stopped in position
         '''
         value = current/5.87*1000
-        if(value > 511):
+        if(value > 1533):
             raise ValueError("Current out of range")
         commands = []
         commands.append(int(value))
