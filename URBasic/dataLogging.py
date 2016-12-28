@@ -42,7 +42,7 @@ class DataLogging(metaclass=Singleton):
     A module that add general logging functions to the UR Interface framework.
     '''
     
-    def __init__(self,path='.\\log'):
+    def __init__(self,path='C:\\SourceCode\\log'):
         '''
         Constructor that setup a path where log files will be stored.
         '''
@@ -55,14 +55,17 @@ class DataLogging(metaclass=Singleton):
         self.fileDataLogHandler = logging.FileHandler(self.directory + '\\UrDataLog.csv', mode='w')
         self.writeDataLogHeadder = True
 
-    def GetLogPath(self,path='.\\log'):
+    def GetLogPath(self,path='C:\\SourceCode\\log', developerTestingFlag=True):
         '''
         Setup a path where log files will be stored
         Path format .\[path]\YY-mm-dd\HH-MM-SS\
         '''
         #Log path C:\SourceCode\bladecrawler\bladecrawler\log
         if self.directory is None:
-            self.directory =  time.strftime(path + "\\%Y-%m-%d\\%H-%M-%S", time.localtime())
+            if developerTestingFlag:
+                self.directory = path
+            else:
+                self.directory =  time.strftime(path + "\\%Y-%m-%d\\%H-%M-%S", time.localtime())
             if not os.path.exists(self.directory):
                 os.makedirs(self.directory)
                 
