@@ -233,7 +233,7 @@ class MIS341(object):
         when the motor is stopped in position
         '''
         value = current/5.87*1000
-        if(value > 511):
+        if(value > 1533):
             raise ValueError("Current out of range")
         commands = []
         commands.append(int(value))
@@ -341,11 +341,6 @@ class MIS341(object):
         return commands      
         
     def __getValueFromTwoRegisters(self, registers):
-        #if(registers.registers[1]==65535):
-        #    temp = 65535-registers.registers[0]
-        #    return (temp)*-1/100
-        #else: 
-        #    return registers.registers[0]/100
         lowWord = BitArray(uint=registers[0], length=16)
         highWord = BitArray(uint=registers[1], length=16)
         total = BitArray(lowWord)
