@@ -27,6 +27,7 @@ __copyright__ = "Copyright 2016, Rope Robotics ApS, Denmark"
 __license__ = "MIT License"
 
 import logging
+from URBasic.connectionState import ConnectionState
 from URBasic.dashboard import DashBoard
 from URBasic.dataLog import DataLog
 from URBasic.dataLogging import DataLogging
