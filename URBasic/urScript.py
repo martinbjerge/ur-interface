@@ -63,8 +63,10 @@ class UrScript(object):
         name = logger.AddEventLogging(__name__)        
         self.__logger = logger.__dict__[name]
         self.robotConnector = URBasic.robotConnector.RobotConnector(robotModel, host, hasForceTorque)
+        #time.sleep(200)
         while(self.robotConnector.RobotModel.ActualTCPPose() == None):      ## check på om vi er startet
-            time.sleep(0.001)
+            print("waiting for everything to be ready")
+            time.sleep(1)
         self.__logger.info('Init done')
 #############   Module motion   ###############
 

@@ -58,7 +58,7 @@ class ConnectionState:
 class RTDE(threading.Thread): #, metaclass=Singleton
     '''
     Interface to UR robot Real Time Data Exchange interface.
-    For more detailes see this site:
+    See this site for more detail:
     http://www.universal-robots.com/how-tos-and-faqs/how-to/ur-how-tos/real-time-data-exchange-rtde-guide-22229/ 
 
     The constructor takes a UR robot hostname as input and a path to a RTDE configuration file.
@@ -85,21 +85,32 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         logger = URBasic.dataLogging.DataLogging()
         name = logger.AddEventLogging(__name__,log2Consol=False)        
         self._logger = logger.__dict__[name]
-        self.__reconnectTimeout = 60 #Seconds (while in run)
-        self.__dataSend = DataObject()
+        self.__reconnectTimeout = 600 #Seconds (while in run)
+        self.__dataSend = RTDEDataObject()
         self.__conf_filename = conf_filename
         self.__stop_event = True
         threading.Thread.__init__(self)
         self.__dataEvent = threading.Condition()
-        self.__dataAccess = threading.Lock()
+        
         self.__conn_state = ConnectionState.DISCONNECTED
         self.__sock = None
-        self.__output_config = None
-        self.__input_config = {}
-        self.__buf = bytes()
+        self.__rtde_output_names = None
+        self.__rtde_output_config = None
+        self.__rtde_input_names = None
+        self.__rtde_input_config = None
+        
+        
+        self.__controllerVersion = None
+        self.__protocol_version = None
+        
+        self.__packageCounter = 0
+        #self.__receiveTimer = threading.Timer(interval=0.002, function=self.__receive())
+        
         self.start()
-        self.wait_rtde()
+        #self.__wait_rtde()
         self._logger.info('RTDE constructor done')
+
+        
 
 
     def __connect(self):
@@ -123,16 +134,16 @@ class RTDE(threading.Thread): #, metaclass=Singleton
             self.__sock = None
             return False
         
-        try:        
-            time.sleep(2)
-            self.get_controller_version()
-            if not self.__negotiate_protocol_version(1):
-                self._logger.error('Unable to negotiate protocol version')
+        #try:        
+        #    #time.sleep(2)
+        #    self.__get_controller_version()
+        #    if not self.__negotiate_protocol_version(1):
+        #        self._logger.error('Unable to negotiate protocol version')
     
-        except:
-            self.__sock.close()
-            self.__sock = None
-            return False        
+        #except:
+        #    self.__sock.close()
+        #    self.__sock = None
+        #    return False        
         
         return True
 
@@ -146,7 +157,7 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         self.__conn_state = ConnectionState.DISCONNECTED
         return True
 
-    def rtde_is_connected(self):
+    def __rtde_is_connected(self):
         '''
         Returns True if the connection is open.
 
@@ -162,7 +173,7 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         
         return self.__conn_state >= ConnectionState.STARTED
     
-    def get_controller_version(self):
+    def __get_controller_version(self):
         '''
         Returns the software version of the robot controller running the RTDE server.
 
@@ -172,14 +183,17 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         bugfix (int)
         '''
         cmd = Command.RTDE_GET_URCONTROL_VERSION
-        (major, minor, bugfix, build) = self.__sendAndReceive(cmd)
-        if major and minor and bugfix:
-            self._logger.info('Controller version: ' + str(major) + '.' + str(minor) + '.' + str(bugfix) + '-' + str(build))
-            if major <= 3 and minor <= 2 and bugfix < 19171:
-                self._logger.error("Please upgrade your controller to minimally version 3.2.19171")
-                self.stop()
-            return major, minor, bugfix
-        return None, None, None
+        self.__send(cmd)
+        
+        #(major, minor, bugfix, build) = self.__receive(cmd)
+        
+        #if major and minor and bugfix:
+        #    self._logger.info('Controller version: ' + str(major) + '.' + str(minor) + '.' + str(bugfix) + '-' + str(build))
+        #    if major <= 3 and minor <= 2 and bugfix < 19171:
+        #        self._logger.error("Please upgrade your controller to minimum version 3.2.19171")
+        #        self.stop()
+        #    return major, minor, bugfix
+        #return None, None, None
 
     def __negotiate_protocol_version(self, protocol):
         '''
@@ -196,98 +210,106 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         '''
         cmd = Command.RTDE_REQUEST_PROTOCOL_VERSION
         payload = struct.pack('>H',protocol)
-        return bool(self.__sendAndReceive(cmd, payload))
+        self.__send(cmd, payload)
+        #result = self.__receive(cmd)
+        #return bool(result) #Why return bool when we actually get the protocol number back?
+        #return bool(self.__sendAndReceive(cmd, payload))
     
-    def send_rtde_input_setup(self, variables=None, types=[], initValues=None):
+    def __setup_rtde_input(self, input_variables=None, types=[], initValues=None):
         '''
         Configure an input package that the external(this) application will send to the robot controller. 
-        An input package is a collection of input variables that the external application will provide 
+        An input package is a collection of input input_variables that the external application will provide 
         to the robot controller in a single update. Variables is a list of variable names and should be 
         a subset of the names supported as input by the RTDE interface.The list of types is optional, 
-        but if any types are provided it should have the same length as the variables list. 
+        but if any types are provided it should have the same length as the input_variables list. 
         The provided types will be matched with the types that the RTDE interface expects and the 
         function returns None if they are not equal. Multiple input packages can be configured. 
         The returned InputObject has a reference to the recipe id which is used to identify the 
         specific input format when sending an update.
-        If variables is empty, xml configuration file is used.
+        If input_variables is empty, xml configuration file is used.
 
         Input parameters:
-        variables (list<string> or Str): [Optional] Variable names from the list of possible RTDE inputs
-        types (list<string> or str): [Optional] Types matching the variables
+        input_variables (list<string> or Str): [Optional] Variable names from the list of possible RTDE inputs
+        types (list<string> or str): [Optional] Types matching the input_variables
         
         Return value:        
         success (boolean)
         '''
         
-        if variables is None:        
+        if input_variables is None:        
             tree = ET.parse(self.__conf_filename)
             root = tree.getroot()
 
             #setup data that can be send
             recive = root.find('send')
-            variables = []
+            input_variables = []
             initValues = []
             for child in recive:
-                variables.append(child.attrib['name'])
+                input_variables.append(child.attrib['name'])
                 initValues.append(float(child.attrib['initValue']))
         
         cmd = Command.RTDE_CONTROL_PACKAGE_SETUP_INPUTS
-        if type(variables) is list:
-            payload = ','.join(variables)
-        elif type(variables) is str:
-            payload = variables
+        if type(input_variables) is list:
+            payload = ','.join(input_variables)
+        elif type(input_variables) is str:
+            payload = input_variables
         else:
-            self._logger.error('Variables must be list of stings or a single string, variables is: ' + str(type(variables)))
+            self._logger.error('Variables must be list of stings or a single string, input_variables is: ' + str(type(input_variables)))
             return None
         
+        self.__rtde_input_names = input_variables
+        
         payload = bytes(payload, 'utf-8')
-        result = self.__sendAndReceive(cmd, payload)
-        if result is None:
-            self._logger.debug('Could not send input configuration')
-            return False
-        if len(types)!=0 and not self.__list_equals(result.types, types):
-            self._logger.error('Data type inconsistency for input setup: ' +
-                     str(types) + ' - ' +
-                     str(result.types))
-            return None
-        result.names = variables
-        self.__input_config[result.id] = result
-        self.__dataSend = DataObject.create_empty(variables, result.id)
-        if initValues is not None:
-            for ii in range(len(variables)):
-                if 'UINT8' == result.types[ii]:
-                    self.set_rtde_data(variables[ii], int(initValues[ii]))
-                elif 'UINT32' == result.types[ii]:
-                    self.set_rtde_data(variables[ii], int(initValues[ii]))
-                elif 'INT32' == result.types[ii]:
-                    self.set_rtde_data(variables[ii], int(initValues[ii]))
-                elif 'DOUBLE' == result.types[ii]:
-                    self.set_rtde_data(variables[ii], (initValues[ii]))
-                else:
-                    self._logger.error('Unknown data type')
+        self.__send(cmd, payload)
+        
+        #result = self.__receive(cmd)
+        ##result = self.__sendAndReceive(cmd, payload)
+        #if result is None:
+        #    self._logger.debug('Could not send input configuration')
+        #    return False
+        #if len(types)!=0 and not self.__list_equals(result.types, types):
+        #    self._logger.error('Data type inconsistency for input setup: ' +
+        #             str(types) + ' - ' +
+        #             str(result.types))
+        #    return None
+        #result.names = input_variables
+        #self.__rtde_input_config[result.id] = result
+        #self.__dataSend = RTDEDataObject.create_empty(input_variables, result.id)
+        #if initValues is not None:
+        #    for ii in range(len(input_variables)):
+        #        if 'UINT8' == result.types[ii]:
+        #            self.set_rtde_data(input_variables[ii], int(initValues[ii]))
+        #        elif 'UINT32' == result.types[ii]:
+        #            self.set_rtde_data(input_variables[ii], int(initValues[ii]))
+        #        elif 'INT32' == result.types[ii]:
+        #            self.set_rtde_data(input_variables[ii], int(initValues[ii]))
+        #        elif 'DOUBLE' == result.types[ii]:
+        #            self.set_rtde_data(input_variables[ii], (initValues[ii]))
+        #        else:
+        #            self._logger.error('Unknown data type')
         return True
  
-    def send_rtde_output_setup(self, variables=None, types=[]):
+    def __setup_rtde_output(self, output_variables=None, types=[]):
         '''
         Configure an output package that the robot controller will send to the 
         external(this) application at the control frequency. Variables is a list of 
         variable names and should be a subset of the names supported as output by the 
         RTDE interface. The list of types is optional, but if any types are provided 
-        it should have the same length as the variables list. The provided types will 
+        it should have the same length as the output_variables list. The provided types will 
         be matched with the types that the RTDE interface expects and the function 
         returns False if they are not equal. Only one output package format can be 
         specified and hence no recipe id is used for output.
-        If variables is empty, xml configuration file is used.
+        If output_variables is empty, xml configuration file is used.
 
         Input parameters:        
-        variables (list<string> or str): [Optional] Variable names from the list of possible RTDE outputs 
-        types (list<string> or str): [Optional] Types matching the variables
+        output_variables (list<string> or str): [Optional] Variable names from the list of possible RTDE outputs 
+        types (list<string> or str): [Optional] Types matching the output_variables
         
         Return value:        
         success (boolean)
         '''
         
-        if variables is None: 
+        if output_variables is None: 
             if not os.path.isfile(self.__conf_filename):        
                 self._logger.error("Configuration file don't exist : " + self.__conf_filename)
                 return False
@@ -296,147 +318,157 @@ class RTDE(threading.Thread): #, metaclass=Singleton
 
             #Setup data to be recived
             recive = root.find('receive')
-            variables = ['timestamp']
+            output_variables = ['timestamp']
             for child in recive:
-                variables.append(child.attrib['name'])
+                output_variables.append(child.attrib['name'])
 
         
         cmd = Command.RTDE_CONTROL_PACKAGE_SETUP_OUTPUTS
-        if type(variables) is list:
-            payload = ','.join(variables)
-        elif type(variables) is str:
-            payload = variables
+        if type(output_variables) is list:
+            payload = ','.join(output_variables)
+        elif type(output_variables) is str:
+            payload = output_variables
         else:
-            self._logger.error('Variables must be list of stings or a single string, variables is: ' + str(type(variables)))
+            self._logger.error('Variables must be list of stings or a single string, output_variables is: ' + str(type(output_variables)))
             return None
         
+        self.__rtde_output_names = output_variables
         payload = bytes(payload, 'utf-8')
-        result = self.__sendAndReceive(cmd, payload)
-        if result is None:
-            self._logger.debug('Could not send output configuration')
-            return False
-        if len(types)!=0 and not self.__list_equals(result.types, types):
-            self._logger.error('Data type inconsistency for output setup: ' +
-                     str(types) + ' - ' +
-                     str(result.types))
-            return False
-        result.names = variables
-        self.__output_config = result
+        self.__send(cmd, payload)
+        ######################################################################## husk at fixe NAMES  TODO ##############################################################
+        #result = self.__receive(cmd)
+        ##result = self.__sendAndReceive(cmd, payload)
+        #if result is None:
+        #    self._logger.debug('Could not send output configuration')
+        #    return False
+        #if len(types)!=0 and not self.__list_equals(result.types, types):
+        #    self._logger.error('Data type inconsistency for output setup: ' +
+        #             str(types) + ' - ' +
+        #             str(result.types))
+        #    return False
+        #result.names = output_variables
+        #self.__rtde_output_config = result
         return True
 
-    def send_rtde_start(self):
+    def __send_rtde_start(self):
         '''
-        Sends a start command to the RTDE server to initiate the actual synchronization. 
-        Setup of all inputs and outputs should be done before starting the synchronization.
+        Sends a start command to the RTDE server. 
+        Setup of all inputs and outputs must be done before starting the RTDE interface
 
         Return value:
         success (boolean)
         '''
         cmd = Command.RTDE_CONTROL_PACKAGE_START
-        success = self.__sendAndReceive(cmd)
-        if success:
-            self._logger.info('RTDE synchronization started')
-            self.__conn_state = ConnectionState.STARTED
-        else:
-            self._logger.debug('RTDE synchronization failed to start')
-        return success
+        self.__send(cmd)
+
+        #success = self.__receive(cmd)
+        #if success:
+        #    self._logger.info('RTDE started')
+        #    self.__conn_state = ConnectionState.STARTED
+        #else:
+        #    self._logger.debug('RTDE failed to start')
+        #return success
+        return True
         
-    def send_rtde_pause(self):
+    def __send_rtde_pause(self):
         '''
-        Sends a pause command to the RTDE server to pause the synchronization. 
-        When paused it is possible to change the input and output configurations 
-        and start the synchronization again.
+        Sends a pause command to the RTDE server 
+        When paused it is possible to change the input and output configurations
 
         Return value:
         success (boolean)
         '''
         cmd = Command.RTDE_CONTROL_PACKAGE_PAUSE
-        success = self.__sendAndReceive(cmd)
-        if success:
-            self._logger.info('RTDE synchronization paused')
-            self.__conn_state = ConnectionState.PAUSED
-        else:
-            self._logger.debug('RTDE synchronization failed to pause')
-        return success
+        self.__send(cmd)
+        #success = self.__sendAndReceive(cmd)
+        #success = self.__receive(cmd)
+        #if success:
+        #    self._logger.info('RTDE paused')
+        #    self.__conn_state = ConnectionState.PAUSED
+        #else:
+        #    self._logger.debug('RTDE failed to pause')
+        #return success
+        return True
 
     def send_rtde_data(self):
         '''
-        Send the contents of a DataObject as input to the RTDE server. 
+        Send the contents of a RTDEDataObject as input to the RTDE server. 
         Returns True if successful.
                 
         Return value:
         success (boolean)
         '''
         if self.__conn_state != ConnectionState.STARTED:
-            self._logger.error('Cannot send when RTDE synchronization is inactive')
+            self._logger.error('Cannot send when RTDE is inactive')
             return
-        if not (self.__dataSend.recipe_id in self.__input_config):
+        if not (self.__dataSend.recipe_id in self.__rtde_input_config.names):
             self._logger.error('Input configuration id not found: ' + str(self.__dataSend.recipe_id))
             return
         if self.__robotModel.StopRunningFlag():
             self._logger.info('"send_rtde_data" send ignored due to "stopRunningFlag" True')
             return        
-        config = self.__input_config[self.__dataSend.recipe_id]
-        return self.__sendall(Command.RTDE_DATA_PACKAGE, config.pack(self.__dataSend))
+        config = self.__rtde_input_config[self.__dataSend.recipe_id]
+        return self.__send(Command.RTDE_DATA_PACKAGE, config.pack(self.__dataSend))
 
-    def __receive(self):
-        '''
-        Blocking call to receive next output DataObject from RTDE server.
+    #def __receive(self):
+    #    '''
+    #    Blocking call to receive next output RTDEDataObject from RTDE server
+    #    Return value:        
+    #    output_data (RTDEDataObject): object with member variables matching the names of the configured RTDE variables
+    #    '''
+    #    if self.__rtde_output_config is None:
+    #        self._logger.error('Output configuration not initialized')
+    #        return None
+    #    if self.__conn_state != ConnectionState.STARTED:
+    #        self._logger.debug('Cannot receive when RTDE synchronization is inactive')
+    #        return None
+    #    return self.__receive(Command.RTDE_DATA_PACKAGE)
 
-        Return value:        
-        output_data (DataObject): object with member variables matching the names of the configured RTDE variables
-        '''
-        if self.__output_config is None:
-            self._logger.error('Output configuration not initialized')
-            return None
-        if self.__conn_state != ConnectionState.STARTED:
-            self._logger.debug('Cannot receive when RTDE synchronization is inactive')
-            return None
-        return self.__recv(Command.RTDE_DATA_PACKAGE)
+    #def __has_get_rtde_data_attr(self,name):
+    #    '''
+    #    Check if RTDE interface is configured with a given variable name.
+    #    
+    #    Input parameter:
+    #    name (str): Name of variable to check.
+    #    '''
+    #    return hasattr(self._data, name)
 
-    def has_get_rtde_data_attr(self,name):
-        '''
-        Check if RTDE interface is configured with a given variable name.
-        
-        Input parameter:
-        name (str): Name of variable to check.
-        '''
-        return hasattr(self._data, name)
+    #def __get_rtde_data(self, variable_name, wait=False):
+    #    '''
+    #    Get data from RTDE data stream when thread is running
+    #    
+    #    Input parameters:
+    #    variable_name (str):  Variable name from the list of possible RTDE outputs 
+    #    wait (boolean): Wait for next value, default value is False
+    #    
+    #    Return value:        
+    #    output_data (???): Variable(s) matching the names of the requested RTDE variables
+    #    '''
+    #    if not self.__stop_event:
+    #        if wait:
+    #            if not self.__wait_rtde():
+    #                return None
+    #        if self.__has_get_rtde_data_attr(variable_name):
+    #            return np.array(self._data[variable_name])
+    #        self._logger.warning('"get_rtde_data" tried to access non existing data tag: ' + variable_name)
+    #    return None
 
-    def get_rtde_data(self, variable_name, wait=False):
-        '''
-        Get data from RTDE data stream when thread is running
-        
-        Input parameters:
-        variable_name (str):  Variable name from the list of possible RTDE outputs 
-        wait (boolean): Wait for next value, default value is False
-        
-        Return value:        
-        output_data (???): Variable(s) matching the names of the requested RTDE variables
-        '''
-        if not self.__stop_event:
-            if wait:
-                if not self.wait_rtde():
-                    return None
-            if self.has_get_rtde_data_attr(variable_name):
-                return np.array(self._data[variable_name])
-            self._logger.warning('"get_rtde_data" tried to access non existing data tag: ' + variable_name)
-        return None
 
-    def has_set_rtde_data_attr(self,name):
-        '''
-        Check if RTDE interface is configured with a given variable name.
-        
-        Input parameter:
-        name (str): Name of variable to check.
-        '''
-        return hasattr(self.__dataSend, name)
+    #def has_set_rtde_data_attr(self,name):
+    #    '''
+    #    Check if RTDE interface is configured with a given variable name.
+    #    
+    #    Input parameter:
+    #    name (str): Name of variable to check.
+    #    '''
+    #    return hasattr(self.__dataSend, name)
+    
     
     def set_rtde_data(self, variable_name, value):
         '''
-        Set data to be send to the UR controller by the send/recive thread.
+        Set data to be send to the robot
         Object is locked while updating to avoid sending half updated values,
-        hence send all values as to (two???) lists of equal lengths 
+        hence send all values as two lists of equal lengths 
         
         Input parameters:
         variable_name (List/str):  Variable name from the list of possible RTDE inputs
@@ -467,25 +499,22 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         
         return True
     
-    def __sendAndReceive(self, cmd, payload=bytes()):
-        '''
-        Send command and data (payload) to Robot Controller 
-        and receive the respond from the Robot Controller. 
-
-        Input parameters:
-        cmd (int)
-        payload (bytes)
-
-        Return value(s):
-        Output from Robot controller (type is depended on the input parameters)
-
-        '''
-        if self.__sendall(cmd, payload):
-            return self.__recv(cmd)
-        else:
-            return None
+    #def __sendAndReceive(self, cmd, payload=bytes()):
+    #    '''
+    #    Send command and data (payload) to Robot Controller 
+    #    and receive the respond from the Robot Controller. 
+    #    Input parameters:
+    #    cmd (int)
+    #    payload (bytes)
+    #    Return value(s):
+    #    Output from Robot controller (type is depended on the input parameters)
+    #    '''
+    #    if self.__send(cmd, payload):
+    #        return self.__receive(cmd)
+    #    else:
+    #        return None
         
-    def __sendall(self, command, payload=bytes()):
+    def __send(self, command, payload=bytes()):
         '''
         Send command and data (payload) to Robot Controller 
         and receive the respond from the Robot Controller. 
@@ -509,57 +538,147 @@ class RTDE(threading.Thread): #, metaclass=Singleton
             self.__sock.sendall(buf)
             return True
         else:
-            self.__trigger_disconnected()
+            self._logger.info("RTDE disconnected")
+            self.__disconnect()
             return False
-
-    def __recv(self, command):
-        '''
-        Receive the respond a send command from the Robot Controller. 
-
-        Input parameters:
-        cmd (int)
-
-        Return value(s):
-        Output from Robot controller (type is depended on the input parameters)
-        '''
-        while self.rtde_is_connected():
+    '''
+    def __receive(self, command):
+        byte_buffer = bytes()
+        while self.__rtde_is_connected():
+            if(self.__stop_event):
+                break
             (readable, _, _) = select.select([self.__sock], [], [], DEFAULT_TIMEOUT)
             if len(readable):
                 more = self.__sock.recv(4096)
                 if len(more) == 0:
-                    self.__trigger_disconnected()
+                    self._logger.info("RTDE disconnected")
+                    self.__disconnect()
                     return None
-                self.__buf +=  more
+                byte_buffer +=  more
                 
             # unpack_from requires a buffer of at least 3 bytes
-            while len(self.__buf) >= 3:
+            while len(byte_buffer) >= 3:
                 #Get the packed header
-                (size, command) = struct.unpack_from('>HB', self.__buf)
+                (size, packet_command) = struct.unpack_from('>HB', byte_buffer)
 
                 # Attempts to extract a packet
-                if len(self.__buf) >= size:
-                    packet, self.__buf = self.__buf[3:size], self.__buf[size:]
-                    data = self.__on_packet(command, packet)
-                    if command == command and len(self.__buf) == 0:
-                        return data
-                    if command == command and len(self.__buf) != 0:
-                        pass
-                        #self._logger.warning('skipping package')
+                if len(byte_buffer) >= size:
+                    packet, byte_buffer = byte_buffer[3:size], byte_buffer[size:]
+                    data = self.__decode_packet(command, packet)
+                    if command == packet_command:
+                        if(command == Command.RTDE_DATA_PACKAGE):
+                            self.__updateModel(data)
+                        else:
+                            if(len(byte_buffer) == 0):
+                                return data
+                    else:
+                        self._logger.error('package was not the right type - skipping')
+                    if command == packet_command and len(byte_buffer) != 0:
+                        self._logger.warning('skipping package')
                 else:
+                    if(len(byte_buffer) > 0):
+                        print("røg ind i break med buffer " + str(len(byte_buffer)) )
                     break
-        return None
+            #if(len(byte_buffer > 0)):
+            #    print(len(byte_buffer))            
+        #return None
+    '''        
+    def __receive(self):
+        byte_buffer = bytes()
+        
+        (readable, _, _) = select.select([self.__sock], [], [], DEFAULT_TIMEOUT)
+        if (len(readable)):
+            more = self.__sock.recv(16384)
+            if len(more) == 0:
+                self._logger.info("RTDE disconnected")
+                self.__disconnect()
+                return None
+            byte_buffer +=  more
+            #print("Added bytes from socket to buffer: " + str(len(more)))
+                
+        while len(byte_buffer) >= 3:
+            (packet_size, packet_command) = struct.unpack_from('>HB', byte_buffer)
+            buffer_length = len(byte_buffer)
+            #print("packet_size " + str(packet_size) + " - buffer length " + str(buffer_length) + " - packet_command " + str(packet_command))
+            
+            #if(buffer_length == 23):
+            #    print(str(byte_buffer))
+            
+            if ((buffer_length) >= packet_size):
+                packet, byte_buffer = byte_buffer[3:packet_size], byte_buffer[packet_size:]
+                data = self.__decode_payload(packet_command, packet)
+                    
+                if(packet_command == Command.RTDE_GET_URCONTROL_VERSION):
+                    self.__verify_controller_version(data)
+                elif(packet_command == Command.RTDE_REQUEST_PROTOCOL_VERSION):
+                    self.__veriry_protocol_version(data)
+                elif(packet_command == Command.RTDE_CONTROL_PACKAGE_SETUP_INPUTS):
+                    self.__rtde_input_config = data
+                    self.__rtde_input_config.names = self.__rtde_input_names
+                elif(packet_command == Command.RTDE_CONTROL_PACKAGE_SETUP_OUTPUTS):
+                    self.__rtde_output_config = data
+                    self.__rtde_output_config.names = self.__rtde_output_names
+                elif(packet_command == Command.RTDE_CONTROL_PACKAGE_START):
+                    self._logger.info('RTDE started')
+                    self.__conn_state = ConnectionState.STARTED
+                elif(packet_command == Command.RTDE_CONTROL_PACKAGE_PAUSE):
+                    self._logger.info('RTDE paused')
+                    self.__conn_state = ConnectionState.PAUSED
+                elif(packet_command == Command.RTDE_DATA_PACKAGE):
+                    self.__updateModel(data)
+                elif(packet_command == 0):
+                    byte_buffer = bytes()
+            else:
+                print("skipping package - unexpected packet_size - length: " + str(len(byte_buffer)))
+                byte_buffer = bytes()
+                
+                
+                
+        if len(byte_buffer) != 0:
+            self._logger.warning('skipping package - not a package but buffer was not empty')
+            byte_buffer = bytes()
 
-    def __trigger_disconnected(self):
-        self._logger.info("RTDE disconnected")
-        self.__disconnect() #clean-up
+        
 
-    def __on_packet(self, cmd, payload):
+    def __updateModel(self, rtde_data_package):
+        self.__packageCounter = self.__packageCounter + 1
+        #print("got a rtde package nr " + str(self.__packageCounter))
+        if(self.__packageCounter % 1000 == 0):
+            print("Total packages: " + str(self.__packageCounter))
+        if(self.__robotModel.dataDir['timestamp'] != None):
+            delta = rtde_data_package['timestamp'] - self.__robotModel.dataDir['timestamp']
+            if(delta > 0.00800001):
+                self._logger.error("Lost some RTDE at " + str(rtde_data_package['timestamp']) + " - " + str(delta*1000) + " milliseconds since last package")
+                #print("Lost something at " + str(rtde_data_package['timestamp']) + " - " + str(delta*1000) + " milliseconds since last package")
+        for tagname in rtde_data_package.keys():
+            self.__robotModel.dataDir[tagname] = rtde_data_package[tagname] 
+            #print(tagname)
+            #with self.__dataEvent:
+            #    self.__dataEvent.notifyAll()
+    
+    def __verify_controller_version(self, data):
+        self.__controllerVersion = data
+        (major, minor, bugfix, build) = self.__controllerVersion
+        if major and minor and bugfix:
+            self._logger.info('Controller version: ' + str(major) + '.' + str(minor) + '.' + str(bugfix) + '-' + str(build))
+            if major <= 3 and minor <= 2 and bugfix < 19171:
+                self._logger.error("Please upgrade your controller to minimum version 3.2.19171")
+                raise ValueError("Please upgrade your controller to minimum version 3.2.19171")
+        
+    def __veriry_protocol_version(self, data):
+        self.__protocol_version = data
+        if(self.__protocol_version != 1):
+            raise ValueError("We only support protocol version 1 at the moment")
+    
+    
+    #def __trigger_disconnected(self):
+    #    self._logger.info("RTDE disconnected")
+    #    self.__disconnect() #clean-up
+
+    #def __decode_packet(self, cmd, payload):
+    def __decode_payload(self, cmd, payload):
         '''
-        Interpret the data received from the Robot Controller
-        Based on the command returned from the Robot Controller different interoperation methods is selected. 
-
-        Input parameters:
-        cmd (int)
+        Decode the package received from the Robot
         payload (bytes)
 
         Return value(s):
@@ -606,7 +725,7 @@ class RTDE(threading.Thread): #, metaclass=Singleton
                 self._logger.error('RTDE_CONTROL_PACKAGE_SETUP_OUTPUTS: No payload')
                 return None
             has_recipe_id = False
-            output_config = DataConfig.unpack_recipe(payload, has_recipe_id)
+            output_config = RTDE_IO_Config.unpack_recipe(payload, has_recipe_id)
             return output_config
 
         elif cmd == Command.RTDE_CONTROL_PACKAGE_SETUP_INPUTS:
@@ -614,7 +733,7 @@ class RTDE(threading.Thread): #, metaclass=Singleton
                 self._logger.error('RTDE_CONTROL_PACKAGE_SETUP_INPUTS: No payload')
                 return None
             has_recipe_id = True
-            input_config = DataConfig.unpack_recipe(payload, has_recipe_id)
+            input_config = RTDE_IO_Config.unpack_recipe(payload, has_recipe_id)
             return input_config
             
         elif cmd == Command.RTDE_CONTROL_PACKAGE_START:
@@ -630,14 +749,14 @@ class RTDE(threading.Thread): #, metaclass=Singleton
             return bool(struct.unpack_from('>B', payload)[0])
 
         elif cmd == Command.RTDE_DATA_PACKAGE:            
-            if self.__output_config is None:
+            if self.__rtde_output_config is None:
                 self._logger.error('RTDE_DATA_PACKAGE: Missing output configuration')
                 return None
-            output = self.__output_config.unpack(payload)
+            output = self.__rtde_output_config.unpack(payload)
             return output
         
         else:
-            self._logger.error('Unknown package command: ' + chr(cmd))
+            self._logger.error('Unknown RTDE command type: ' + chr(cmd))
 
 
     def __list_equals(self, l1, l2):
@@ -648,63 +767,7 @@ class RTDE(threading.Thread): #, metaclass=Singleton
                 return False
         return True
 
-
-    '''Threading Data receive'''
-    def close(self):
-        if self.__stop_event is False:
-            self.__stop_event = True
-            self.wait_rtde()
-            self.join()
-            self.__disconnect()
-        
-    def run(self):
-        self.__stop_event = False
-        t0 = time.time()
-        while (time.time()-t0<self.__reconnectTimeout) and self.__conn_state != ConnectionState.STARTED:
-            self.__connect()
-            self.send_rtde_output_setup()
-            self.send_rtde_input_setup()
-            if not self.send_rtde_start():
-                self._logger.warning("RTDE connection failed!")
-
-        if self.__conn_state != ConnectionState.STARTED:
-            self._logger.error("RTDE interface not able to connect and timed out!")
-            return
-        
-        while (not self.__stop_event) and (time.time()-t0<self.__reconnectTimeout):
-            try:
-                self._data = self.__receive()
-                for tagname in self._data.keys():
-                    self.__robotModel.dataDir[tagname] = self._data[tagname] 
-                with self.__dataEvent:
-                    self.__dataEvent.notifyAll()
-                t0 = time.time()
-            except Exception:
-                if self.__conn_state >= ConnectionState.STARTED:
-                    self.__conn_state = ConnectionState.ERROR
-                    self._logger.error("RTDE interface stopped running")
-
-                self.send_rtde_pause()
-                if not self.send_rtde_start():
-                    self.__disconnect()
-                    time.sleep(1)
-                    self.__connect()
-                    self.send_rtde_output_setup()
-                    self.send_rtde_input_setup()
-                    self.send_rtde_start()
-
-                if self.__conn_state == ConnectionState.STARTED:
-                    self._logger.info("RTDE interface restarted")
-                else:
-                    self._logger.warning("RTDE reconnection failed!")
-
-        self.send_rtde_pause()
-        with self.__dataEvent:
-            self.__dataEvent.notifyAll()
-        self._logger.info("RTDE interface is stopped")
-                
-
-    def wait_rtde(self):
+    def __wait_rtde(self):
         '''Wait while the data receiving thread is receiving a new data set.'''
         cnt = 0
         while self.__conn_state < ConnectionState.STARTED:
@@ -720,11 +783,72 @@ class RTDE(threading.Thread): #, metaclass=Singleton
 
 
 
-class DataConfig(object):
+    '''Threading Data receive'''
+    def close(self):
+        if self.__stop_event is False:
+            self.__stop_event = True
+            self.__wait_rtde()
+            self.join()
+            self.__disconnect()
+        
+    def run(self):
+        self.__stop_event = False
+        t0 = time.time()
+        while (time.time()-t0<self.__reconnectTimeout) and self.__conn_state != ConnectionState.STARTED:
+            self.__connect()
+            self.__get_controller_version()
+            self.__receive()
+            self.__negotiate_protocol_version(1)
+            self.__receive()
+            self.__setup_rtde_output()
+            self.__receive()
+            self.__setup_rtde_input()
+            self.__receive()
+            self.__send_rtde_start()
+            self.__receive()
+            #time.sleep(0.5)
+        if self.__conn_state != ConnectionState.STARTED:
+            self._logger.error("RTDE interface not able to connect and timed out!")
+            return
+        
+        while (not self.__stop_event) and (time.time()-t0<self.__reconnectTimeout):
+            try:
+                #self.__receive(Command.RTDE_DATA_PACKAGE)
+                #startTime = time.time()
+                self.__receive()
+                t0 = time.time()
+                #delta = t0-startTime
+                #print("Time to recieve: " + str(delta))
+            except Exception:
+                if self.__conn_state >= ConnectionState.STARTED:
+                    self.__conn_state = ConnectionState.ERROR
+                    self._logger.error("RTDE interface stopped running")
+
+                self.__send_rtde_pause()
+                if not self.__send_rtde_start():
+                    self.__disconnect()
+                    time.sleep(1)
+                    self.__connect()
+                    self.__setup_rtde_output()
+                    self.__setup_rtde_input()
+                    self.__send_rtde_start()
+
+                if self.__conn_state == ConnectionState.STARTED:
+                    self._logger.info("RTDE interface restarted")
+                else:
+                    self._logger.warning("RTDE reconnection failed!")
+
+        self.__send_rtde_pause()
+        with self.__dataEvent:
+            self.__dataEvent.notifyAll()
+        self._logger.info("RTDE interface is stopped")
+                
+
+class RTDE_IO_Config(object):
     __slots__ = ['id', 'names', 'types', 'fmt']
     @staticmethod
     def unpack_recipe(buf, has_recipe_id):
-        rmd = DataConfig();
+        rmd = RTDE_IO_Config();
         if has_recipe_id:
             rmd.id = struct.unpack_from('>B', buf)[0]
             fmt = ">" + str(len(buf)) + "B"
@@ -769,9 +893,9 @@ class DataConfig(object):
 
     def unpack(self, data):
         li =  struct.unpack_from(self.fmt, data)
-        return DataObject.unpack(li, self.names, self.types)
+        return RTDEDataObject.unpack(li, self.names, self.types)
 
-class DataObject(object):
+class RTDEDataObject(object):
     '''
     Data container for data send to or received from the Robot Controller.
     The Object will have attributes for each of that data tags received or send.
@@ -800,13 +924,13 @@ class DataObject(object):
         obj = dict()
         offset = 0
         for i in range(len(names)):
-            obj[names[i]] = DataObject.unpack_field(data, offset, types[i]) 
-            offset += DataObject.get_item_size(types[i])
+            obj[names[i]] = RTDEDataObject.unpack_field(data, offset, types[i]) 
+            offset += RTDEDataObject.get_item_size(types[i])
         return obj
 
     @staticmethod
     def create_empty(names, recipe_id):
-        obj = DataObject()
+        obj = RTDEDataObject()
         for i in range(len(names)):
             obj.__dict__[names[i]] = None
         obj.recipe_id = recipe_id
@@ -822,7 +946,7 @@ class DataObject(object):
 
     @staticmethod
     def unpack_field(data, offset, data_type):
-        size = DataObject.get_item_size(data_type)
+        size = RTDEDataObject.get_item_size(data_type)
         if(data_type == 'VECTOR6D' or
            data_type == 'VECTOR3D'):
             return np.array([float(data[offset+i]) for i in range(size)])
