@@ -20,24 +20,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 Except as contained in this notice, the name of "Rope Robotics ApS" shall not be used 
 in advertising or otherwise to promote the sale, use or other dealings in this Software 
 without prior written authorization from "Rope Robotics ApS".
-
 '''
+
 __author__ = "Martin Huus Bjerge"
 __copyright__ = "Copyright 2016, Rope Robotics ApS, Denmark"
 __license__ = "MIT License"
 
-import logging
-from URBasic.connectionState import ConnectionState
-from URBasic.dashboard import DashBoard
-from URBasic.dataLog import DataLog
-from URBasic.dataLogging import DataLogging
-from URBasic.kinematic import *
-from URBasic.manipulation import *
-from URBasic.realTimeClient import RealTimeClient
-from URBasic.robotConnector import RobotConnector
-from URBasic.robotModel import RobotModel
-from URBasic.rtde import RTDE
-from URBasic.urScript import UrScript
-from URBasic.urScriptExt import UrScriptExt
-
-
+class ConnectionState:
+    ERROR = 0
+    DISCONNECTED = 1
+    CONNECTED = 2
+    PAUSED = 3
+    STARTED = 4
