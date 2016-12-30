@@ -42,6 +42,7 @@ class AirosSander(object):
     def close(self):
         pass            #### TODO - remember to do nice shutdown
 
+
     def powerOn(self):
         pass
     
