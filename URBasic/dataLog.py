@@ -28,7 +28,8 @@ __license__ = "MIT License"
 import threading
 import URBasic
 import numpy as np
-import time 
+import time
+
 
 
 class DataLog(threading.Thread):
@@ -47,32 +48,30 @@ class DataLog(threading.Thread):
         name = logger.AddEventLogging(__name__,log2Consol=True)        
         self.__logger = logger.__dict__[name]
         self.__stop_event = True
-        self.__rtdeDataCopy = self.__robotModel.dataDir.copy()
+
+        self.__robotModelDataDirCopy = None
         self.start()
         self.__logger.info('DataLog constructor done')
          
-    def logdata(self):
+    def logdata(self, robotModelDataDir):
+        if(self.__robotModelDataDirCopy != None):
+            if(self.__robotModelDataDirCopy['timestamp'] != robotModelDataDir['timestamp']):
+                for tagname in robotModelDataDir.keys():
+                    if tagname != 'timestamp' and  robotModelDataDir[tagname] is not None:
+                        tp = type(robotModelDataDir[tagname])
+                        if tp is np.ndarray:
+                            if 6==len(robotModelDataDir[tagname]):
+                                self.__dataLogger.info((tagname+';%s;%s;%s;%s;%s;%s;%s'), robotModelDataDir['timestamp'], *robotModelDataDir[tagname])
+                            elif 3==len(robotModelDataDir[tagname]):
+                                self.__dataLogger.info((tagname+';%s;%s;%s;%s'), robotModelDataDir['timestamp'], *robotModelDataDir[tagname])
+                            else:
+                                self.__logger.warning('Logger data unexpected type in rtde.py - class URRTDElogger - def logdata Type: ' + str(tp) + ' - Len: ' + str(len(robotModelDataDir[tagname])))
+                        elif tp is bool or tp is float or tp is int: 
+                            self.__dataLogger.info((tagname+';%s;%s'), robotModelDataDir['timestamp'], robotModelDataDir[tagname])
+                        else:
+                            self.__logger.warning('Logger data unexpected type in rtde.py - class URRTDElogger - def logdata Type: ' + str(tp))
+        self.__robotModelDataDirCopy = robotModelDataDir
         
-        while self.__rtdeDataCopy['timestamp'] == self.__robotModel.dataDir['timestamp']:
-            time.sleep(0.005)
-        
-        self.__rtdeDataCopy['timestamp'] = self.__robotModel.dataDir['timestamp']
-        for tagname in self.__robotModel.dataDir.keys():
-            if tagname != 'timestamp' and  self.__robotModel.dataDir[tagname] is not None:# and self.__rtdeDataCopy[tagname] != self.__robotModel.dataDir[tagname]:
-                #self._DataLog__rtdeDataCopy[tagname] != self._DataLog__robotModel.dataDir[tagname]
-                self.__rtdeDataCopy[tagname] = self.__robotModel.dataDir[tagname]
-                tp = type(self.__robotModel.dataDir[tagname])
-                if tp is np.ndarray:
-                    if 6==len(self.__robotModel.dataDir[tagname]):
-                        self.__dataLogger.info((tagname+';%s;%s;%s;%s;%s;%s;%s'), self.__robotModel.dataDir['timestamp'], *self.__robotModel.dataDir[tagname])
-                    elif 3==len(self.__robotModel.dataDir[tagname]):
-                        self.__dataLogger.info((tagname+';%s;%s;%s;%s'), self.__robotModel.dataDir['timestamp'], *self.__robotModel.dataDir[tagname])
-                    else:
-                        self.__logger.warning('Logger data unexpected type in rtde.py - class URRTDElogger - def logdata Type: ' + str(tp) + ' - Len: ' + str(len(self.__robotModel.dataDir[tagname])))
-                elif tp is bool or tp is float or tp is int: 
-                    self.__dataLogger.info((tagname+';%s;%s'), self.__robotModel.dataDir['timestamp'], self.__robotModel.dataDir[tagname])
-                else:
-                    self.__logger.warning('Logger data unexpected type in rtde.py - class URRTDElogger - def logdata Type: ' + str(tp))
                     
     def close(self):
         if self.__stop_event is False:
@@ -83,7 +82,9 @@ class DataLog(threading.Thread):
         self.__stop_event = False
         while not self.__stop_event:
             try:
-                self.logdata()
+                temp = self.__robotModel.dataDir.copy()
+                self.logdata(temp)
+                time.sleep(0.005)
             except:
                 self.__logger.warning("DataLog error while running, but will retry")
         self.__logger.info("DataLog is stopped")
