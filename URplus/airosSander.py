@@ -26,38 +26,109 @@ __author__ = "Martin Huus Bjerge"
 __copyright__ = "Copyright 2016, Rope Robotics ApS, Denmark"
 __license__ = "MIT License"
 
-from pymodbus.client.sync import ModbusTcpClient as ModbusClient
+import URBasic
+import threading
+#from pymodbus.client.sync import ModbusTcpClient as ModbusClient
+from pymodbus.client.sync import ModbusSerialClient as ModbusClient
+
 
 class AirosSander(object):
     '''
     Driver for controlling Mirka Airos Sander via Modbus over to TCP
     '''
     
+    
     def __init__(self, host):
         '''
-        Constructor - takes the hostname of the sander
+        Constructor - takes the serial port of the sander
         '''
-        
+        logger = URBasic.dataLogging.DataLogging()
+        name = logger.AddEventLogging(__name__,log2Consol=False)        
+        self.__logger = logger.__dict__[name]
+        self.__client = ModbusClient(port=host, baudrate='19200', parity='E', stopbits=1, method='RTU')
+        self.__serialUnit = 86
+        self.__whatchdogTime = 300  #300 seconds
+        self.__whatchdog = threading.Timer(interval=self.__whatchdogTime, function=self.__whatchdogExpired)
+        self.__stopRunningFlag = False
         
     def close(self):
-        pass            #### TODO - remember to do nice shutdown
-
+        self.__stopRunningFlag = True
+        self.__whatchdog.cancel()
+        self.__whatchdog.join()
+        
 
     def powerOn(self):
-        pass
-    
+        '''
+        Power on the sander before setting values and running
+        '''
+        self.__client.write_register(11, 4, unit=self.__serialUnit)
+        self.__logger.info("Sander powered on")
+        
     def powerOff(self):
-        pass
+        '''
+        Power down sander nicely
+        '''
+        self.__whatchdog.cancel()
+        self.__client.write_register(11, 8, unit=self.__serialUnit)
+        self.__logger.info("Sander powered off")
+        self.__whatchdog = threading.Timer(interval=self.__whatchdogTime, function=self.__whatchdogExpired)
     
-    def runSander(self):
-        pass
+    def runSander(self, rpm=4000):
+        '''
+        Start the sanding - set anywhere from 4000 to 10000 RPM - default is 4000 RPM 
+        call powerOn before running
+        '''
+        if(self.__stopRunningFlag == False):
+            self.setDesiredSpeed(rpm)
+            self.__client.write_register(11, 1, unit=self.__serialUnit)
+            self.__logger.info("Sander started")
+            self.__whatchdog.start()
+        else:
+            self.__logger.error("Sander can not be started - has probably run too long in a row")
     
     def stopSander(self):
-        pass
+        '''
+        Stop the sander from running
+        '''
+        self.__whatchdog.cancel()
+        self.__client.write_register(11, 2, unit=self.__serialUnit)
+        self.__logger.info("Sander stopped")
+        self.__whatchdog = threading.Timer(interval=self.__whatchdogTime, function=self.__whatchdogExpired)
     
     def setDesiredSpeed(self, rpm):
-        pass
+        '''
+        Set the speed in RPM to run the sander at - 4000 to 10000 is allowed
+        '''
+        if(rpm < 4000 or rpm > 10000):
+            raise ValueError("Sander RPM out of range")
+        self.__client.write_register(10, rpm, unit=86)
+        self.__logger.info("Sander speed set to " + str(rpm))
+        self.__resetWhatchdog()
+        
+    def __resetWhatchdog(self):
+        wasRunning=False
+        if(self.__whatchdog.is_alive()):
+            wasRunning = True
+        self.__whatchdog = threading.Timer(interval=self.__whatchdogTime, function=self.__whatchdogExpired)
+        if(wasRunning):
+            self.__whatchdog.start()
     
-    def getTemperature(self):
+    
+    def __whatchdogExpired(self):
+        self.__stopRunningFlag = True
+        self.stopSander()
+        self.__logger.error("Sander ran too long")
+    
+    def getMotorTemperature(self):
+        '''
+        Note implemented due to Mirka adressing problems
+        '''
+        pass
+        
+        
+    def getPcbTemperature(self):
+        '''
+        Note implemented due to Mirka adressing problems
+        '''
         pass
     
