@@ -35,6 +35,20 @@ from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 class AirosSander(object):
     '''
     Driver for controlling Mirka Airos Sander via Modbus over to TCP
+    
+    Example how to use (in my case COM4:
+    
+    sander = AirosSander(host='COM4')
+    sander.powerOn()
+    time.sleep(1)
+    sander.runSander()
+    time.sleep(2)    
+    sander.setDesiredSpeed(5000)
+    time.sleep(2)
+    sander.setDesiredSpeed(8000)
+    time.sleep(2)
+    sander.stopSander()
+    sander.powerOff()
     '''
     
     
@@ -47,7 +61,7 @@ class AirosSander(object):
         self.__logger = logger.__dict__[name]
         self.__client = ModbusClient(port=host, baudrate='19200', parity='E', stopbits=1, method='RTU')
         self.__serialUnit = 86
-        self.__whatchdogTime = 300  #300 seconds
+        self.__whatchdogTime = 300  #300 seconds default
         self.__whatchdog = threading.Timer(interval=self.__whatchdogTime, function=self.__whatchdogExpired)
         self.__stopRunningFlag = False
         
@@ -71,6 +85,7 @@ class AirosSander(object):
         self.__whatchdog.cancel()
         self.__client.write_register(11, 8, unit=self.__serialUnit)
         self.__logger.info("Sander powered off")
+        self.__whatchdog.cancel()
         self.__whatchdog = threading.Timer(interval=self.__whatchdogTime, function=self.__whatchdogExpired)
     
     def runSander(self, rpm=4000):
@@ -82,9 +97,11 @@ class AirosSander(object):
             self.setDesiredSpeed(rpm)
             self.__client.write_register(11, 1, unit=self.__serialUnit)
             self.__logger.info("Sander started")
+            self.__whatchdog.cancel()
+            self.__whatchdog = threading.Timer(interval=self.__whatchdogTime, function=self.__whatchdogExpired)
             self.__whatchdog.start()
         else:
-            self.__logger.error("Sander can not be started - has probably run too long in a row")
+            self.__logger.error("Sander can not be started - has ")
     
     def stopSander(self):
         '''
@@ -109,6 +126,7 @@ class AirosSander(object):
         wasRunning=False
         if(self.__whatchdog.is_alive()):
             wasRunning = True
+        self.__whatchdog.cancel()
         self.__whatchdog = threading.Timer(interval=self.__whatchdogTime, function=self.__whatchdogExpired)
         if(wasRunning):
             self.__whatchdog.start()
@@ -116,8 +134,9 @@ class AirosSander(object):
     
     def __whatchdogExpired(self):
         self.__stopRunningFlag = True
-        self.stopSander()
         self.__logger.error("Sander ran too long")
+        self.stopSander()
+        
     
     def getMotorTemperature(self):
         '''
