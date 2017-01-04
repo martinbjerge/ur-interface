@@ -97,6 +97,7 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         self.__rtde_output_names = None
         self.__rtde_output_config = None
         self.__rtde_input_names = None
+        self.__rtde_input_initValues = None
         self.__rtde_input_config = None
         
         
@@ -258,6 +259,7 @@ class RTDE(threading.Thread): #, metaclass=Singleton
             return None
         
         self.__rtde_input_names = input_variables
+        self.__rtde_input_initValues = initValues
         
         payload = bytes(payload, 'utf-8')
         self.__send(cmd, payload)
@@ -401,13 +403,14 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         if self.__conn_state != ConnectionState.STARTED:
             self._logger.error('Cannot send when RTDE is inactive')
             return
-        if not (self.__dataSend.recipe_id in self.__rtde_input_config.names):
-            self._logger.error('Input configuration id not found: ' + str(self.__dataSend.recipe_id))
-            return
+        #if not (self.__rtde_input_config.names.has_key(self.__dataSend.recipe_id)):
+        #    self._logger.error('Input configuration id not found: ' + str(self.__dataSend.recipe_id))
+        #    return
         if self.__robotModel.StopRunningFlag():
             self._logger.info('"send_rtde_data" send ignored due to "stopRunningFlag" True')
             return        
-        config = self.__rtde_input_config[self.__dataSend.recipe_id]
+        #config = self.__rtde_input_config[self.__dataSend.recipe_id]
+        config = self.__rtde_input_config
         return self.__send(Command.RTDE_DATA_PACKAGE, config.pack(self.__dataSend))
 
     #def __receive(self):
@@ -481,23 +484,28 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         #check if input is list of equal length
         if type(variable_name) is list:
             if type(variable_name) != type(value):
-                return False
+                raise ValueError("RTDE " + str(variable_name) + " is not type of " + str(value))
+                #return False
             if len(variable_name) != len(value):
-                return False
-            
+                raise ValueError("List of RTDE Output values does not have same length as list of variable names")
+                #return False
             for ii in range(len(value)):
-                if self.has_set_data_attr(variable_name[ii]):
+                if self.hasattr(self.__rtde_input_config.names, variable_name[ii]):
                     self.__dataSend.__dict__[variable_name[ii]] = value[ii]
                 else:
-                    return False
+                    raise ValueError(str(variable_name[ii]) + " not found in RTDE OUTPUT config")
+                    #return False
         
         else:
-            if hasattr(self.__dataSend, variable_name):
+            if variable_name in self.__rtde_input_config.names:
+            #if hasattr(self.__rtde_input_config.names, variable_name):
+            #if hasattr(self.__dataSend, variable_name):
                 self.__dataSend.__dict__[variable_name] = value
             else:
-                return False
+                raise ValueError(str(variable_name) + " not found in RTDE OUTPUT config")
+                #return False
         
-        return True
+        #return True
     
     #def __sendAndReceive(self, cmd, payload=bytes()):
     #    '''
@@ -615,6 +623,21 @@ class RTDE(threading.Thread): #, metaclass=Singleton
                 elif(packet_command == Command.RTDE_CONTROL_PACKAGE_SETUP_INPUTS):
                     self.__rtde_input_config = data
                     self.__rtde_input_config.names = self.__rtde_input_names
+                    #self.__rtde_input_config[self.__rtde_input_config.id] = self.__rtde_input_config
+                    self.__dataSend = RTDEDataObject.create_empty(self.__rtde_input_names, self.__rtde_input_config.id)
+                    if self.__rtde_input_initValues is not None:
+                        for ii in range(len(self.__rtde_input_config.names)):
+                            if 'UINT8' == self.__rtde_input_config.types[ii]:
+                                self.set_rtde_data(self.__rtde_input_config.names[ii], int(self.__rtde_input_initValues[ii]))
+                            elif 'UINT32' == self.__rtde_input_config.types[ii]:
+                                self.set_rtde_data(self.__rtde_input_config.names[ii], int(self.__rtde_input_initValues[ii]))
+                            elif 'INT32' == self.__rtde_input_config.types[ii]:
+                                self.set_rtde_data(self.__rtde_input_config.names[ii], int(self.__rtde_input_initValues[ii]))
+                            elif 'DOUBLE' == self.__rtde_input_config.types[ii]:
+                                self.set_rtde_data(self.__rtde_input_config.names[ii], (self.__rtde_input_initValues[ii]))
+                            else:
+                                self._logger.error('Unknown data type')
+                
                 elif(packet_command == Command.RTDE_CONTROL_PACKAGE_SETUP_OUTPUTS):
                     self.__rtde_output_config = data
                     self.__rtde_output_config.names = self.__rtde_output_names
