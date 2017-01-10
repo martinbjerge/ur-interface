@@ -1094,7 +1094,7 @@ end
         '''
         raise NotImplementedError('Function Not yet implemented')
     
-    def set_payload_cog(self, CoG):
+    def set_payload_cog(self, CoG, wait=True):
         '''
         Set center of gravity
         
@@ -1111,8 +1111,17 @@ end
         Parameters:
         CoG: Center of Gravity: [CoGx, CoGy, CoGz] in meters.
         '''
-        raise NotImplementedError('Function Not yet implemented')
         
+        prg = 'set payload cog({CoG})\n'
+        
+        programString = prg.format(**locals())
+        
+        self.robotConnector.RealTimeClient.Send(programString)
+        if(wait):
+            self.waitRobotIdleOrStopFlag()
+
+        
+                    
     def set_payload_mass(self, m, wait=True):
         '''
         Set payload mass
