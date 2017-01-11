@@ -68,7 +68,6 @@ class AirosSander(object):
     def close(self):
         self.__stopRunningFlag = True
         self.__whatchdog.cancel()
-        self.__whatchdog.join()
         
 
     def powerOn(self):
@@ -118,7 +117,7 @@ class AirosSander(object):
         '''
         if(rpm < 4000 or rpm > 10000):
             raise ValueError("Sander RPM out of range")
-        self.__client.write_register(10, rpm, unit=86)
+        self.__client.write_register(10, rpm, unit=self.__serialUnit)
         self.__logger.info("Sander speed set to " + str(rpm))
         self.__resetWhatchdog()
         
@@ -142,12 +141,13 @@ class AirosSander(object):
         '''
         Note implemented due to Mirka adressing problems
         '''
-        pass
+        #self.__client.read_holding_registers(address, count)
+        return self.__client.read_input_registers(18, 1,unit=self.__serialUnit).registers[0]
         
         
     def getPcbTemperature(self):
         '''
         Note implemented due to Mirka adressing problems
         '''
-        pass
+        return self.__client.read_input_registers(19, 1,unit=self.__serialUnit).registers[0]
     
