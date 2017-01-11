@@ -1,8 +1,5 @@
-*.log
 *.pyc
-*.csv
-bladecrawler/dist/
-bladecrawler/build/
+log/
 Playground*.py
 playground*.py
 URConnect/RobotServer/obj/

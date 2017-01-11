@@ -32,9 +32,6 @@ import URplus
 import time
 import clr  #remember to pip install pythonnet as administrator for clr access
 import sys
-sys.path.append(r"C:\SourceCode\ur-interface\URConnect\UniversalRobotsConnect\bin\Debug")
-clr.AddReference("UniversalRobotsConnect")
-from UniversalRobotsConnect import RobotConnector
 
 
 #IP = '192.168.56.101'  #URSim - Running in Oracle VM VirtualBox  
