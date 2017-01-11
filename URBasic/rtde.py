@@ -667,7 +667,7 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         self.__packageCounter = self.__packageCounter + 1
         #print("got a rtde package nr " + str(self.__packageCounter))
         if(self.__packageCounter % 1000 == 0):
-            print("Total packages: " + str(self.__packageCounter))
+            self._logger.info("Total packages: " + str(self.__packageCounter))
         if(self.__robotModel.dataDir['timestamp'] != None):
             delta = rtde_data_package['timestamp'] - self.__robotModel.dataDir['timestamp']
             if(delta > 0.00800001):
