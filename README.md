@@ -20,7 +20,11 @@ Driver to communicate with a
 
 If you like to participate you are more than welcome.
 Please contact me and I will help you get started:
+
 Martin Huus Bjerge
+
 Rope Robotics ApS
+
 martin@roperobotics.com
+
 phone: +45 6177 2641
