@@ -5,17 +5,27 @@ The purpose of this repository is to provide a framework that enables communicat
 The intention is to make the full script manual available, but there is still parts missing to be implemented.
 
 The protocols implemented is:
+
 URBasic:
+
 Part of “Real Time Client” only the send program part.
+
 RTDE for sending and receiving data
+
 Dashboard server mainly for resting errors. 
 
 URPlus:
+
 Driver to communicate with a 
+
 -	Robotiq FT 300 Sensor
+
 -	ADAM-6017 IO extension
+
 -	Mirka Sander
+
 -	FESTO CTEU-EP valve controller
+
 -	JVL MIS341 stepper motor
 
 If you like to participate you are more than welcome.
