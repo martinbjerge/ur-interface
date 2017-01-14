@@ -1,6 +1,6 @@
 '''
 Python 3.x library to control an UR robot through its TCP/IP interfaces
-Copyright (C) 2016  Martin Huus Bjerge, Rope Robotics ApS, Denmark
+Copyright (C) 2017  Martin Huus Bjerge, Rope Robotics ApS, Denmark
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
 and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -23,7 +23,7 @@ without prior written authorization from "Rope Robotics ApS".
 '''
 import ctypes
 __author__ = "Martin Huus Bjerge"
-__copyright__ = "Copyright 2016, Rope Robotics ApS, Denmark"
+__copyright__ = "Copyright 2017, Rope Robotics ApS, Denmark"
 __license__ = "MIT License"
 
 import URBasic
@@ -1112,7 +1112,7 @@ end
         CoG: Center of Gravity: [CoGx, CoGy, CoGz] in meters.
         '''
         
-        prg = 'set payload cog({CoG})\n'
+        prg = 'set_payload_cog({CoG})\n'
         
         programString = prg.format(**locals())
         
@@ -1787,12 +1787,12 @@ end
         '''
         #self.robotConnector.RTDE.SetConfigurableDigitalOutput(n, b)
         if b:
-            self.robotConnector.RTDE.set_rtde_data('configurable_digital_output_mask', 2**n)
-            self.robotConnector.RTDE.set_rtde_data('configurable_digital_output', 2**n)
+            self.robotConnector.RTDE.setData('configurable_digital_output_mask', 2**n)
+            self.robotConnector.RTDE.setData('configurable_digital_output', 2**n)
         else:
-            self.robotConnector.RTDE.set_rtde_data('configurable_digital_output_mask', 2**n)
-            self.robotConnector.RTDE.set_rtde_data('configurable_digital_output', 0)
-        self.robotConnector.RTDE.send_rtde_data()
+            self.robotConnector.RTDE.setData('configurable_digital_output_mask', 2**n)
+            self.robotConnector.RTDE.setData('configurable_digital_output', 0)
+        self.robotConnector.RTDE.sendData()
             
     def set_euromap_output(self, port_number, signal_value):
         '''
@@ -1949,12 +1949,12 @@ end
         '''
         #self.robotConnector.RTDE.SetStandardDigitalOutput(n, b)
         if b:
-            self.robotConnector.RTDE.set_rtde_data('standard_digital_output_mask', 2**n)
-            self.robotConnector.RTDE.set_rtde_data('standard_digital_output', 2**n)
+            self.robotConnector.RTDE.setData('standard_digital_output_mask', 2**n)
+            self.robotConnector.RTDE.setData('standard_digital_output', 2**n)
         else:
-            self.robotConnector.RTDE.set_rtde_data('standard_digital_output_mask', 2**n)
-            self.robotConnector.RTDE.set_rtde_data('standard_digital_output', 0)
-        self.robotConnector.RTDE.send_rtde_data()
+            self.robotConnector.RTDE.setData('standard_digital_output_mask', 2**n)
+            self.robotConnector.RTDE.setData('standard_digital_output', 0)
+        self.robotConnector.RTDE.sendData()
 
         
     

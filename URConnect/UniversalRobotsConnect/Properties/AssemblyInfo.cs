@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("UniversalRobotsConnect")]
-[assembly: AssemblyCopyright("Copyright© Rope Robotics  2016")]
+[assembly: AssemblyCopyright("Copyright© Rope Robotics  2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

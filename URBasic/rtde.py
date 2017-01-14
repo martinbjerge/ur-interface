@@ -1,6 +1,6 @@
 '''
 Python 3.x library to control an UR robot through its TCP/IP interfaces
-Copyright (C) 2016  Martin Huus Bjerge, Rope Robotics ApS, Denmark
+Copyright (C) 2017  Martin Huus Bjerge, Rope Robotics ApS, Denmark
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
 and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -22,7 +22,7 @@ in advertising or otherwise to promote the sale, use or other dealings in this S
 without prior written authorization from "Rope Robotics ApS".
 '''
 __author__ = "Martin Huus Bjerge"
-__copyright__ = "Copyright 2016, Rope Robotics ApS, Denmark"
+__copyright__ = "Copyright 2017, Rope Robotics ApS, Denmark"
 __license__ = "MIT License"
 
 import URBasic
@@ -74,7 +74,7 @@ class RTDE(threading.Thread): #, metaclass=Singleton
     '''
 
 
-    def __init__(self, robotModel, conf_filename='rtde_configuration.xml'):
+    def __init__(self, robotModel, conf_filename=None):
         '''
         Constructor see class description for more info.
         '''
@@ -87,6 +87,10 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         self._logger = logger.__dict__[name]
         self.__reconnectTimeout = 600 #Seconds (while in run)
         self.__dataSend = RTDEDataObject()
+        if conf_filename is None:
+            conf_filename = URBasic.__file__[0:URBasic.__file__.find('URBasic')] + 'rtdeConfiguration.xml'
+            if not os.path.isfile(conf_filename):
+                conf_filename = URBasic.__file__[0:URBasic.__file__.find('URBasic')] + 'rtdeConfigurationDefault.xml'
         self.__conf_filename = conf_filename
         self.__stop_event = True
         threading.Thread.__init__(self)
@@ -108,7 +112,7 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         #self.__receiveTimer = threading.Timer(interval=0.002, function=self.__receive())
         
         self.start()
-        #self.__wait_rtde()
+        #self.__wait()
         self._logger.info('RTDE constructor done')
 
         
@@ -158,7 +162,7 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         self.__conn_state = ConnectionState.DISCONNECTED
         return True
 
-    def __rtde_is_connected(self):
+    def __isConnected(self):
         '''
         Returns True if the connection is open.
 
@@ -167,14 +171,14 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         '''
         return self.__conn_state > ConnectionState.DISCONNECTED
         
-    def rtde_is_running(self):
+    def isRunning(self):
         '''
         Return True if RTDE interface is running 
         '''
         
         return self.__conn_state >= ConnectionState.STARTED
     
-    def __get_controller_version(self):
+    def __getControllerVersion(self):
         '''
         Returns the software version of the robot controller running the RTDE server.
 
@@ -185,18 +189,8 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         '''
         cmd = Command.RTDE_GET_URCONTROL_VERSION
         self.__send(cmd)
-        
-        #(major, minor, bugfix, build) = self.__receive(cmd)
-        
-        #if major and minor and bugfix:
-        #    self._logger.info('Controller version: ' + str(major) + '.' + str(minor) + '.' + str(bugfix) + '-' + str(build))
-        #    if major <= 3 and minor <= 2 and bugfix < 19171:
-        #        self._logger.error("Please upgrade your controller to minimum version 3.2.19171")
-        #        self.stop()
-        #    return major, minor, bugfix
-        #return None, None, None
 
-    def __negotiate_protocol_version(self, protocol):
+    def __negotiateProtocolVersion(self, protocol):
         '''
         Negotiate the protocol version with the server. 
         Returns True if the controller supports the specified protocol version. 
@@ -212,11 +206,8 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         cmd = Command.RTDE_REQUEST_PROTOCOL_VERSION
         payload = struct.pack('>H',protocol)
         self.__send(cmd, payload)
-        #result = self.__receive(cmd)
-        #return bool(result) #Why return bool when we actually get the protocol number back?
-        #return bool(self.__sendAndReceive(cmd, payload))
     
-    def __setup_rtde_input(self, input_variables=None, types=[], initValues=None):
+    def __setupInput(self, input_variables=None, types=[], initValues=None):
         '''
         Configure an input package that the external(this) application will send to the robot controller. 
         An input package is a collection of input input_variables that the external application will provide 
@@ -264,34 +255,9 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         payload = bytes(payload, 'utf-8')
         self.__send(cmd, payload)
         
-        #result = self.__receive(cmd)
-        ##result = self.__sendAndReceive(cmd, payload)
-        #if result is None:
-        #    self._logger.debug('Could not send input configuration')
-        #    return False
-        #if len(types)!=0 and not self.__list_equals(result.types, types):
-        #    self._logger.error('Data type inconsistency for input setup: ' +
-        #             str(types) + ' - ' +
-        #             str(result.types))
-        #    return None
-        #result.names = input_variables
-        #self.__rtde_input_config[result.id] = result
-        #self.__dataSend = RTDEDataObject.create_empty(input_variables, result.id)
-        #if initValues is not None:
-        #    for ii in range(len(input_variables)):
-        #        if 'UINT8' == result.types[ii]:
-        #            self.set_rtde_data(input_variables[ii], int(initValues[ii]))
-        #        elif 'UINT32' == result.types[ii]:
-        #            self.set_rtde_data(input_variables[ii], int(initValues[ii]))
-        #        elif 'INT32' == result.types[ii]:
-        #            self.set_rtde_data(input_variables[ii], int(initValues[ii]))
-        #        elif 'DOUBLE' == result.types[ii]:
-        #            self.set_rtde_data(input_variables[ii], (initValues[ii]))
-        #        else:
-        #            self._logger.error('Unknown data type')
         return True
  
-    def __setup_rtde_output(self, output_variables=None, types=[]):
+    def __setupOutput(self, output_variables=None, types=[]):
         '''
         Configure an output package that the robot controller will send to the 
         external(this) application at the control frequency. Variables is a list of 
@@ -343,7 +309,7 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         #if result is None:
         #    self._logger.debug('Could not send output configuration')
         #    return False
-        #if len(types)!=0 and not self.__list_equals(result.types, types):
+        #if len(types)!=0 and not self.__listEquals(result.types, types):
         #    self._logger.error('Data type inconsistency for output setup: ' +
         #             str(types) + ' - ' +
         #             str(result.types))
@@ -352,7 +318,7 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         #self.__rtde_output_config = result
         return True
 
-    def __send_rtde_start(self):
+    def __sendStart(self):
         '''
         Sends a start command to the RTDE server. 
         Setup of all inputs and outputs must be done before starting the RTDE interface
@@ -362,17 +328,9 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         '''
         cmd = Command.RTDE_CONTROL_PACKAGE_START
         self.__send(cmd)
-
-        #success = self.__receive(cmd)
-        #if success:
-        #    self._logger.info('RTDE started')
-        #    self.__conn_state = ConnectionState.STARTED
-        #else:
-        #    self._logger.debug('RTDE failed to start')
-        #return success
         return True
         
-    def __send_rtde_pause(self):
+    def __sendPause(self):
         '''
         Sends a pause command to the RTDE server 
         When paused it is possible to change the input and output configurations
@@ -382,17 +340,9 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         '''
         cmd = Command.RTDE_CONTROL_PACKAGE_PAUSE
         self.__send(cmd)
-        #success = self.__sendAndReceive(cmd)
-        #success = self.__receive(cmd)
-        #if success:
-        #    self._logger.info('RTDE paused')
-        #    self.__conn_state = ConnectionState.PAUSED
-        #else:
-        #    self._logger.debug('RTDE failed to pause')
-        #return success
         return True
 
-    def send_rtde_data(self):
+    def sendData(self):
         '''
         Send the contents of a RTDEDataObject as input to the RTDE server. 
         Returns True if successful.
@@ -407,67 +357,13 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         #    self._logger.error('Input configuration id not found: ' + str(self.__dataSend.recipe_id))
         #    return
         if self.__robotModel.StopRunningFlag():
-            self._logger.info('"send_rtde_data" send ignored due to "stopRunningFlag" True')
+            self._logger.info('"sendData" send ignored due to "stopRunningFlag" True')
             return        
         #config = self.__rtde_input_config[self.__dataSend.recipe_id]
         config = self.__rtde_input_config
         return self.__send(Command.RTDE_DATA_PACKAGE, config.pack(self.__dataSend))
-
-    #def __receive(self):
-    #    '''
-    #    Blocking call to receive next output RTDEDataObject from RTDE server
-    #    Return value:        
-    #    output_data (RTDEDataObject): object with member variables matching the names of the configured RTDE variables
-    #    '''
-    #    if self.__rtde_output_config is None:
-    #        self._logger.error('Output configuration not initialized')
-    #        return None
-    #    if self.__conn_state != ConnectionState.STARTED:
-    #        self._logger.debug('Cannot receive when RTDE synchronization is inactive')
-    #        return None
-    #    return self.__receive(Command.RTDE_DATA_PACKAGE)
-
-    #def __has_get_rtde_data_attr(self,name):
-    #    '''
-    #    Check if RTDE interface is configured with a given variable name.
-    #    
-    #    Input parameter:
-    #    name (str): Name of variable to check.
-    #    '''
-    #    return hasattr(self._data, name)
-
-    #def __get_rtde_data(self, variable_name, wait=False):
-    #    '''
-    #    Get data from RTDE data stream when thread is running
-    #    
-    #    Input parameters:
-    #    variable_name (str):  Variable name from the list of possible RTDE outputs 
-    #    wait (boolean): Wait for next value, default value is False
-    #    
-    #    Return value:        
-    #    output_data (???): Variable(s) matching the names of the requested RTDE variables
-    #    '''
-    #    if not self.__stop_event:
-    #        if wait:
-    #            if not self.__wait_rtde():
-    #                return None
-    #        if self.__has_get_rtde_data_attr(variable_name):
-    #            return np.array(self._data[variable_name])
-    #        self._logger.warning('"get_rtde_data" tried to access non existing data tag: ' + variable_name)
-    #    return None
-
-
-    #def has_set_rtde_data_attr(self,name):
-    #    '''
-    #    Check if RTDE interface is configured with a given variable name.
-    #    
-    #    Input parameter:
-    #    name (str): Name of variable to check.
-    #    '''
-    #    return hasattr(self.__dataSend, name)
     
-    
-    def set_rtde_data(self, variable_name, value):
+    def setData(self, variable_name, value):
         '''
         Set data to be send to the robot
         Object is locked while updating to avoid sending half updated values,
@@ -498,29 +394,9 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         
         else:
             if variable_name in self.__rtde_input_config.names:
-            #if hasattr(self.__rtde_input_config.names, variable_name):
-            #if hasattr(self.__dataSend, variable_name):
                 self.__dataSend.__dict__[variable_name] = value
             else:
                 raise ValueError(str(variable_name) + " not found in RTDE OUTPUT config")
-                #return False
-        
-        #return True
-    
-    #def __sendAndReceive(self, cmd, payload=bytes()):
-    #    '''
-    #    Send command and data (payload) to Robot Controller 
-    #    and receive the respond from the Robot Controller. 
-    #    Input parameters:
-    #    cmd (int)
-    #    payload (bytes)
-    #    Return value(s):
-    #    Output from Robot controller (type is depended on the input parameters)
-    #    '''
-    #    if self.__send(cmd, payload):
-    #        return self.__receive(cmd)
-    #    else:
-    #        return None
         
     def __send(self, command, payload=bytes()):
         '''
@@ -549,48 +425,7 @@ class RTDE(threading.Thread): #, metaclass=Singleton
             self._logger.info("RTDE disconnected")
             self.__disconnect()
             return False
-    '''
-    def __receive(self, command):
-        byte_buffer = bytes()
-        while self.__rtde_is_connected():
-            if(self.__stop_event):
-                break
-            (readable, _, _) = select.select([self.__sock], [], [], DEFAULT_TIMEOUT)
-            if len(readable):
-                more = self.__sock.recv(4096)
-                if len(more) == 0:
-                    self._logger.info("RTDE disconnected")
-                    self.__disconnect()
-                    return None
-                byte_buffer +=  more
-                
-            # unpack_from requires a buffer of at least 3 bytes
-            while len(byte_buffer) >= 3:
-                #Get the packed header
-                (size, packet_command) = struct.unpack_from('>HB', byte_buffer)
-
-                # Attempts to extract a packet
-                if len(byte_buffer) >= size:
-                    packet, byte_buffer = byte_buffer[3:size], byte_buffer[size:]
-                    data = self.__decode_packet(command, packet)
-                    if command == packet_command:
-                        if(command == Command.RTDE_DATA_PACKAGE):
-                            self.__updateModel(data)
-                        else:
-                            if(len(byte_buffer) == 0):
-                                return data
-                    else:
-                        self._logger.error('package was not the right type - skipping')
-                    if command == packet_command and len(byte_buffer) != 0:
-                        self._logger.warning('skipping package')
-                else:
-                    if(len(byte_buffer) > 0):
-                        print("røg ind i break med buffer " + str(len(byte_buffer)) )
-                    break
-            #if(len(byte_buffer > 0)):
-            #    print(len(byte_buffer))            
-        #return None
-    '''        
+        
     def __receive(self):
         byte_buffer = bytes()
         
@@ -602,24 +437,19 @@ class RTDE(threading.Thread): #, metaclass=Singleton
                 self.__disconnect()
                 return None
             byte_buffer +=  more
-            #print("Added bytes from socket to buffer: " + str(len(more)))
                 
         while len(byte_buffer) >= 3:
             (packet_size, packet_command) = struct.unpack_from('>HB', byte_buffer)
             buffer_length = len(byte_buffer)
-            #print("packet_size " + str(packet_size) + " - buffer length " + str(buffer_length) + " - packet_command " + str(packet_command))
-            
-            #if(buffer_length == 23):
-            #    print(str(byte_buffer))
             
             if ((buffer_length) >= packet_size):
                 packet, byte_buffer = byte_buffer[3:packet_size], byte_buffer[packet_size:]
-                data = self.__decode_payload(packet_command, packet)
+                data = self.__decodePayload(packet_command, packet)
                     
                 if(packet_command == Command.RTDE_GET_URCONTROL_VERSION):
-                    self.__verify_controller_version(data)
+                    self.__verifyControllerVersion(data)
                 elif(packet_command == Command.RTDE_REQUEST_PROTOCOL_VERSION):
-                    self.__veriry_protocol_version(data)
+                    self.__verifyProtocolVersion(data)
                 elif(packet_command == Command.RTDE_CONTROL_PACKAGE_SETUP_INPUTS):
                     self.__rtde_input_config = data
                     self.__rtde_input_config.names = self.__rtde_input_names
@@ -628,13 +458,13 @@ class RTDE(threading.Thread): #, metaclass=Singleton
                     if self.__rtde_input_initValues is not None:
                         for ii in range(len(self.__rtde_input_config.names)):
                             if 'UINT8' == self.__rtde_input_config.types[ii]:
-                                self.set_rtde_data(self.__rtde_input_config.names[ii], int(self.__rtde_input_initValues[ii]))
+                                self.setData(self.__rtde_input_config.names[ii], int(self.__rtde_input_initValues[ii]))
                             elif 'UINT32' == self.__rtde_input_config.types[ii]:
-                                self.set_rtde_data(self.__rtde_input_config.names[ii], int(self.__rtde_input_initValues[ii]))
+                                self.setData(self.__rtde_input_config.names[ii], int(self.__rtde_input_initValues[ii]))
                             elif 'INT32' == self.__rtde_input_config.types[ii]:
-                                self.set_rtde_data(self.__rtde_input_config.names[ii], int(self.__rtde_input_initValues[ii]))
+                                self.setData(self.__rtde_input_config.names[ii], int(self.__rtde_input_initValues[ii]))
                             elif 'DOUBLE' == self.__rtde_input_config.types[ii]:
-                                self.set_rtde_data(self.__rtde_input_config.names[ii], (self.__rtde_input_initValues[ii]))
+                                self.setData(self.__rtde_input_config.names[ii], (self.__rtde_input_initValues[ii]))
                             else:
                                 self._logger.error('Unknown data type')
                 
@@ -655,13 +485,9 @@ class RTDE(threading.Thread): #, metaclass=Singleton
                 print("skipping package - unexpected packet_size - length: " + str(len(byte_buffer)))
                 byte_buffer = bytes()
                 
-                
-                
         if len(byte_buffer) != 0:
             self._logger.warning('skipping package - not a package but buffer was not empty')
             byte_buffer = bytes()
-
-        
 
     def __updateModel(self, rtde_data_package):
         self.__packageCounter = self.__packageCounter + 1
@@ -672,14 +498,10 @@ class RTDE(threading.Thread): #, metaclass=Singleton
             delta = rtde_data_package['timestamp'] - self.__robotModel.dataDir['timestamp']
             if(delta > 0.00800001):
                 self._logger.error("Lost some RTDE at " + str(rtde_data_package['timestamp']) + " - " + str(delta*1000) + " milliseconds since last package")
-                #print("Lost something at " + str(rtde_data_package['timestamp']) + " - " + str(delta*1000) + " milliseconds since last package")
         for tagname in rtde_data_package.keys():
             self.__robotModel.dataDir[tagname] = rtde_data_package[tagname] 
-            #print(tagname)
-            #with self.__dataEvent:
-            #    self.__dataEvent.notifyAll()
     
-    def __verify_controller_version(self, data):
+    def __verifyControllerVersion(self, data):
         self.__controllerVersion = data
         (major, minor, bugfix, build) = self.__controllerVersion
         if major and minor and bugfix:
@@ -688,18 +510,12 @@ class RTDE(threading.Thread): #, metaclass=Singleton
                 self._logger.error("Please upgrade your controller to minimum version 3.2.19171")
                 raise ValueError("Please upgrade your controller to minimum version 3.2.19171")
         
-    def __veriry_protocol_version(self, data):
+    def __verifyProtocolVersion(self, data):
         self.__protocol_version = data
         if(self.__protocol_version != 1):
             raise ValueError("We only support protocol version 1 at the moment")
-    
-    
-    #def __trigger_disconnected(self):
-    #    self._logger.info("RTDE disconnected")
-    #    self.__disconnect() #clean-up
-
-    #def __decode_packet(self, cmd, payload):
-    def __decode_payload(self, cmd, payload):
+        
+    def __decodePayload(self, cmd, payload):
         '''
         Decode the package received from the Robot
         payload (bytes)
@@ -782,7 +598,7 @@ class RTDE(threading.Thread): #, metaclass=Singleton
             self._logger.error('Unknown RTDE command type: ' + chr(cmd))
 
 
-    def __list_equals(self, l1, l2):
+    def __listEquals(self, l1, l2):
         if len(l1) != len(l2):
             return False
         for i in range(len((l1))):
@@ -790,7 +606,7 @@ class RTDE(threading.Thread): #, metaclass=Singleton
                 return False
         return True
 
-    def __wait_rtde(self):
+    def __wait(self):
         '''Wait while the data receiving thread is receiving a new data set.'''
         cnt = 0
         while self.__conn_state < ConnectionState.STARTED:
@@ -810,7 +626,7 @@ class RTDE(threading.Thread): #, metaclass=Singleton
     def close(self):
         if self.__stop_event is False:
             self.__stop_event = True
-            self.__wait_rtde()
+            self.__wait()
             self.join()
             self.__disconnect()
         
@@ -819,15 +635,15 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         t0 = time.time()
         while (time.time()-t0<self.__reconnectTimeout) and self.__conn_state != ConnectionState.STARTED:
             self.__connect()
-            self.__get_controller_version()
+            self.__getControllerVersion()
             self.__receive()
-            self.__negotiate_protocol_version(1)
+            self.__negotiateProtocolVersion(1)
             self.__receive()
-            self.__setup_rtde_output()
+            self.__setupOutput()
             self.__receive()
-            self.__setup_rtde_input()
+            self.__setupInput()
             self.__receive()
-            self.__send_rtde_start()
+            self.__sendStart()
             self.__receive()
             #time.sleep(0.5)
         if self.__conn_state != ConnectionState.STARTED:
@@ -847,21 +663,21 @@ class RTDE(threading.Thread): #, metaclass=Singleton
                     self.__conn_state = ConnectionState.ERROR
                     self._logger.error("RTDE interface stopped running")
 
-                self.__send_rtde_pause()
-                if not self.__send_rtde_start():
+                self.__sendPause()
+                if not self.__sendStart():
                     self.__disconnect()
                     time.sleep(1)
                     self.__connect()
-                    self.__setup_rtde_output()
-                    self.__setup_rtde_input()
-                    self.__send_rtde_start()
+                    self.__setupOutput()
+                    self.__setupInput()
+                    self.__sendStart()
 
                 if self.__conn_state == ConnectionState.STARTED:
                     self._logger.info("RTDE interface restarted")
                 else:
                     self._logger.warning("RTDE reconnection failed!")
 
-        self.__send_rtde_pause()
+        self.__sendPause()
         with self.__dataEvent:
             self.__dataEvent.notifyAll()
         self._logger.info("RTDE interface is stopped")

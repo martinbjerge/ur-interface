@@ -1,6 +1,6 @@
 '''
 Python 3.x library to control an UR robot through its TCP/IP interfaces
-Copyright (C) 2016  Martin Huus Bjerge, Rope Robotics ApS, Denmark
+Copyright (C) 2017  Martin Huus Bjerge, Rope Robotics ApS, Denmark
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
 and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -22,7 +22,7 @@ in advertising or otherwise to promote the sale, use or other dealings in this S
 without prior written authorization from "Rope Robotics ApS".
 '''
 __author__ = "Martin Huus Bjerge"
-__copyright__ = "Copyright 2016, Rope Robotics ApS, Denmark"
+__copyright__ = "Copyright 2017, Rope Robotics ApS, Denmark"
 __license__ = "MIT License"
 
 from URplus.forceTorqueSensor import ForceTorqueSensor
