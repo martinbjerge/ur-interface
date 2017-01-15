@@ -495,14 +495,40 @@ end
         Status (bool): Status, True if signal set successfully.
         
         """
-        
-        prg =  '''def move_force():
+        task_frame = np.array(task_frame)
+        if np.size(task_frame.shape)==2:
+            prefix="p"
+            t_val=''
+            if pose is None:
+                prefix=""
+                pose=q
+            pose = np.array(pose)
+            if movetype == 'j' or movetype == 'l':
+                tval='t={t},'.format(**locals())
+            
+            prg = 'def move_force():\n'
+            for idx in range(np.size(pose, 0)):
+                posex = np.round(pose[idx], 4)
+                posex = posex.tolist()
+                task_framex = np.round(task_frame[idx], 4)
+                task_framex = task_framex.tolist()
+                if (np.size(pose, 0)-1)==idx:
+                    r=0
+                prg +=  '    force_mode(p{task_framex}, {selection_vector}, {wrench}, {f_type}, {limits})\n'.format(**locals())
+                prg +=  '    move{movetype}({prefix}{posex}, a={a}, v={v}, {t_val} r={r})\n'.format(**locals())
+                
+            prg +=  '    stopl({a}, {a})\n'.format(**locals())
+            prg +=  '    end_force_mode()\nend\n'
+            
+        else: 
+            prg =  '''def move_force():
     force_mode(p{task_frame}, {selection_vector}, {wrench}, {f_type}, {limits})
 {movestr}
     end_force_mode()
 end
 '''
-        movestr = self._move(movetype, pose, a, v, t, r, wait, q)
+            task_frame = task_frame.tolist()
+            movestr = self._move(movetype, pose, a, v, t, r, wait, q)
         
         self.robotConnector.RealTimeClient.SendProgram(prg.format(**locals()))
         if(wait):
