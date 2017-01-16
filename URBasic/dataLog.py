@@ -29,7 +29,7 @@ import threading
 import URBasic
 import numpy as np
 import time
-
+import xml.etree.ElementTree as ET
 
 
 class DataLog(threading.Thread):
@@ -48,25 +48,51 @@ class DataLog(threading.Thread):
         name = logger.AddEventLogging(__name__,log2Consol=True)        
         self.__logger = logger.__dict__[name]
         self.__stop_event = True
-
+        
+        
+        configFilename = URBasic.__file__[0:URBasic.__file__.find('URBasic')] + 'dataLogConfig.xml'
+        self.__config = Config
+        self.__readConfig(configFileName=configFilename, config=self.__config)
+        
         self.__robotModelDataDirCopy = None
         self.start()
         self.__logger.info('DataLog constructor done')
+         
+         
+    def __readConfig(self, configFileName, config):
+        tree = ET.parse(configFileName)
+        logConfig = tree.getroot()
+        dataLogConfig = logConfig.find('dataLogConfig')
+        decimals = dataLogConfig.find('defaultDecimals')
+        config.Decimals = int(decimals.text)         
+        logParameters = dataLogConfig.find('logParameters')
+        for Child in logParameters:
+            setattr(config, Child.tag, Child.text)
+            
+
          
     def logdata(self, robotModelDataDir):
         if(self.__robotModelDataDirCopy != None):
             if(self.__robotModelDataDirCopy['timestamp'] != robotModelDataDir['timestamp']):
                 for tagname in robotModelDataDir.keys():
                     if tagname != 'timestamp' and  robotModelDataDir[tagname] is not None:
+                        roundingDecimals = self.__config.Decimals
                         tp = type(robotModelDataDir[tagname])
                         if tp is np.ndarray:
+                            if tagname in self.__config.__dict__:
+                                roundingDecimals = int(self.__config.__dict__[tagname])
+                            roundedValues = np.round(robotModelDataDir[tagname], roundingDecimals)
                             if 6==len(robotModelDataDir[tagname]):
-                                self.__dataLogger.info((tagname+';%s;%s;%s;%s;%s;%s;%s'), robotModelDataDir['timestamp'], *robotModelDataDir[tagname])
+                                self.__dataLogger.info((tagname+';%s;%s;%s;%s;%s;%s;%s'), robotModelDataDir['timestamp'], *roundedValues)
                             elif 3==len(robotModelDataDir[tagname]):
-                                self.__dataLogger.info((tagname+';%s;%s;%s;%s'), robotModelDataDir['timestamp'], *robotModelDataDir[tagname])
+                                self.__dataLogger.info((tagname+';%s;%s;%s;%s'), robotModelDataDir['timestamp'], *roundedValues)
                             else:
                                 self.__logger.warning('Logger data unexpected type in rtde.py - class URRTDElogger - def logdata Type: ' + str(tp) + ' - Len: ' + str(len(robotModelDataDir[tagname])))
-                        elif tp is bool or tp is float or tp is int: 
+                        elif tp is float:
+                            if tagname in self.__config.__dict__:
+                                roundingDecimals = int(self.__config.__dict__[tagname])
+                            self.__dataLogger.info((tagname+';%s;%s'), robotModelDataDir['timestamp'], round(robotModelDataDir[tagname], roundingDecimals))
+                        elif tp is bool or tp is int: 
                             self.__dataLogger.info((tagname+';%s;%s'), robotModelDataDir['timestamp'], robotModelDataDir[tagname])
                         else:
                             self.__logger.warning('Logger data unexpected type in rtde.py - class URRTDElogger - def logdata Type: ' + str(tp))
@@ -82,9 +108,12 @@ class DataLog(threading.Thread):
         self.__stop_event = False
         while not self.__stop_event:
             try:
-                temp = self.__robotModel.dataDir.copy()
-                self.logdata(temp)
+                dataDirCopy = self.__robotModel.dataDir.copy()
+                self.logdata(dataDirCopy)
                 time.sleep(0.005)
             except:
                 self.__logger.warning("DataLog error while running, but will retry")
         self.__logger.info("DataLog is stopped")
+
+class Config(object):
+    Decimals = 5
