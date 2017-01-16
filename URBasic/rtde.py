@@ -103,16 +103,10 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         self.__rtde_input_names = None
         self.__rtde_input_initValues = None
         self.__rtde_input_config = None
-        
-        
         self.__controllerVersion = None
         self.__protocol_version = None
-        
         self.__packageCounter = 0
-        #self.__receiveTimer = threading.Timer(interval=0.002, function=self.__receive())
-        
         self.start()
-        #self.__wait()
         self._logger.info('RTDE constructor done')
 
         
@@ -138,18 +132,6 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         except (socket.timeout, socket.error):
             self.__sock = None
             return False
-        
-        #try:        
-        #    #time.sleep(2)
-        #    self.__get_controller_version()
-        #    if not self.__negotiate_protocol_version(1):
-        #        self._logger.error('Unable to negotiate protocol version')
-    
-        #except:
-        #    self.__sock.close()
-        #    self.__sock = None
-        #    return False        
-        
         return True
 
     def __disconnect(self):
@@ -303,19 +285,6 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         self.__rtde_output_names = output_variables
         payload = bytes(payload, 'utf-8')
         self.__send(cmd, payload)
-        ######################################################################## husk at fixe NAMES  TODO ##############################################################
-        #result = self.__receive(cmd)
-        ##result = self.__sendAndReceive(cmd, payload)
-        #if result is None:
-        #    self._logger.debug('Could not send output configuration')
-        #    return False
-        #if len(types)!=0 and not self.__listEquals(result.types, types):
-        #    self._logger.error('Data type inconsistency for output setup: ' +
-        #             str(types) + ' - ' +
-        #             str(result.types))
-        #    return False
-        #result.names = output_variables
-        #self.__rtde_output_config = result
         return True
 
     def __sendStart(self):
