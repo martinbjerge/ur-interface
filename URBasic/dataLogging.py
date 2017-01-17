@@ -30,6 +30,7 @@ import logging
 import time 
 import os
 import URBasic
+import xml.etree.ElementTree as ET
 
 class Singleton(type):
     _instances = {}
@@ -50,13 +51,58 @@ class DataLogging(metaclass=Singleton):
         '''
         self.directory = None
         self.logDir = None
-        self.GetLogPath(path=path)
-        self.fileLogHandler = logging.FileHandler(self.directory + '\\UrEvent.log', mode='w')
+        
+        self.__developerTestingFlag = False
+        self.__eventLogFileMode = 'w'
+        self.__dataLogFileMode = 'w'
+        
+        configFilename = URBasic.__file__[0:URBasic.__file__.find('URBasic')] + 'dataLogConfig.xml'
+        self.__readConfig(configFileName=configFilename)
+        
+        self.GetLogPath(path=path, developerTestingFlag=self.__developerTestingFlag)
+        
+        
+        
+        self.fileLogHandler = logging.FileHandler(self.directory + '\\UrEvent.log', mode=self.__eventLogFileMode)
         self.fileLogHandler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
         self.streamLogHandler = logging.StreamHandler()
         self.streamLogHandler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-        self.fileDataLogHandler = logging.FileHandler(self.directory + '\\UrDataLog.csv', mode='w')
+        self.fileDataLogHandler = logging.FileHandler(self.directory + '\\UrDataLog.csv', mode=self.__dataLogFileMode)
         self.writeDataLogHeadder = True
+
+
+    
+    def __readConfig(self, configFileName):
+        tree = ET.parse(configFileName)
+        logConfig = tree.getroot()
+        developerModeTag = logConfig.find('developerMode')
+        self.__developerTestingFlag = bool(developerModeTag.text)
+                
+        eventLogConfig = logConfig.find('eventLogConfig')
+        eventFileModeTag = eventLogConfig.find('fileMode')
+        if (eventFileModeTag.text == "Overwrite"):
+            self.__eventLogFileMode = 'w'
+        elif (eventFileModeTag.text == "Append"):
+            self.__eventLogFileMode = 'a'
+        else:
+            raise ValueError("Not supported eventLogfile mode: " + eventFileModeTag.text)
+        
+        dataLogConfig = logConfig.find('dataLogConfig')
+        dataFileModeTag = dataLogConfig.find('fileMode')
+        if (dataFileModeTag.text == "Overwrite"):
+            self.__dataLogFileMode = 'w'
+        elif (dataFileModeTag.text == "Append"):
+            self.__dataLogFileMode = 'a'
+        else:
+            raise ValueError("Not supported dataLogfile mode: " + dataFileModeTag.text)
+        
+        
+        #decimals = dataLogConfig.find('defaultDecimals')
+        #config.Decimals = int(decimals.text)         
+        #logParameters = dataLogConfig.find('logParameters')
+        #for Child in logParameters:
+        #    setattr(config, Child.tag, Child.text)
+
 
     def GetLogPath(self,path=None, developerTestingFlag=True):
         '''
