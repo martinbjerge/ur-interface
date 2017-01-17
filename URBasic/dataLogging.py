@@ -97,13 +97,7 @@ class DataLogging(metaclass=Singleton):
             raise ValueError("Not supported dataLogfile mode: " + dataFileModeTag.text)
         
         
-        #decimals = dataLogConfig.find('defaultDecimals')
-        #config.Decimals = int(decimals.text)         
-        #logParameters = dataLogConfig.find('logParameters')
-        #for Child in logParameters:
-        #    setattr(config, Child.tag, Child.text)
-
-
+        
     def GetLogPath(self,path=None, developerTestingFlag=True):
         '''
         Setup a path where log files will be stored
