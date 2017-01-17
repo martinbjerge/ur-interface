@@ -1,13 +1,11 @@
-*.log
 *.pyc
-*.csv
-bladecrawler/dist/
-bladecrawler/build/
+rtdeConfiguration.xml
 Playground*.py
 playground*.py
+log/
 URConnect/RobotServer/obj/
 URConnect/TestGui/obj/Debug/
 URConnect/RobotServer/bin/Debug/RobotServer.pdb
+URConnect/UniversalRobotsConnect/obj/Debug/
 *.suo
 *.pdb
-URConnect/UniversalRobotsConnect/obj/Debug/

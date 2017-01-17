@@ -1,6 +1,6 @@
 '''
 Python 3.x library to control an UR robot through its TCP/IP interfaces
-Copyright (C) 2016  Martin Huus Bjerge, Rope Robotics ApS, Denmark
+Copyright (C) 2017  Martin Huus Bjerge, Rope Robotics ApS, Denmark
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
 and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -22,7 +22,7 @@ in advertising or otherwise to promote the sale, use or other dealings in this S
 without prior written authorization from "Rope Robotics ApS".
 '''
 __author__ = "Martin Huus Bjerge"
-__copyright__ = "Copyright 2016, Rope Robotics ApS, Denmark"
+__copyright__ = "Copyright 2017, Rope Robotics ApS, Denmark"
 __license__ = "MIT License"
 
 import URBasic
@@ -146,7 +146,7 @@ class UrScriptExt(URBasic.urScript.UrScript):
         elif 'TDO' == port[:3]:
             pass
 
-            #if self.send_rtde_data():
+            #if self.sendData():
             #    return True
             return True #Vi har sendt det .. vi checker ikke
         else:
@@ -171,75 +171,44 @@ class UrScriptExt(URBasic.urScript.UrScript):
         Status (bool): Status, True if successfully initialized.
         ''' 
         
-        if not self.robotConnector.RTDE.rtde_is_running():
+        if not self.robotConnector.RTDE.isRunning():
             self.__logger.error('RTDE need to be running to use force remote')
             return False
             
-        rtde_input_check = True
-        rtde_input_check = rtde_input_check and self.robotConnector.RTDE.has_set_rtde_data_attr('input_int_register_0')
-        rtde_input_check = rtde_input_check and self.robotConnector.RTDE.has_set_rtde_data_attr('input_int_register_1')
-        rtde_input_check = rtde_input_check and self.robotConnector.RTDE.has_set_rtde_data_attr('input_int_register_2')
-        rtde_input_check = rtde_input_check and self.robotConnector.RTDE.has_set_rtde_data_attr('input_int_register_3')
-        rtde_input_check = rtde_input_check and self.robotConnector.RTDE.has_set_rtde_data_attr('input_int_register_4')
-        rtde_input_check = rtde_input_check and self.robotConnector.RTDE.has_set_rtde_data_attr('input_int_register_5')
-        rtde_input_check = rtde_input_check and self.robotConnector.RTDE.has_set_rtde_data_attr('input_int_register_6')
-        
-        rtde_input_check = rtde_input_check and self.robotConnector.RTDE.has_set_rtde_data_attr('input_double_register_0')
-        rtde_input_check = rtde_input_check and self.robotConnector.RTDE.has_set_rtde_data_attr('input_double_register_1')
-        rtde_input_check = rtde_input_check and self.robotConnector.RTDE.has_set_rtde_data_attr('input_double_register_2')
-        rtde_input_check = rtde_input_check and self.robotConnector.RTDE.has_set_rtde_data_attr('input_double_register_3')
-        rtde_input_check = rtde_input_check and self.robotConnector.RTDE.has_set_rtde_data_attr('input_double_register_4')
-        rtde_input_check = rtde_input_check and self.robotConnector.RTDE.has_set_rtde_data_attr('input_double_register_5')
-        rtde_input_check = rtde_input_check and self.robotConnector.RTDE.has_set_rtde_data_attr('input_double_register_6')
-        rtde_input_check = rtde_input_check and self.robotConnector.RTDE.has_set_rtde_data_attr('input_double_register_7')
-        rtde_input_check = rtde_input_check and self.robotConnector.RTDE.has_set_rtde_data_attr('input_double_register_8')
-        rtde_input_check = rtde_input_check and self.robotConnector.RTDE.has_set_rtde_data_attr('input_double_register_9')
-        rtde_input_check = rtde_input_check and self.robotConnector.RTDE.has_set_rtde_data_attr('input_double_register_10')
-        rtde_input_check = rtde_input_check and self.robotConnector.RTDE.has_set_rtde_data_attr('input_double_register_11')
-        rtde_input_check = rtde_input_check and self.robotConnector.RTDE.has_set_rtde_data_attr('input_double_register_12')
-        rtde_input_check = rtde_input_check and self.robotConnector.RTDE.has_set_rtde_data_attr('input_double_register_13')
-        rtde_input_check = rtde_input_check and self.robotConnector.RTDE.has_set_rtde_data_attr('input_double_register_14')
-        rtde_input_check = rtde_input_check and self.robotConnector.RTDE.has_set_rtde_data_attr('input_double_register_15')
-        rtde_input_check = rtde_input_check and self.robotConnector.RTDE.has_set_rtde_data_attr('input_double_register_16')
-        rtde_input_check = rtde_input_check and self.robotConnector.RTDE.has_set_rtde_data_attr('input_double_register_17')
-        
-        if not rtde_input_check:
-            self.__logger.error('RTDE is not configured to have all the needed input registeres needed')
-            return False
         selection_vector=[0, 0, 0,  0, 0, 0]
         wrench=[0.0, 0.0, 0.0,  0.0, 0.0, 0.0]
         limits=[0.1, 0.1, 0.1,  0.1, 0.1, 0.1]
 
-        self.robotConnector.RTDE.set_rtde_data('input_int_register_0', selection_vector[0])
-        self.robotConnector.RTDE.set_rtde_data('input_int_register_1', selection_vector[1])
-        self.robotConnector.RTDE.set_rtde_data('input_int_register_2', selection_vector[2])
-        self.robotConnector.RTDE.set_rtde_data('input_int_register_3', selection_vector[3])
-        self.robotConnector.RTDE.set_rtde_data('input_int_register_4', selection_vector[4])
-        self.robotConnector.RTDE.set_rtde_data('input_int_register_5', selection_vector[5])
+        self.robotConnector.RTDE.setData('input_int_register_0', selection_vector[0])
+        self.robotConnector.RTDE.setData('input_int_register_1', selection_vector[1])
+        self.robotConnector.RTDE.setData('input_int_register_2', selection_vector[2])
+        self.robotConnector.RTDE.setData('input_int_register_3', selection_vector[3])
+        self.robotConnector.RTDE.setData('input_int_register_4', selection_vector[4])
+        self.robotConnector.RTDE.setData('input_int_register_5', selection_vector[5])
         
-        self.robotConnector.RTDE.set_rtde_data('input_double_register_0', wrench[0])
-        self.robotConnector.RTDE.set_rtde_data('input_double_register_1', wrench[1])
-        self.robotConnector.RTDE.set_rtde_data('input_double_register_2', wrench[2])
-        self.robotConnector.RTDE.set_rtde_data('input_double_register_3', wrench[3])
-        self.robotConnector.RTDE.set_rtde_data('input_double_register_4', wrench[4])
-        self.robotConnector.RTDE.set_rtde_data('input_double_register_5', wrench[5])
+        self.robotConnector.RTDE.setData('input_double_register_0', wrench[0])
+        self.robotConnector.RTDE.setData('input_double_register_1', wrench[1])
+        self.robotConnector.RTDE.setData('input_double_register_2', wrench[2])
+        self.robotConnector.RTDE.setData('input_double_register_3', wrench[3])
+        self.robotConnector.RTDE.setData('input_double_register_4', wrench[4])
+        self.robotConnector.RTDE.setData('input_double_register_5', wrench[5])
 
-        self.robotConnector.RTDE.set_rtde_data('input_double_register_6', limits[0])
-        self.robotConnector.RTDE.set_rtde_data('input_double_register_7', limits[1])
-        self.robotConnector.RTDE.set_rtde_data('input_double_register_8', limits[2])
-        self.robotConnector.RTDE.set_rtde_data('input_double_register_9', limits[3])
-        self.robotConnector.RTDE.set_rtde_data('input_double_register_10', limits[4])
-        self.robotConnector.RTDE.set_rtde_data('input_double_register_11', limits[5])
+        self.robotConnector.RTDE.setData('input_double_register_6', limits[0])
+        self.robotConnector.RTDE.setData('input_double_register_7', limits[1])
+        self.robotConnector.RTDE.setData('input_double_register_8', limits[2])
+        self.robotConnector.RTDE.setData('input_double_register_9', limits[3])
+        self.robotConnector.RTDE.setData('input_double_register_10', limits[4])
+        self.robotConnector.RTDE.setData('input_double_register_11', limits[5])
 
-        self.robotConnector.RTDE.set_rtde_data('input_double_register_12', task_frame[0])
-        self.robotConnector.RTDE.set_rtde_data('input_double_register_13', task_frame[1])
-        self.robotConnector.RTDE.set_rtde_data('input_double_register_14', task_frame[2])
-        self.robotConnector.RTDE.set_rtde_data('input_double_register_15', task_frame[3])
-        self.robotConnector.RTDE.set_rtde_data('input_double_register_16', task_frame[4])
-        self.robotConnector.RTDE.set_rtde_data('input_double_register_17', task_frame[5])
+        self.robotConnector.RTDE.setData('input_double_register_12', task_frame[0])
+        self.robotConnector.RTDE.setData('input_double_register_13', task_frame[1])
+        self.robotConnector.RTDE.setData('input_double_register_14', task_frame[2])
+        self.robotConnector.RTDE.setData('input_double_register_15', task_frame[3])
+        self.robotConnector.RTDE.setData('input_double_register_16', task_frame[4])
+        self.robotConnector.RTDE.setData('input_double_register_17', task_frame[5])
         
-        self.robotConnector.RTDE.set_rtde_data('input_int_register_6', f_type)
-        self.robotConnector.RTDE.send_rtde_data()
+        self.robotConnector.RTDE.setData('input_int_register_6', f_type)
+        self.robotConnector.RTDE.sendData()
         
         prog='''def force_remote():
     while (True):
@@ -323,38 +292,38 @@ end
         if not self.robotConnector.RobotModel.forceRemoteActiveFlag:
             self.init_force_remote(task_frame, f_type)
         
-        if self.robotConnector.RTDE.rtde_is_running() and self.robotConnector.RobotModel.forceRemoteActiveFlag:
-            self.robotConnector.RTDE.set_rtde_data('input_int_register_0', selection_vector[0])
-            self.robotConnector.RTDE.set_rtde_data('input_int_register_1', selection_vector[1])
-            self.robotConnector.RTDE.set_rtde_data('input_int_register_2', selection_vector[2])
-            self.robotConnector.RTDE.set_rtde_data('input_int_register_3', selection_vector[3])
-            self.robotConnector.RTDE.set_rtde_data('input_int_register_4', selection_vector[4])
-            self.robotConnector.RTDE.set_rtde_data('input_int_register_5', selection_vector[5])
+        if self.robotConnector.RTDE.isRunning() and self.robotConnector.RobotModel.forceRemoteActiveFlag:
+            self.robotConnector.RTDE.setData('input_int_register_0', selection_vector[0])
+            self.robotConnector.RTDE.setData('input_int_register_1', selection_vector[1])
+            self.robotConnector.RTDE.setData('input_int_register_2', selection_vector[2])
+            self.robotConnector.RTDE.setData('input_int_register_3', selection_vector[3])
+            self.robotConnector.RTDE.setData('input_int_register_4', selection_vector[4])
+            self.robotConnector.RTDE.setData('input_int_register_5', selection_vector[5])
             
-            self.robotConnector.RTDE.set_rtde_data('input_double_register_0', wrench[0])
-            self.robotConnector.RTDE.set_rtde_data('input_double_register_1', wrench[1])
-            self.robotConnector.RTDE.set_rtde_data('input_double_register_2', wrench[2])
-            self.robotConnector.RTDE.set_rtde_data('input_double_register_3', wrench[3])
-            self.robotConnector.RTDE.set_rtde_data('input_double_register_4', wrench[4])
-            self.robotConnector.RTDE.set_rtde_data('input_double_register_5', wrench[5])
+            self.robotConnector.RTDE.setData('input_double_register_0', wrench[0])
+            self.robotConnector.RTDE.setData('input_double_register_1', wrench[1])
+            self.robotConnector.RTDE.setData('input_double_register_2', wrench[2])
+            self.robotConnector.RTDE.setData('input_double_register_3', wrench[3])
+            self.robotConnector.RTDE.setData('input_double_register_4', wrench[4])
+            self.robotConnector.RTDE.setData('input_double_register_5', wrench[5])
 
-            self.robotConnector.RTDE.set_rtde_data('input_double_register_6', limits[0])
-            self.robotConnector.RTDE.set_rtde_data('input_double_register_7', limits[1])
-            self.robotConnector.RTDE.set_rtde_data('input_double_register_8', limits[2])
-            self.robotConnector.RTDE.set_rtde_data('input_double_register_9', limits[3])
-            self.robotConnector.RTDE.set_rtde_data('input_double_register_10', limits[4])
-            self.robotConnector.RTDE.set_rtde_data('input_double_register_11', limits[5])
+            self.robotConnector.RTDE.setData('input_double_register_6', limits[0])
+            self.robotConnector.RTDE.setData('input_double_register_7', limits[1])
+            self.robotConnector.RTDE.setData('input_double_register_8', limits[2])
+            self.robotConnector.RTDE.setData('input_double_register_9', limits[3])
+            self.robotConnector.RTDE.setData('input_double_register_10', limits[4])
+            self.robotConnector.RTDE.setData('input_double_register_11', limits[5])
             
-            self.robotConnector.RTDE.set_rtde_data('input_double_register_12', task_frame[0])
-            self.robotConnector.RTDE.set_rtde_data('input_double_register_13', task_frame[1])
-            self.robotConnector.RTDE.set_rtde_data('input_double_register_14', task_frame[2])
-            self.robotConnector.RTDE.set_rtde_data('input_double_register_15', task_frame[3])
-            self.robotConnector.RTDE.set_rtde_data('input_double_register_16', task_frame[4])
-            self.robotConnector.RTDE.set_rtde_data('input_double_register_17', task_frame[5])
+            self.robotConnector.RTDE.setData('input_double_register_12', task_frame[0])
+            self.robotConnector.RTDE.setData('input_double_register_13', task_frame[1])
+            self.robotConnector.RTDE.setData('input_double_register_14', task_frame[2])
+            self.robotConnector.RTDE.setData('input_double_register_15', task_frame[3])
+            self.robotConnector.RTDE.setData('input_double_register_16', task_frame[4])
+            self.robotConnector.RTDE.setData('input_double_register_17', task_frame[5])
             
-            self.robotConnector.RTDE.set_rtde_data('input_int_register_6', f_type)
+            self.robotConnector.RTDE.setData('input_int_register_6', f_type)
             
-            self.robotConnector.RTDE.send_rtde_data()
+            self.robotConnector.RTDE.sendData()
             return True
             
         else:
@@ -526,14 +495,40 @@ end
         Status (bool): Status, True if signal set successfully.
         
         """
-        
-        prg =  '''def move_force():
+        task_frame = np.array(task_frame)
+        if np.size(task_frame.shape)==2:
+            prefix="p"
+            t_val=''
+            if pose is None:
+                prefix=""
+                pose=q
+            pose = np.array(pose)
+            if movetype == 'j' or movetype == 'l':
+                tval='t={t},'.format(**locals())
+            
+            prg = 'def move_force():\n'
+            for idx in range(np.size(pose, 0)):
+                posex = np.round(pose[idx], 4)
+                posex = posex.tolist()
+                task_framex = np.round(task_frame[idx], 4)
+                task_framex = task_framex.tolist()
+                if (np.size(pose, 0)-1)==idx:
+                    r=0
+                prg +=  '    force_mode(p{task_framex}, {selection_vector}, {wrench}, {f_type}, {limits})\n'.format(**locals())
+                prg +=  '    move{movetype}({prefix}{posex}, a={a}, v={v}, {t_val} r={r})\n'.format(**locals())
+                
+            prg +=  '    stopl({a}, {a})\n'.format(**locals())
+            prg +=  '    end_force_mode()\nend\n'
+            
+        else: 
+            prg =  '''def move_force():
     force_mode(p{task_frame}, {selection_vector}, {wrench}, {f_type}, {limits})
 {movestr}
     end_force_mode()
 end
 '''
-        movestr = self._move(movetype, pose, a, v, t, r, wait, q)
+            task_frame = task_frame.tolist()
+            movestr = self._move(movetype, pose, a, v, t, r, wait, q)
         
         self.robotConnector.RealTimeClient.SendProgram(prg.format(**locals()))
         if(wait):
@@ -556,6 +551,6 @@ end
         print a pose 
         '''        
         if q is None:
-            print('Robot Pose: [{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*pose))
+            print('Robot Pose: [{: 06.4f}, {: 06.4f}, {: 06.4f},   {: 06.4f}, {: 06.4f}, {: 06.4f}]'.format(*pose))
         else:
-            print('Robot joint positions: [{: 06.3f}, {: 06.3f}, {: 06.3f},   {: 06.3f}, {: 06.3f}, {: 06.3f}]'.format(*q))
+            print('Robot joint positions: [{: 06.4f}, {: 06.4f}, {: 06.4f},   {: 06.4f}, {: 06.4f}, {: 06.4f}]'.format(*q))

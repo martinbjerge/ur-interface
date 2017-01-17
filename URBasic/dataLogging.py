@@ -1,6 +1,6 @@
 '''
 Python 3.x library to control an UR robot through its TCP/IP interfaces
-Copyright (C) 2016  Martin Huus Bjerge, Rope Robotics ApS, Denmark
+Copyright (C) 2017  Martin Huus Bjerge, Rope Robotics ApS, Denmark
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
 and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -21,13 +21,15 @@ Except as contained in this notice, the name of "Rope Robotics ApS" shall not be
 in advertising or otherwise to promote the sale, use or other dealings in this Software 
 without prior written authorization from "Rope Robotics ApS".
 '''
+import path
 __author__ = "Martin Huus Bjerge"
-__copyright__ = "Copyright 2016, Rope Robotics ApS, Denmark"
+__copyright__ = "Copyright 2017, Rope Robotics ApS, Denmark"
 __license__ = "MIT License"
 
 import logging
 import time 
 import os
+import URBasic
 
 class Singleton(type):
     _instances = {}
@@ -42,11 +44,12 @@ class DataLogging(metaclass=Singleton):
     A module that add general logging functions to the UR Interface framework.
     '''
     
-    def __init__(self,path='C:\\SourceCode\\log'):
+    def __init__(self,path=None):
         '''
         Constructor that setup a path where log files will be stored.
         '''
         self.directory = None
+        self.logDir = None
         self.GetLogPath(path=path)
         self.fileLogHandler = logging.FileHandler(self.directory + '\\UrEvent.log', mode='w')
         self.fileLogHandler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
@@ -55,13 +58,17 @@ class DataLogging(metaclass=Singleton):
         self.fileDataLogHandler = logging.FileHandler(self.directory + '\\UrDataLog.csv', mode='w')
         self.writeDataLogHeadder = True
 
-    def GetLogPath(self,path='C:\\SourceCode\\log', developerTestingFlag=True):
+    def GetLogPath(self,path=None, developerTestingFlag=True):
         '''
         Setup a path where log files will be stored
         Path format .\[path]\YY-mm-dd\HH-MM-SS\
         '''
-        #Log path C:\SourceCode\bladecrawler\bladecrawler\log
+        if path is None:
+            path = URBasic.__file__[0:URBasic.__file__.find('URBasic')] + 'log'
+        if path[-1:]=='\\':
+            path = path[0:-1]
         if self.directory is None:
+            self.logDir = path
             if developerTestingFlag:
                 self.directory = path
             else:
@@ -69,7 +76,7 @@ class DataLogging(metaclass=Singleton):
             if not os.path.exists(self.directory):
                 os.makedirs(self.directory)
                 
-        return self.directory        
+        return self.directory, self.logDir        
     
     def AddEventLogging(self, name='root', log2file=True, log2Consol=True, level = logging.INFO):
         '''
