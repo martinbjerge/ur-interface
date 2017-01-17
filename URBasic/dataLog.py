@@ -50,7 +50,7 @@ class DataLog(threading.Thread):
         self.__stop_event = True
         
         
-        configFilename = URBasic.__file__[0:URBasic.__file__.find('URBasic')] + 'dataLogConfig.xml'
+        configFilename = URBasic.__file__[0:URBasic.__file__.find('URBasic')] + 'logConfig.xml'
         self.__config = Config
         self.__readConfig(configFileName=configFilename, config=self.__config)
         
