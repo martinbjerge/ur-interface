@@ -2,7 +2,8 @@
 <logConfig>
     <developerMode>True</developerMode> 
     <eventLogConfig>					
-        <fileMode>Overwrite</fileMode>	
+        <!--<fileMode>Overwrite</fileMode>-->
+		<fileMode>Append</fileMode>
     </eventLogConfig>					
     <dataLogConfig>
         <fileMode>Append</fileMode>		
