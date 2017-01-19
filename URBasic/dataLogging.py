@@ -56,7 +56,7 @@ class DataLogging(metaclass=Singleton):
         self.__eventLogFileMode = 'w'
         self.__dataLogFileMode = 'w'
         
-        configFilename = URBasic.__file__[0:URBasic.__file__.find('URBasic')] + 'dataLogConfig.xml'
+        configFilename = URBasic.__file__[0:URBasic.__file__.find('URBasic')] + 'logConfig.xml'
         self.__readConfig(configFileName=configFilename)
         
         self.GetLogPath(path=path, developerTestingFlag=self.__developerTestingFlag)
