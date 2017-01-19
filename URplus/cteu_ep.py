@@ -39,22 +39,28 @@ class CTEU_EP(object):
         '''
         Constructor - takes ip address to the CTEU-EP box
         '''
+        self.__connectionState = URBasic.connectionState.ConnectionState.DISCONNECTED        
+        
         logger = URBasic.dataLogging.DataLogging()        
         name = logger.AddEventLogging(__name__)        
         self.__logger = logger.__dict__[name]
+
+        if host is None: #Only for enable code completion
+            return
 
         if(False):
             assert isinstance(robotModel, URBasic.robotModel.RobotModel)  ### This line is to get code completion for RobotModel
         self.__robotModel = robotModel
         
-        if host is None: #Only for enable code completion
-            return
         self.__client = ModbusClient(host=host)
         connected = self.__client.connect()
         if(connected):
             self.__logger.info("Modbus connected to CTEU-EP")
+            self.__connectionState = URBasic.connectionState.ConnectionState.CONNECTED        
+
         else:
-            pass    #todo - nice error handling and reconnect
+            self.__connectionState = URBasic.connectionState.ConnectionState.ERROR
+            
         
     def setValve(self, valveNumber, state):
         
@@ -63,6 +69,10 @@ class CTEU_EP(object):
         '''
         #Valves are 0 to 11 - todo make input validation
         #valveNumber = valveNumber*2
+        if not self.__connectionState>URBasic.connectionState.ConnectionState.DISCONNECTED:
+            self.__logger.warning('SetValve but not Connected')
+            return
+             
         if self.__robotModel.StopRunningFlag():
             return
         result = self.__client.write_coil(valveNumber, state)
@@ -75,6 +85,10 @@ class CTEU_EP(object):
         Get the state of a valve - 0 to 23
         Returns True or False if valve is set or not - None if error
         '''
+        if not self.__connectionState>URBasic.connectionState.ConnectionState.DISCONNECTED:
+            self.__logger.warning('GetValvePosition but not Connected')
+            return
+
         #Valves are 0 to 11 - todo make input validation
         result = self.__client.read_coils(valveNumber, 1)
         if(result == None): #Just one retry
