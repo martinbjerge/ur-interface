@@ -68,7 +68,7 @@ class AirosSander(object):
     def close(self):
         self.__stopRunningFlag = True
         self.__whatchdog.cancel()
-        
+        self.__client.close()
 
     def powerOn(self):
         '''
