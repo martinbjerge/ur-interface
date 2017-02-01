@@ -30,15 +30,22 @@ import URBasic
 import threading
 #from pymodbus.client.sync import ModbusTcpClient as ModbusClient
 from pymodbus.client.sync import ModbusSerialClient as ModbusClient
+import numpy as np
 
 
 class Mib(object):
     '''
     Driver for controlling DEIF MIB 7000C electical multi meter Modbus serial
     
-    Example how to use (in my case COM4):
+    Example how to use (in my case COM3):
     
-    mic = URplus.mic.Mic(host='COM4')
+    mib = URplus.mib.Mib(host='COM3')
+    print(mib.GetVoltage())
+    
+    
+    Note: If using BarinBoxes ES-313 Ethernet to serial device, 
+    remember to remove the tag in port default settings that ignores the application settings.
+    http://[IP]/serialport1.html
     '''
     
     
@@ -51,94 +58,30 @@ class Mib(object):
         self.__logger = logger.__dict__[name]
         self.client = ModbusClient(port=host, baudrate='19200', parity='N', stopbits=1, method='RTU')
         self.__serialUnit = 17
+        self.__PT1 = 400
+        self.__PT2 = 400
+        self.__CT1 = 12
+        self.__CT2 = 5
         self.__stopRunningFlag = False
         
     def close(self):
         pass
         
 
-    def GetVoltage(self):
-        return self.client.read_input_registers(18, 1,unit=self.__serialUnit).registers[0]
+    def GetFrequency(self):
+        return np.array(self.client.read_holding_registers(304, 1, unit=self.__serialUnit).registers)/100
 
+    def GetVoltage(self):
+        return np.array(self.client.read_holding_registers(305, 6, unit=self.__serialUnit).registers)*self.__PT1/self.__PT2/10
+
+    def GetCurrent(self):
+        return np.array(self.client.read_holding_registers(311, 3, unit=self.__serialUnit).registers)*self.__CT1/self.__CT2/1000
+
+    def GetPower(self):
+        return np.array(self.client.read_holding_registers(315, 3, unit=self.__serialUnit).registers)*self.__PT1/self.__PT2*self.__CT1/self.__CT2
+
+    def GetEnergy(self):
+        return np.array(self.client.read_holding_registers(156, 1, unit=self.__serialUnit).registers)/10
     
-    def powerOn(self):
-        '''
-        Power on the sander before setting values and running
-        '''
-        self.__client.write_register(11, 4, unit=self.__serialUnit)
-        self.__logger.info("Sander powered on")
-        
-    def powerOff(self):
-        '''
-        Power down sander nicely
-        '''
-        self.__whatchdog.cancel()
-        self.__client.write_register(11, 8, unit=self.__serialUnit)
-        self.__logger.info("Sander powered off")
-        self.__whatchdog.cancel()
-        self.__whatchdog = threading.Timer(interval=self.__whatchdogTime, function=self.__whatchdogExpired)
-    
-    def runSander(self, rpm=4000):
-        '''
-        Start the sanding - set anywhere from 4000 to 10000 RPM - default is 4000 RPM 
-        call powerOn before running
-        '''
-        if(self.__stopRunningFlag == False):
-            self.setDesiredSpeed(rpm)
-            self.__client.write_register(11, 1, unit=self.__serialUnit)
-            self.__logger.info("Sander started")
-            self.__whatchdog.cancel()
-            self.__whatchdog = threading.Timer(interval=self.__whatchdogTime, function=self.__whatchdogExpired)
-            self.__whatchdog.start()
-        else:
-            self.__logger.error("Sander can not be started - has ")
-    
-    def stopSander(self):
-        '''
-        Stop the sander from running
-        '''
-        self.__whatchdog.cancel()
-        self.__client.write_register(11, 2, unit=self.__serialUnit)
-        self.__logger.info("Sander stopped")
-        self.__whatchdog = threading.Timer(interval=self.__whatchdogTime, function=self.__whatchdogExpired)
-    
-    def setDesiredSpeed(self, rpm):
-        '''
-        Set the speed in RPM to run the sander at - 4000 to 10000 is allowed
-        '''
-        if(rpm < 4000 or rpm > 10000):
-            raise ValueError("Sander RPM out of range")
-        self.__client.write_register(10, rpm, unit=self.__serialUnit)
-        self.__logger.info("Sander speed set to " + str(rpm))
-        self.__resetWhatchdog()
-        
-    def __resetWhatchdog(self):
-        wasRunning=False
-        if(self.__whatchdog.is_alive()):
-            wasRunning = True
-        self.__whatchdog.cancel()
-        self.__whatchdog = threading.Timer(interval=self.__whatchdogTime, function=self.__whatchdogExpired)
-        if(wasRunning):
-            self.__whatchdog.start()
-    
-    
-    def __whatchdogExpired(self):
-        self.__stopRunningFlag = True
-        self.__logger.error("Sander ran too long")
-        self.stopSander()
-        
-    
-    def getMotorTemperature(self):
-        '''
-        Note implemented due to Mirka adressing problems
-        '''
-        #self.__client.read_holding_registers(address, count)
-        return self.__client.read_input_registers(18, 1,unit=self.__serialUnit).registers[0]
-        
-        
-    def getPcbTemperature(self):
-        '''
-        Note implemented due to Mirka adressing problems
-        '''
-        return self.__client.read_input_registers(19, 1,unit=self.__serialUnit).registers[0]
-    
+    def GetMaxCurrent(self):
+        return np.array(self.client.read_holding_registers(1126, 3, unit=self.__serialUnit).registers)*self.__CT1/self.__CT2/1000
