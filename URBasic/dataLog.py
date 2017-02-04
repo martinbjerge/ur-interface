@@ -73,7 +73,7 @@ class DataLog(threading.Thread):
          
     def logdata(self, robotModelDataDir):
         if(self.__robotModelDataDirCopy != None):
-            if(self.__robotModelDataDirCopy['timestamp'] != robotModelDataDir['timestamp']):
+            if(self.__robotModelDataDirCopy['timestamp'] != robotModelDataDir['timestamp'] or robotModelDataDir['timestamp'] is None):
                 for tagname in robotModelDataDir.keys():
                     if tagname != 'timestamp' and  robotModelDataDir[tagname] is not None:
                         roundingDecimals = self.__config.Decimals
