@@ -46,17 +46,22 @@ class XsensImu(threading.Thread):
         '''
         Constructor - takes the serial port of the sander
         '''
+        threading.Thread.__init__(self)
         logger = URBasic.dataLogging.DataLogging()
         name = logger.AddEventLogging(__name__,log2Consol=False)        
         self.__logger = logger.__dict__[name]
+                
         if(False):
             assert isinstance(robotModel, URBasic.robotModel.RobotModel)  ### This line is to get code completion for RobotModel
         if robotModel is None:
             self.__robotModel = URBasic.robotModel.RobotModel()
         else:
             self.__robotModel = robotModel
+        self.__initDataModel()
+    
+        if host is None:
+            return
 
-        
         self.ser = serial.Serial()
         self.ser.baudrate = 115200
         self.ser.port = host
@@ -69,14 +74,14 @@ class XsensImu(threading.Thread):
         self.ser.open()
         self.__packetCounter=None
         self.__stop_event = True
-        threading.Thread.__init__(self)
         self.start()
         self.__logger.info('XsensImu constructor done')
 
     def close(self):
         self.__stop_event = True
-        self.join()
-        self.ser.close()
+        if self.isAlive():
+            self.join()
+            self.ser.close()
 
     def run(self):
         self.__stop_event = False
@@ -173,3 +178,37 @@ class XsensImu(threading.Thread):
             self.__logger.warning('Data block not implemented: ' + hex(dataId))            
 
     
+    def __initDataModel(self):
+            self.__robotModel.dataDir['imuSampleTimeFine'] = None
+            self.__robotModel.dataDir['imuStatusWord'] = None
+            self.__robotModel.dataDir['imuRawAccX'] = None
+            self.__robotModel.dataDir['imuRawAccY'] = None
+            self.__robotModel.dataDir['imuRawAccZ'] = None
+            self.__robotModel.dataDir['imuRawGyrX'] = None
+            self.__robotModel.dataDir['imuRawGyrY'] = None
+            self.__robotModel.dataDir['imuRawGyrZ'] = None
+            self.__robotModel.dataDir['imuRawMagX'] = None
+            self.__robotModel.dataDir['imuRawMagY'] = None
+            self.__robotModel.dataDir['imuRawMagZ'] = None
+            self.__robotModel.dataDir['imuRawTemp'] = None
+            self.__robotModel.dataDir['imuRawTempGyrX'] = None
+            self.__robotModel.dataDir['imuRawTempGyrY'] = None
+            self.__robotModel.dataDir['imuRawTempGyrZ'] = None
+            self.__robotModel.dataDir['imuAccX'] = None
+            self.__robotModel.dataDir['imuAccY'] = None
+            self.__robotModel.dataDir['imuAccZ'] = None
+            self.__robotModel.dataDir['imuDeltaVX'] = None
+            self.__robotModel.dataDir['imuDeltaVY'] = None
+            self.__robotModel.dataDir['imuDeltaVZ'] = None
+            self.__robotModel.dataDir['imuGyrX'] = None
+            self.__robotModel.dataDir['imuGyrY'] = None
+            self.__robotModel.dataDir['imuGyrZ'] = None
+            self.__robotModel.dataDir['imuDeltaQ0'] = None
+            self.__robotModel.dataDir['imuDeltaQ1'] = None
+            self.__robotModel.dataDir['imuDeltaQ2'] = None
+            self.__robotModel.dataDir['imuDeltaQ3'] = None
+            self.__robotModel.dataDir['imuMagX'] = None
+            self.__robotModel.dataDir['imuMagY'] = None
+            self.__robotModel.dataDir['imuMagZ'] = None
+            self.__robotModel.dataDir['imuTemp'] = None
+       
