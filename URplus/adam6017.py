@@ -87,9 +87,11 @@ class ADAM6017(object):
         registers and values
         '''
         #Analog inputs return mA and V - only tested on 4-20 mA range
+        #counter = 0 
         result = self.__client.read_holding_registers(0, 8)
-        #bit = Bits(uint=result.registers[0], length=16)
-        #print(bit.int)
+        for x in range(0,8):
+            result.registers[x] = self.__getValueFromReading(reading=result.registers[x], inputRange=self.__inputRanges[x])
+            #counter = counter+1
         return result.registers
     
     def getAnalogInput(self, inputNumber):
