@@ -73,7 +73,7 @@ class DataLog(threading.Thread):
          
     def logdata(self, robotModelDataDir):
         if(self.__robotModelDataDirCopy != None):
-            if(self.__robotModelDataDirCopy['timestamp'] != robotModelDataDir['timestamp']):
+            if(self.__robotModelDataDirCopy['timestamp'] != robotModelDataDir['timestamp'] or robotModelDataDir['timestamp'] is None):
                 for tagname in robotModelDataDir.keys():
                     if tagname != 'timestamp' and  robotModelDataDir[tagname] is not None:
                         roundingDecimals = self.__config.Decimals
@@ -82,18 +82,30 @@ class DataLog(threading.Thread):
                             if tagname in self.__config.__dict__:
                                 roundingDecimals = int(self.__config.__dict__[tagname])
                             roundedValues = np.round(robotModelDataDir[tagname], roundingDecimals)
-                            if 6==len(robotModelDataDir[tagname]):
-                                self.__dataLogger.info((tagname+';%s;%s;%s;%s;%s;%s;%s'), robotModelDataDir['timestamp'], *roundedValues)
-                            elif 3==len(robotModelDataDir[tagname]):
-                                self.__dataLogger.info((tagname+';%s;%s;%s;%s'), robotModelDataDir['timestamp'], *roundedValues)
+                            if self.__robotModelDataDirCopy[tagname] is None:
+                                roundedValuesCopy = roundedValues+1
                             else:
-                                self.__logger.warning('Logger data unexpected type in rtde.py - class URRTDElogger - def logdata Type: ' + str(tp) + ' - Len: ' + str(len(robotModelDataDir[tagname])))
+                                roundedValuesCopy = np.round(self.__robotModelDataDirCopy[tagname], roundingDecimals)
+                            if not (roundedValues==roundedValuesCopy).all():
+                                if 6==len(robotModelDataDir[tagname]):
+                                    self.__dataLogger.info((tagname+';%s;%s;%s;%s;%s;%s;%s'), robotModelDataDir['timestamp'], *roundedValues)
+                                elif 3==len(robotModelDataDir[tagname]):
+                                    self.__dataLogger.info((tagname+';%s;%s;%s;%s'), robotModelDataDir['timestamp'], *roundedValues)
+                                else:
+                                    self.__logger.warning('Logger data unexpected type in rtde.py - class URRTDElogger - def logdata Type: ' + str(tp) + ' - Len: ' + str(len(robotModelDataDir[tagname])))
                         elif tp is float:
                             if tagname in self.__config.__dict__:
                                 roundingDecimals = int(self.__config.__dict__[tagname])
-                            self.__dataLogger.info((tagname+';%s;%s'), robotModelDataDir['timestamp'], round(robotModelDataDir[tagname], roundingDecimals))
-                        elif tp is bool or tp is int: 
-                            self.__dataLogger.info((tagname+';%s;%s'), robotModelDataDir['timestamp'], robotModelDataDir[tagname])
+                            roundedValues = round(robotModelDataDir[tagname], roundingDecimals)
+                            if self.__robotModelDataDirCopy[tagname] is None:
+                                roundedValuesCopy = roundedValues+1
+                            else:                            
+                                roundedValuesCopy = round(self.__robotModelDataDirCopy[tagname], roundingDecimals)
+                            if roundedValues != roundedValuesCopy:
+                                self.__dataLogger.info((tagname+';%s;%s'), robotModelDataDir['timestamp'], roundedValues)
+                        elif tp is bool or tp is int or tp is np.float64: 
+                            if robotModelDataDir[tagname] != self.__robotModelDataDirCopy[tagname]:
+                                self.__dataLogger.info((tagname+';%s;%s'), robotModelDataDir['timestamp'], robotModelDataDir[tagname])
                         else:
                             self.__logger.warning('Logger data unexpected type in rtde.py - class URRTDElogger - def logdata Type: ' + str(tp))
         self.__robotModelDataDirCopy = robotModelDataDir
