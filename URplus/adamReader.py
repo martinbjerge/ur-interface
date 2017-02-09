@@ -65,7 +65,7 @@ class AdamReader(threading.Thread):
     
     def run(self):
         self.__stop_flag = False
-        print("start")
+        #print("start")
         while not self.__stop_flag:
             self.__readSample()
     
