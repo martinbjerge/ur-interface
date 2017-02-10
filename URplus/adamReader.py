@@ -34,6 +34,7 @@ class AdamReader(threading.Thread):
     
     def __init__(self, host, robotModel=None):
         threading.Thread.__init__(self)
+        self.__adam6017 = None
         if host is None:
             return
         if robotModel is None:
