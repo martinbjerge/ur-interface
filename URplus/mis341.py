@@ -57,6 +57,7 @@ class MIS341(object):
     Mode_Reg = 2
     P_SOLL = 3
     V_SOLL = 5
+    A_SOLL=6
     RUN_CURREMT = 7
     STANDBY_CURRENT = 9
     P_IST = 10
@@ -145,7 +146,24 @@ class MIS341(object):
         commands.append(highWord.uint)
         result = self.__safeWriteRegisters(MIS341.V_SOLL*2, commands)
     
+    def setMaxAcceleration(self, rpm):
+        '''
+        Set maxium velocity in RPM
+        '''
+        if(rpm < 1 or rpm > 500000):
+            raise ValueError('Accleration outside specs')
+        
+        
+        fullRegister = Bits(int=int(rpm), length=32)
+        highWord = Bits(bin = fullRegister[0:16].bin)
+        lowWord = Bits(bin = fullRegister[16:32].bin)
+        commands = []
+        commands.append(lowWord.uint)
+        commands.append(highWord.uint)
+        result = self.__safeWriteRegisters(MIS341.A_SOLL*2, commands)
+    
     def stopInPosition(self):
+        self.setMaxAcceleration(25000)
         self.setMaxVelocity(0)
     
         actualPosition = self.getActualPosition()
