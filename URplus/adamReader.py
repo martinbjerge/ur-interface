@@ -63,6 +63,12 @@ class AdamReader(threading.Thread):
             self.join()
             #self.ser.close()
     
+    def connected(self):
+        if(self.__adam6017 is not None):
+            return self.__adam6017.connected
+        else:
+            return False
+    
     def run(self):
         self.__stop_flag = False
         #print("start")
@@ -70,24 +76,24 @@ class AdamReader(threading.Thread):
             self.__readSample()
     
     def __updateDataModel(self, values):
-            self.__robotModel.dataDir['additionalIo0'] = values[0]
-            self.__robotModel.dataDir['additionalIo1'] = values[1]
-            self.__robotModel.dataDir['additionalIo2'] = values[2]
-            self.__robotModel.dataDir['additionalIo3'] = values[3]
-            self.__robotModel.dataDir['additionalIo4'] = values[4]
-            self.__robotModel.dataDir['additionalIo5'] = values[5]
-            self.__robotModel.dataDir['additionalIo6'] = values[6]
-            self.__robotModel.dataDir['additionalIo7'] = values[7]
+            self.__robotModel.dataDir['analogInput0'] = values[0]
+            self.__robotModel.dataDir['analogInput1'] = values[1]
+            self.__robotModel.dataDir['analogInput2'] = values[2]
+            self.__robotModel.dataDir['analogInput3'] = values[3]
+            self.__robotModel.dataDir['analogInput4'] = values[4]
+            self.__robotModel.dataDir['analogInput5'] = values[5]
+            self.__robotModel.dataDir['analogInput6'] = values[6]
+            self.__robotModel.dataDir['analogInput7'] = values[7]
     
     def __initDataModel(self):
-            self.__robotModel.dataDir['additionalIo0'] = None
-            self.__robotModel.dataDir['additionalIo1'] = None
-            self.__robotModel.dataDir['additionalIo2'] = None
-            self.__robotModel.dataDir['additionalIo3'] = None
-            self.__robotModel.dataDir['additionalIo4'] = None
-            self.__robotModel.dataDir['additionalIo5'] = None
-            self.__robotModel.dataDir['additionalIo6'] = None
-            self.__robotModel.dataDir['additionalIo7'] = None
+            self.__robotModel.dataDir['analogInput0'] = None
+            self.__robotModel.dataDir['analogInput1'] = None
+            self.__robotModel.dataDir['analogInput2'] = None
+            self.__robotModel.dataDir['analogInput3'] = None
+            self.__robotModel.dataDir['analogInput4'] = None
+            self.__robotModel.dataDir['analogInput5'] = None
+            self.__robotModel.dataDir['analogInput6'] = None
+            self.__robotModel.dataDir['analogInput7'] = None
 
            
     
