@@ -150,7 +150,8 @@ class RobotModel(object):
                          'output_double_register_21':None,
                          'output_double_register_22':None,
                          'output_double_register_23':None,
-                         'urPlus_force_torque_sensor':None
+                         'urPlus_force_torque_sensor':None,
+                         'totalMovedVerticalDistance':0
                          }
                             
         
