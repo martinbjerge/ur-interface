@@ -165,12 +165,12 @@ class MIS341(object):
     def stopInPosition(self):
         self.setMaxAcceleration(25000)
         self.setMaxVelocity(0)
-    
+        """
         actualPosition = self.getActualPosition()
         self.setDesiredPosition(actualPosition)
         self.setOperationMode(OperatingMode.Position)
         self.setMaxVelocity(50)
-    
+        """
     def getStatus(self):
         result = self.__safeReadHoldingRegisters(MIS341.STATUSBITS*2, 2)
         return result
