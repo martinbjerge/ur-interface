@@ -1242,7 +1242,7 @@ end
         Return Value:
         boolean, The signal level. 
         '''
-        raise NotImplementedError('Function Not yet implemented')
+        return self.robotConnector.RobotModel.ConfigurableInputBits(n)
         
     def get_conﬁgurable_digital_out(self, n):
         '''
@@ -1256,7 +1256,8 @@ end
         Return Value:
         boolean, The signal level.
         '''
-        raise NotImplementedError('Function Not yet implemented')
+        
+        return self.robotConnector.RobotModel.ConfigurableOutputBits(n)
     
     def get_euromap_input(self, port_number):
         '''
@@ -1356,7 +1357,7 @@ end
         Return Value:
         boolean, The signal level.
         '''
-        return self.robotConnector.RobotModel.DigitalInputBits.GetBit(n)
+        return self.robotConnector.RobotModel.DigitalInputBits(n)
         
     def get_standard_digital_out(self, n):
         '''
@@ -1371,7 +1372,7 @@ end
         boolean, The signal level.
         '''
         
-        return self.robotConnector.RobotModel.DigitalOutputBits.GetBit(n)
+        return self.robotConnector.RobotModel.DigitalOutputBits(n)
         
     
     def get_tool_analog_in(self, n):

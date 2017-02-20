@@ -150,7 +150,8 @@ class RobotModel(object):
                          'output_double_register_21':None,
                          'output_double_register_22':None,
                          'output_double_register_23':None,
-                         'urPlus_force_torque_sensor':None
+                         'urPlus_force_torque_sensor':None,
+                         'urPlus_totalMovedVerticalDistance':None
                          }
                             
         
@@ -169,10 +170,34 @@ class RobotModel(object):
     def RTDEConnectionState(self):raise NotImplementedError('Function Not yet implemented')
     def RuntimeState(self): return self.rtcProgramRunning
     def StopRunningFlag(self): return self.stopRunningFlag
-    def DigitalInputbits(self):raise NotImplementedError('Function Not yet implemented')
-    def ConfigurableInputBits(self):raise NotImplementedError('Function Not yet implemented')
-    def DigitalOutputBits(self):raise NotImplementedError('Function Not yet implemented')
-    def ConfigurableOutputBits(self):raise NotImplementedError('Function Not yet implemented')
+    def DigitalInputbits(self,n):
+        if n>=0 & n<8:
+            n = pow(2,n)
+            return n&self.dataDir['actual_digital_input_bits']==n
+        else:
+            return None
+        
+    def ConfigurableInputBits(self,n):
+        if n>=8 & n<16:
+            n = pow(2,n+8)
+            return n&self.dataDir['actual_digital_input_bits']==n
+        else:
+            return None
+    
+    def DigitalOutputBits(self,n):
+        if n>=0 & n<8:
+            n = pow(2,n)
+            return n&self.dataDir['actual_digital_output_bits']==n
+        else:
+            return None
+    
+    def ConfigurableOutputBits(self,n):
+        if n>=8 & n<16:
+            n = pow(2,n+8)
+            return n&self.dataDir['actual_digital_output_bits']==n
+        else:
+            return None
+    
     def RTDEProtocolVersion(self):raise NotImplementedError('Function Not yet implemented')
     def ActualTCPPose(self):return self.dataDir['actual_TCP_pose']
     def RobotModee(self):raise NotImplementedError('Function Not yet implemented')

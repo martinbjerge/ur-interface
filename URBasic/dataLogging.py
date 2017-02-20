@@ -31,6 +31,7 @@ import time
 import os
 import URBasic
 import xml.etree.ElementTree as ET
+import ast
 
 class Singleton(type):
     _instances = {}
@@ -76,7 +77,7 @@ class DataLogging(metaclass=Singleton):
         tree = ET.parse(configFileName)
         logConfig = tree.getroot()
         developerModeTag = logConfig.find('developerMode')
-        self.__developerTestingFlag = bool(developerModeTag.text)
+        self.__developerTestingFlag = ast.literal_eval(developerModeTag.text)
                 
         eventLogConfig = logConfig.find('eventLogConfig')
         eventFileModeTag = eventLogConfig.find('fileMode')
