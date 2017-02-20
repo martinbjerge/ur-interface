@@ -124,6 +124,7 @@ class DataLog(threading.Thread):
                 self.logdata(dataDirCopy)
                 time.sleep(0.005)
             except:
+                self.__robotModelDataDirCopy = dataDirCopy
                 self.__logger.warning("DataLog error while running, but will retry")
         self.__logger.info("DataLog is stopped")
 
