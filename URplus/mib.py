@@ -77,7 +77,7 @@ class Mib(threading.Thread):
         self.__stopRunningFlag = False
         self.__stop_event = True
         self.start()
-        self.__logger.info('Bib constructor done')
+        self.__logger.info('Mib constructor done')
 
         
     def close(self):
