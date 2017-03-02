@@ -1794,6 +1794,8 @@ end
             self.robotConnector.RTDE.setData('configurable_digital_output_mask', 2**n)
             self.robotConnector.RTDE.setData('configurable_digital_output', 0)
         self.robotConnector.RTDE.sendData()
+        self.robotConnector.RTDE.setData('configurable_digital_output_mask', 0)
+        self.robotConnector.RTDE.setData('configurable_digital_output', 0)
             
     def set_euromap_output(self, port_number, signal_value):
         '''
@@ -1956,6 +1958,8 @@ end
             self.robotConnector.RTDE.setData('standard_digital_output_mask', 2**n)
             self.robotConnector.RTDE.setData('standard_digital_output', 0)
         self.robotConnector.RTDE.sendData()
+        self.robotConnector.RTDE.setData('standard_digital_output_mask', 0)
+        self.robotConnector.RTDE.setData('standard_digital_output', 0)
 
         
     
