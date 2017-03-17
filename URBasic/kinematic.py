@@ -60,7 +60,7 @@ def Invkine_manip(target_pos,init_joint_pos=[0,0,0, 0,0,0],rob='ur10',tcpOffset=
     #T_sd = Pose2Tran_Mat(pose=target_pos)
     T_target = Pose2Tran_Mat(pose=target_pos)
     T_tcp = Pose2Tran_Mat(pose=tcpOffset)
-    T_sd = T_target@np.linalg.inv(T_tcp)
+    T_sd = np.matmul(T_target, np.linalg.inv(T_tcp))
     thetalist_init = init_joint_pos
     
     ik_init = np.round(IKinFixed(Slist, M, T_sd, thetalist_init, wthresh, vthresh), 3)
@@ -460,7 +460,7 @@ def Inverse_kin(target_pos,init_joint_pos=[0,0,0,0,0,0],tcpOffset=[0,0,0, 0,0,0]
 
     T_target = Pose2Tran_Mat(pose=target_pos)
     T_tcp = Pose2Tran_Mat(pose=tcpOffset)
-    Mar = T_target@np.linalg.inv(T_tcp)
+    Mar = np.matmul(T_target, np.linalg.inv(T_tcp))
 
     #Inverse kinematics       
     if len(init_joint_pos)<6 :            

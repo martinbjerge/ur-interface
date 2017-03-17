@@ -76,7 +76,7 @@ class UrScriptExt(URBasic.urScript.UrScript):
     def reset_error(self):
         '''
         Check if the UR controller is powered on and ready to run.
-        If controller isn’t power on it will be power up. 
+        If controller isn't power on it will be power up. 
         If there is a safety error, it will be tried rest it once.
 
         Return Value:
@@ -119,7 +119,7 @@ class UrScriptExt(URBasic.urScript.UrScript):
         out (bool or float), The signal level.
         '''
         if 'BCI' == port[:3]:
-            return self.get_conﬁgurable_digital_in(int(port[4:]), wait)
+            return self.get_configurable_digital_in(int(port[4:]), wait)
         elif 'BDI' == port[:3]:
             return self.get_standard_digital_in(int(port[4:]), wait)
         elif 'BAI' == port[:3]:
@@ -138,7 +138,7 @@ class UrScriptExt(URBasic.urScript.UrScript):
         '''
         
         if 'BCO' == port[:3]:
-            self.set_conﬁgurable_digital_out(int(port[4:]), value)
+            self.set_configurable_digital_out(int(port[4:]), value)
         elif 'BDO' == port[:3]:
             self.set_standard_digital_out(int(port[4:]), value)
         elif 'BAO' == port[:3]:
@@ -257,7 +257,7 @@ end
         Update/set remote force, see "init_force_remote" for more details.
                        
         Parameters:
-        task frame: A pose vector that deﬁnes the force frame relative to the base frame.
+        task frame: A pose vector that defines the force frame relative to the base frame.
         
         selection vector: A 6d vector that may only contain 0 or 1. 1 means that the robot will be
                           compliant in the corresponding axis of the task frame, 0 means the robot is
@@ -266,11 +266,11 @@ end
         wrench: The forces/torques the robot is to apply to its environment. These values
                 have different meanings whether they correspond to a compliant axis or not.
                 Compliant axis: The robot will adjust its position along/about the axis in order
-                to achieve the speciﬁed force/torque. Non-compliant axis: The robot follows
+                to achieve the specified force/torque. Non-compliant axis: The robot follows
                 the trajectory of the program but will account for an external force/torque
-                of the speciﬁed value.
+                of the specified value.
 
-        limits: A 6d vector with ﬂoat values that are interpreted differently for
+        limits: A 6d vector with float values that are interpreted differently for
                 compliant/non-compliant axes: 
                 Compliant axes: The limit values for compliant axes are the maximum
                                 allowed tcp speed along/about the axis. 
@@ -444,10 +444,10 @@ end
         pose or q is a list of pose or joint-pose, and apply a force in a direction
         
         Parameters:
-        pose: list of target pose (pose can also be speciﬁed as joint
+        pose: list of target pose (pose can also be specified as joint
               positions, then forward kinematics is used to calculate the corresponding pose see q)
 
-        a:    tool acceleration [m/sˆ2]
+        a:    tool acceleration [m/s^2]
 
         v:    tool speed [m/s]
         

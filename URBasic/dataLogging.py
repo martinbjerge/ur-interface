@@ -21,7 +21,7 @@ Except as contained in this notice, the name of "Rope Robotics ApS" shall not be
 in advertising or otherwise to promote the sale, use or other dealings in this Software 
 without prior written authorization from "Rope Robotics ApS".
 '''
-import path
+
 __author__ = "Martin Huus Bjerge"
 __copyright__ = "Copyright 2017, Rope Robotics ApS, Denmark"
 __license__ = "MIT License"
@@ -32,6 +32,7 @@ import os
 import URBasic
 import xml.etree.ElementTree as ET
 import ast
+from six import with_metaclass
 
 class Singleton(type):
     _instances = {}
@@ -41,7 +42,7 @@ class Singleton(type):
         return self._instances[self]
 
 
-class DataLogging(metaclass=Singleton):
+class DataLogging(with_metaclass(Singleton, object)):
     '''
     A module that add general logging functions to the UR Interface framework.
     '''
