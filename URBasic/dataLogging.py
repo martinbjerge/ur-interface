@@ -66,11 +66,11 @@ class DataLogging(with_metaclass(Singleton, object)):
 
 
 
-        self.fileLogHandler = logging.FileHandler(self.directory + '\\UrEvent.log', mode=self.__eventLogFileMode)
+        self.fileLogHandler = logging.FileHandler(os.path.join(self.directory, 'UrEvent.log'), mode=self.__eventLogFileMode)
         self.fileLogHandler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
         self.streamLogHandler = logging.StreamHandler()
         self.streamLogHandler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-        self.fileDataLogHandler = logging.FileHandler(self.directory + '\\UrDataLog.csv', mode=self.__dataLogFileMode)
+        self.fileDataLogHandler = logging.FileHandler(os.path.join(self.directory, 'UrDataLog.csv'), mode=self.__dataLogFileMode)
         self.writeDataLogHeadder = True
 
 
