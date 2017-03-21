@@ -108,17 +108,18 @@ class DataLogging(with_metaclass(Singleton, object)):
         '''
         if path is None:
             path = URBasic.__file__[0:URBasic.__file__.find('URBasic')] + 'log'
-        if path[-1:]=='\\':
+        else:
+            path = os.path.join(*(re.split('\\\\|/', path)))
+        if path[-1:]=='\\' or path[-1:]=='/':
             path = path[0:-1]
         if self.directory is None:
-            self.logDir = os.path.join(re.split('\\\\|/', path))
+            self.logDir = path
             if developerTestingFlag:
                 self.directory = path
             else:
-                self.directory =  time.strftime(path + "\\%Y-%m-%d\\%H-%M-%S", time.localtime())
+                self.directory =  os.path.join(path, time.strftime("%Y-%m-%d", time.localtime()), time.strftime("%H-%M-%S", time.localtime()))
             if not os.path.exists(self.directory):
                 os.makedirs(self.directory)
-        self.directory = os.path.join(re.split('\\\\|/',self.directory))
         return self.directory, self.logDir
 
     def AddEventLogging(self, name='root', log2file=True, log2Consol=True, level = logging.INFO):
