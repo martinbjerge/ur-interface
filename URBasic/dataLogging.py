@@ -110,14 +110,14 @@ class DataLogging(with_metaclass(Singleton, object)):
         if path[-1:]=='\\':
             path = path[0:-1]
         if self.directory is None:
-            self.logDir = path
+            self.logDir = os.path.abspath(path)
             if developerTestingFlag:
                 self.directory = path
             else:
                 self.directory =  time.strftime(path + "\\%Y-%m-%d\\%H-%M-%S", time.localtime())
             if not os.path.exists(self.directory):
                 os.makedirs(self.directory)
-                
+        self.directory = os.path.abspath(self.directory)
         return self.directory, self.logDir        
     
     def AddEventLogging(self, name='root', log2file=True, log2Consol=True, level = logging.INFO):
