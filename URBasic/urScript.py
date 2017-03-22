@@ -1200,7 +1200,8 @@ end
         raise NotImplementedError('Function Not yet implemented')
     
 ############    Module urmath    #################        
-    def pose_add(self,p_1, p_2):
+    @staticmethod
+    def pose_add(p_1, p_2):
         '''
         Pose addition
         
