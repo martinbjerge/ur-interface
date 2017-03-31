@@ -130,6 +130,8 @@ class RTDE(threading.Thread): #, metaclass=Singleton
             self.__sock.connect((self.__robotModel.ipAddress, 30004))
             self.__conn_state = ConnectionState.CONNECTED
         except (socket.timeout, socket.error):
+            if self.__sock:
+                self.sock.close()
             self.__sock = None
             return False
         return True
@@ -603,6 +605,8 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         self.__stop_event = False
         t0 = time.time()
         while (time.time()-t0<self.__reconnectTimeout) and self.__conn_state != ConnectionState.STARTED:
+            self.__connect()
+            self.__disconnect()
             self.__connect()
             self.__getControllerVersion()
             self.__receive()

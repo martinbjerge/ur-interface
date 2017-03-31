@@ -64,7 +64,7 @@ class UrScript(object):
         self.__logger = logger.__dict__[name]
         self.robotConnector = URBasic.robotConnector.RobotConnector(robotModel, host, hasForceTorque)
         #time.sleep(200)
-        while(self.robotConnector.RobotModel.ActualTCPPose() == None):      ## check paa om vi er startet
+        while(self.robotConnector.RobotModel.ActualTCPPose() is None):      ## check paa om vi er startet
             print("waiting for everything to be ready")
             time.sleep(1)
         self.__logger.info('Init done')
