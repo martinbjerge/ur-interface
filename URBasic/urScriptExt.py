@@ -517,7 +517,7 @@ end
                 prg +=  '    force_mode(p{task_framex}, {selection_vector}, {wrench}, {f_type}, {limits})\n'.format(**locals())
                 prg +=  '    move{movetype}({prefix}{posex}, a={a}, v={v}, {t_val} r={r})\n'.format(**locals())
 
-            prg +=  '    stopl({a}, {a})\n'.format(**locals())
+            prg +=  '    stopl({a})\n'.format(**locals())
             prg +=  '    end_force_mode()\nend\n'
 
         else:

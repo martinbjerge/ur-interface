@@ -256,7 +256,7 @@ end
                     r=0
                 movestr +=  '    move{movetype}({pose_via_val} {prefix}{posex}, a={a}, v={v}, {t_val} r={r})\n'.format(**locals())
                 
-            movestr +=  '    stopl({a}, {a})\n'.format(**locals())
+            movestr +=  '    stopl({a})\n'.format(**locals())
         else:
             posex = np.round(pose, 4)
             posex = posex.tolist()
@@ -437,17 +437,14 @@ end
         if(wait):
             self.waitRobotIdleOrStopFlag()
 
-    def stopl(self, a=0.5, aRot=None, wait=True):
+    def stopl(self, a=0.5, wait=True):
         '''
         Stop (linear in tool space)
         Decellerate tool speed to zero
         Parameters:
         a:    tool accleration [m/s^2]
-        aRot: tool acceleration [rad/s^2] (optional), if not defined a, position acceleration, is used
         '''
-        if aRot is None:
-            aRot=a
-        prg = 'stopl({a}, {aRot})\n'
+        prg = 'stopl({a})\n'
         programString = prg.format(**locals())
         
         self.robotConnector.RealTimeClient.Send(programString)
