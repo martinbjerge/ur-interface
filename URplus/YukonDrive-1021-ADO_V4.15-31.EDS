@@ -956,7 +956,7 @@ ParameterName=number_of_entries
 ObjectType=7
 AccessType=ro
 DataType=0x0005
-DefaultValue=5 
+DefaultValue=5
 PDOMapping=0
 
 [1800sub1]
@@ -13669,7 +13669,7 @@ AccessType=rw
 PDOMapping=0
 
 [2163sub2]
-ParameterName=[2163:2] d-current Injection 
+ParameterName=[2163:2] d-current Injection
 DataType=0x0008
 AccessType=rw
 PDOMapping=0
@@ -16439,7 +16439,7 @@ AccessType=rww
 PDOMapping=1
 
 [21bfsub3]
-ParameterName=[21bf:3] ScaleFactor 
+ParameterName=[21bf:3] ScaleFactor
 DataType=0x0008
 AccessType=rww
 PDOMapping=1
@@ -23139,13 +23139,13 @@ AccessType=rw
 PDOMapping=0
 
 [2290sub2]
-ParameterName=[2290:2] KTY_mt80 
+ParameterName=[2290:2] KTY_mt80
 DataType=0x0003
 AccessType=rw
 PDOMapping=0
 
 [2290sub3]
-ParameterName=[2290:3] KTY_mt200 
+ParameterName=[2290:3] KTY_mt200
 DataType=0x0003
 AccessType=rw
 PDOMapping=0
@@ -23164,19 +23164,19 @@ DefaultValue=0x3
 PDOMapping=0
 
 [2291sub1]
-ParameterName=[2291:1] PTC_din1  
+ParameterName=[2291:1] PTC_din1
 DataType=0x0003
 AccessType=rw
 PDOMapping=0
 
 [2291sub2]
-ParameterName=[2291:2] PTC_din2  
+ParameterName=[2291:2] PTC_din2
 DataType=0x0003
 AccessType=rw
 PDOMapping=0
 
 [2291sub3]
-ParameterName=[2291:3] PTC_din3  
+ParameterName=[2291:3] PTC_din3
 DataType=0x0003
 AccessType=rw
 PDOMapping=0
@@ -23195,13 +23195,13 @@ DefaultValue=0x2
 PDOMapping=0
 
 [2292sub1]
-ParameterName=[2292:1] PT100_0   
+ParameterName=[2292:1] PT100_0
 DataType=0x0003
 AccessType=rw
 PDOMapping=0
 
 [2292sub2]
-ParameterName=[2292:2] PT100_200 
+ParameterName=[2292:2] PT100_200
 DataType=0x0003
 AccessType=rw
 PDOMapping=0
@@ -24064,13 +24064,13 @@ AccessType=ro
 PDOMapping=1
 
 [22bdsub12]
-ParameterName=[22bd:12] u_bc_on   
+ParameterName=[22bd:12] u_bc_on
 DataType=0x0008
 AccessType=ro
 PDOMapping=1
 
 [22bdsub13]
-ParameterName=[22bd:13] isd   
+ParameterName=[22bd:13] isd
 DataType=0x0008
 AccessType=ro
 PDOMapping=1
@@ -56603,4 +56603,3 @@ ObjectType=7
 DataType=0x0006
 AccessType=rw
 PDOMapping=0
-
