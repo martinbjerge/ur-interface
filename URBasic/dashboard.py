@@ -449,16 +449,16 @@ class DashBoard(threading.Thread):
         t0 = time.time()
         while (time.time()-t0<self.__reconnectTimeout):
             try:
-                buf = bytes(cmd, 'utf-8')
+                buf = str(cmd).encode('utf-8')
                 (_, writable, _) = select.select([], [self.__sock], [], DEFAULT_TIMEOUT)
                 if len(writable):
                     self.__sock.sendall(buf)
                     self.wait_dbs()
                     return True
             except:
-                self.__logger.error('Could not send program!')
+                self._logger.error('Could not send program!')
 
-        self.__logger.error('Program re-sending timed out - Could not send program!')
+        self._logger.error('Program re-sending timed out - Could not send program!')
         return False
 
 
