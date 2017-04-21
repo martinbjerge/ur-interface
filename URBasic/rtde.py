@@ -34,6 +34,7 @@ import numpy as np
 import xml.etree.ElementTree as ET
 import time
 import os.path
+import rospkg
 
 DEFAULT_TIMEOUT = 1.0
 
@@ -88,9 +89,10 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         self.__reconnectTimeout = 600 #Seconds (while in run)
         self.__dataSend = RTDEDataObject()
         if conf_filename is None:
-            conf_filename = URBasic.__file__[0:URBasic.__file__.find('URBasic')] + 'rtdeConfiguration.xml'
+            r = rospkg.RosPack()
+            conf_filename = os.path.join(r.get_path('ur_interface'), 'rtdeConfiguration.xml')
             if not os.path.isfile(conf_filename):
-                conf_filename = URBasic.__file__[0:URBasic.__file__.find('URBasic')] + 'rtdeConfigurationDefault.xml'
+                conf_filename = os.path.join(r.get_path('ur_interface'), 'rtdeConfigurationDefault.xml')
         self.__conf_filename = conf_filename
         self.__stop_event = True
         threading.Thread.__init__(self)
