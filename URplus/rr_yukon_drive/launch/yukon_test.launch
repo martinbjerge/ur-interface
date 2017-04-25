@@ -1,0 +1,14 @@
+<launch>
+    <include file="$(find rr_moveit_configuration)/launch/planning_context.launch" >
+      <arg name="load_robot_description" value="true"/>
+    </include>
+
+    <node name="left_rope_motor_node" pkg="canopen_motor_node" type="canopen_motor_node" output="screen">
+        <param name="required_drive_mode" value="3" />
+        <rosparam command="load" file="$(find rr_yukon_drive)/config/bus.yaml" />
+        <rosparam command="load" file="$(find rr_yukon_drive)/config/nodes.yaml" />
+    </node>
+
+    <!--<node pkg="controller_manager" type="spawner" args="left_rope_motor/velo" -->
+
+</launch>
