@@ -1,8 +1,13 @@
 <launch>
+  <!-- load planning context to get robot model -->
     <include file="$(find rr_moveit_configuration)/launch/planning_context.launch" >
       <arg name="load_robot_description" value="true"/>
     </include>
 
+    <!-- Load controller settings -->
+    <rosparam file="$(find rr_yukon_drive)/config/controllers.yaml" command="load"/>
+
+    <!-- start canopen_motor_node -->
     <node name="left_rope_motor_node" pkg="canopen_motor_node" type="canopen_motor_node" output="screen">
         <param name="required_drive_mode" value="3" />
         <rosparam command="load" file="$(find rr_yukon_drive)/config/bus.yaml" />

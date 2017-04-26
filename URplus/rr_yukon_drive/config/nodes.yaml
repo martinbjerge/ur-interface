@@ -4,3 +4,4 @@ nodes:
         id: 1
         eds_pkg: rr_yukon_drive # optionals package  name for relative path
         eds_file: "config/YukonDrive-1021-ADO_V4.15-31.EDS" # path to EDS/DCF file
+        #publish: ["0x2119"]
