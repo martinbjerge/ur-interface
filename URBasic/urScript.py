@@ -64,7 +64,7 @@ class UrScript(object):
         self.__logger = logger.__dict__[name]
         self.robotConnector = URBasic.robotConnector.RobotConnector(robotModel, host, hasForceTorque)
         #time.sleep(200)
-        while(self.robotConnector.RobotModel.ActualTCPPose() == None):      ## check på om vi er startet
+        while(self.robotConnector.RobotModel.ActualTCPPose() is None):      ## check paa om vi er startet
             print("waiting for everything to be ready")
             time.sleep(1)
         self.__logger.info('Init done')
@@ -83,16 +83,16 @@ class UrScript(object):
         Move to position (linear in joint-space) When using this command, the
         robot must be at standstill or come from a movej og movel with a
         blend. The speed and acceleration parameters controls the trapezoid
-        speed proﬁle of the move. The $t$ parameters can be used in stead to
+        speed profile of the move. The $t$ parameters can be used in stead to
         set the time for this move. Time setting has priority over speed and
         acceleration settings. The blend radius can be set with the $r$
         parameters, to avoid the robot stopping at the point. However, if he
         blend region of this mover overlaps with previous or following regions,
-        this move will be skipped, and an ’Overlapping Blends’ warning
+        this move will be skipped, and an 'Overlapping Blends' warning
         message will be generated.
         Parameters:
         q:    joint positions (Can also be a pose)
-        a:    joint acceleration of leading axis [rad/sˆ2]
+        a:    joint acceleration of leading axis [rad/s^2]
         v:    joint speed of leading axis [rad/s]
         t:    time [S]
         r:    blend radius [m]
@@ -117,7 +117,7 @@ end
         See movej.
         Parameters:
         pose: target pose (Can also be a joint position)
-        a:    tool acceleration [m/sˆ2]
+        a:    tool acceleration [m/s^2]
         v:    tool speed [m/s]
         t:    time [S]
         r:    blend radius [m]
@@ -147,9 +147,9 @@ end
         Blend circular (in tool-space) and move linear (in tool-space) to
         position. Accelerates to and moves with constant tool speed v.
         Parameters:
-        pose: list of target pose (pose can also be speciﬁed as joint
+        pose: list of target pose (pose can also be specified as joint
               positions, then forward kinematics is used to calculate the corresponding pose)
-        a:    tool acceleration [m/sˆ2]
+        a:    tool acceleration [m/s^2]
         v:    tool speed [m/s]
         r:    blend radius [m]
         wait: function return when movement is finished
@@ -176,11 +176,11 @@ end
         Accelerates to and moves with constant tool speed v.
 
         Parameters:
-        pose_via: path point (note: only position is used). (pose via can also be speciﬁed as joint positions,
+        pose_via: path point (note: only position is used). (pose via can also be specified as joint positions,
                   then forward kinematics is used to calculate the corresponding pose)
-        pose_to:  target pose (pose to can also be speciﬁed as joint positions, then forward kinematics 
+        pose_to:  target pose (pose to can also be specified as joint positions, then forward kinematics 
                   is used to calculate the corresponding pose)
-        a:        tool acceleration [m/sˆ2]
+        a:        tool acceleration [m/s^2]
         v:        tool speed [m/s]
         r:        blend radius (of target pose) [m]
         wait:     function return when movement is finished
@@ -210,9 +210,9 @@ end
         position. Accelerates to and moves with constant tool speed v.
         Parameters:
         movetype: j, l, p, c
-        pose: list of target pose (pose can also be speciﬁed as joint
+        pose: list of target pose (pose can also be specified as joint
               positions, then forward kinematics is used to calculate the corresponding pose)
-        a:    tool acceleration [m/sˆ2]
+        a:    tool acceleration [m/s^2]
         v:    tool speed [m/s]
         r:    blend radius [m]
         wait: function return when movement is finished
@@ -256,7 +256,7 @@ end
                     r=0
                 movestr +=  '    move{movetype}({pose_via_val} {prefix}{posex}, a={a}, v={v}, {t_val} r={r})\n'.format(**locals())
                 
-            movestr +=  '    stopl({a}, {a})\n'.format(**locals())
+            movestr +=  '    stopl({a})\n'.format(**locals())
         else:
             posex = np.round(pose, 4)
             posex = posex.tolist()
@@ -275,7 +275,7 @@ end
         Set robot to be controlled in force mode
         
         Parameters:
-        task frame: A pose vector that deﬁnes the force frame relative to the base frame.
+        task frame: A pose vector that defines the force frame relative to the base frame.
         
         selection vector: A 6d vector that may only contain 0 or 1. 1 means that the robot will be
                           compliant in the corresponding axis of the task frame, 0 means the robot is
@@ -284,9 +284,9 @@ end
         wrench: The forces/torques the robot is to apply to its environment. These values
                 have different meanings whether they correspond to a compliant axis or not.
                 Compliant axis: The robot will adjust its position along/about the axis in order
-                to achieve the speciﬁed force/torque. Non-compliant axis: The robot follows
+                to achieve the specified force/torque. Non-compliant axis: The robot follows
                 the trajectory of the program but will account for an external force/torque
-                of the speciﬁed value.
+                of the specified value.
 
         f_type: An integer specifying how the robot interprets the force frame. 
                 1: The force frame is transformed in a way such that its y-axis is aligned with a vector
@@ -296,7 +296,7 @@ end
                    the robot tcp velocity vector onto the x-y plane of the force frame. 
                 All other values of f_type are invalid.
 
-        limits: A 6d vector with ﬂoat values that are interpreted differently for
+        limits: A 6d vector with float values that are interpreted differently for
                 compliant/non-compliant axes: 
                 Compliant axes: The limit values for compliant axes are the maximum
                                 allowed tcp speed along/about the axis. 
@@ -339,7 +339,7 @@ end
         
         Parameters:
         pose: target pose
-        a:    tool acceleration [m/sˆ2]
+        a:    tool acceleration [m/s^2]
         v:    tool speed [m/s]
         r:    blend radius (of target pose) [m]
         '''
@@ -382,7 +382,7 @@ end
         not provided, the function will return when the target speed is reached.
         Parameters:
         qd: joint speeds [rad/s]
-        a:  joint acceleration [rad/sˆ2] (of leading axis)
+        a:  joint acceleration [rad/s^2] (of leading axis)
         t:  time [s] before the function returns (optional)
         '''
         prg = 'speedj({qd}, {a}, {t})\n'
@@ -397,7 +397,7 @@ end
         Stop (linear in joint space)
         Decellerate joint speeds to zero
         Parameters
-        a: joint acceleration [rad/sˆ2] (of leading axis)
+        a: joint acceleration [rad/s^2] (of leading axis)
         '''
         prg = 'stopj({a})\n'
         programString = prg.format(**locals())
@@ -415,9 +415,9 @@ end
         not provided, the function will return when the target speed is reached.
         Parameters:
         xd:   tool speed [m/s] (spatial vector)
-        a:    tool position acceleration [m/sˆ2]
+        a:    tool position acceleration [m/s^2]
         t:    time [s] before function returns (optional)
-        aRot: tool acceleration [rad/sˆ2] (optional), if not deﬁned a, position acceleration, is used
+        aRot: tool acceleration [rad/s^2] (optional), if not defined a, position acceleration, is used
         '''
         if aRot is None:
             aRot=a
@@ -437,17 +437,14 @@ end
         if(wait):
             self.waitRobotIdleOrStopFlag()
 
-    def stopl(self, a=0.5, aRot=None, wait=True):
+    def stopl(self, a=0.5, wait=True):
         '''
         Stop (linear in tool space)
         Decellerate tool speed to zero
         Parameters:
-        a:    tool accleration [m/sˆ2]
-        aRot: tool acceleration [rad/sˆ2] (optional), if not deﬁned a, position acceleration, is used
+        a:    tool accleration [m/s^2]
         '''
-        if aRot is None:
-            aRot=a
-        prg = 'stopl({a}, {aRot})\n'
+        prg = 'stopl({a})\n'
         programString = prg.format(**locals())
         
         self.robotConnector.RealTimeClient.Send(programString)
@@ -457,7 +454,7 @@ end
     def freedrive_mode(self, wait=False):
         '''
         Set robot in freedrive mode. In this mode the robot can be moved around by hand in the 
-        same way as by pressing the ”freedrive” button.
+        same way as by pressing the "freedrive" button.
         The robot will not be able to follow a trajectory (eg. a movej) in this mode.
         '''
         prg = '''def ur_freedrive_mode():
@@ -488,7 +485,7 @@ end
     def teach_mode(self, wait=True):
         '''
         Set robot in freedrive mode. In this mode the robot can be moved
-        around by hand in the same way as by pressing the ”freedrive” button.
+        around by hand in the same way as by pressing the "freedrive" button.
         The robot will not be able to follow a trajectory (eg. a movej) in this mode.
         '''
         prg = '''def ur_teach_mode():
@@ -601,8 +598,8 @@ end
         Stop tracking the conveyor, started by track conveyor linear() or
         track conveyor circular(), and decellerate tool speed to zero.
         Parameters:
-        a:    tool accleration [m/sˆ2] (optional)
-        aRot: tool acceleration [rad/sˆ2] (optional), if not deﬁned a, position acceleration, is used
+        a:    tool accleration [m/s^2] (optional)
+        aRot: tool acceleration [rad/s^2] (optional), if not defined a, position acceleration, is used
         '''
         prg = 'stop_conveyor_tracking({a}, {aRot})\n'
         
@@ -628,7 +625,7 @@ end
                               coordinate system of the robot.
         ticks_per_revolution: How many tichs the encoder sees when the conveyor moves one revolution.
         rotate tool:          Should the tool rotate with the coneyor or stay in the orientation 
-                              speciﬁed by the trajectory (movel() etc.).
+                              specified by the trajectory (movel() etc.).
         '''
         prg = 'track_conveyor_circular({center}, {ticks_per_revolution}, {rotate_tool})\n'
         
@@ -680,15 +677,15 @@ end
         
     def reset_revolution_counter(self, qNear=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0], wait=True):
         '''
-        Reset the revolution counter, if no offset is speciﬁed. This is applied on
-        joints which safety limits are set to ”Unlimited” and are only applied
+        Reset the revolution counter, if no offset is specified. This is applied on
+        joints which safety limits are set to "Unlimited" and are only applied
         when new safety settings are applied with limitted joint angles.
 
         >>> reset revolution counter()
 
         Parameters:
         qNear: Optional parameter, reset the revolution counter to one close to the given qNear joint vector. 
-               If not deﬁned, the joint’s actual number of revolutions are used.
+               If not defined, the joint's actual number of revolutions are used.
         ''' 
         prg = 'reset_revolution_counter(qNear)\n'
         
@@ -721,7 +718,7 @@ end
         Return the current externally exerted force at the TCP. The force is the
         norm of Fx, Fy, and Fz calculated using get tcp force().
         Return Value
-        The force in Newtons (ﬂoat)
+        The force in Newtons (float)
         '''
         raise NotImplementedError('Function Not yet implemented')
 
@@ -778,7 +775,7 @@ end
         Returns the current measured tool pose
         
         Returns the 6d pose representing the tool position and orientation
-        speciﬁed in the base frame. The calculation of this pose is based on
+        specified in the base frame. The calculation of this pose is based on
         the actual robot encoder readings.
         
         Return Value
@@ -803,9 +800,9 @@ end
         '''
         Returns the current measured TCP speed
         
-        The speed of the TCP retuned in a pose structure. The ﬁrst three values
-        are the cartesian speeds along x,y,z, and the last three deﬁne the
-        current rotation axis, rx,ry,rz, and the length |rz,ry,rz| deﬁnes the angular
+        The speed of the TCP retuned in a pose structure. The first three values
+        are the cartesian speeds along x,y,z, and the last three define the
+        current rotation axis, rx,ry,rz, and the length |rz,ry,rz| defines the angular
         velocity in radians/s.
         Return Value
         The current actual TCP velocity vector; ([X, Y, Z, Rx, Ry, Rz])
@@ -814,17 +811,17 @@ end
             self.sync()
         return self.robotConnector.RobotModel.ActualTCPSpeed
         
-    def get_actual_tool_ﬂange_pose(self):
+    def get_actual_tool_flange_pose(self):
         '''
-        Returns the current measured tool ﬂange pose
+        Returns the current measured tool flange pose
         
-        Returns the 6d pose representing the tool ﬂange position and
-        orientation speciﬁed in the base frame, without the Tool Center Point
+        Returns the 6d pose representing the tool flange position and
+        orientation specified in the base frame, without the Tool Center Point
         offset. The calculation of this pose is based on the actual robot
         encoder readings.
         
         Return Value:
-        The current actual tool ﬂange vector : ([X, Y, Z, Rx, Ry, Rz])
+        The current actual tool flange vector : ([X, Y, Z, Rx, Ry, Rz])
         
         Note: See get actual tcp pose for the actual 6d pose including TCP offset.
         '''
@@ -837,22 +834,22 @@ end
         The temperature of the robot control box in degrees Celcius.
         
         Return Value:
-        A temperature in degrees Celcius (ﬂoat)
+        A temperature in degrees Celcius (float)
         '''
         raise NotImplementedError('Function Not yet implemented')
         
     def get_inverse_kin(self, x, qnear =[-1.6, -1.7, -2.2, -0.8, 1.6, 0.0], maxPositionError =0.0001, maxOrientationError =0.0001):
         '''
         Inverse kinematic transformation (tool space -> joint space). 
-        Solution closest to current joint positions is returned, unless qnear deﬁnes one.
+        Solution closest to current joint positions is returned, unless qnear defines one.
         
         Parameters:
         x:                   tool pose (spatial vector)
         qnear:               joint positions to select solution. 
                              Optional.
-        maxPositionError:    Deﬁne the max allowed position error. 
+        maxPositionError:    Define the max allowed position error. 
                              Optional.
-        maxOrientationError: Deﬁne the max allowed orientation error. 
+        maxOrientationError: Define the max allowed orientation error. 
                              Optional.
         
         Return Value:
@@ -865,13 +862,13 @@ end
         Returns the temperature of joint j
         
         The temperature of the joint house of joint j, counting from zero. j=0 is
-        the base joint, and j=5 is the last joint before the tool ﬂange.
+        the base joint, and j=5 is the last joint before the tool flange.
         
         Parameters:
         j: The joint number (int)
         
         Return Value:
-        A temperature in degrees Celcius (ﬂoat)
+        A temperature in degrees Celcius (float)
         '''
         raise NotImplementedError('Function Not yet implemented')
     
@@ -883,7 +880,7 @@ end
         robot itself (gravity, friction, etc.), returned as
         
         Return Value:
-        The joint torque vector in ; ([ﬂoat])
+        The joint torque vector in ; ([float])
         '''
         raise NotImplementedError('Function Not yet implemented')
         
@@ -922,7 +919,7 @@ end
         Returns the current target tool pose
         
         Returns the 6d pose representing the tool position and orientation
-        speciﬁed in the base frame. The calculation of this pose is  based on
+        specified in the base frame. The calculation of this pose is  based on
         the current target joint positions.
         
         Return Value:
@@ -934,9 +931,9 @@ end
         '''
         Returns the current target TCP speed
         
-        The desired speed of the TCP returned in a pose structure. The ﬁrst
+        The desired speed of the TCP returned in a pose structure. The first
         three values are the cartesian speeds along x,y,z, and the last three
-        deﬁne the current rotation axis, rx,ry,rz, and the length |rz,ry,rz| deﬁnes
+        define the current rotation axis, rx,ry,rz, and the length |rz,ry,rz| defines
         the angular velocity in radians/s.
         
         Return Value:
@@ -950,8 +947,8 @@ end
         
         The external wrench is computed based on the error between the joint
         torques required to stay on the trajectory and the expected joint
-        torques. The function returns ”p[Fx (N), Fy(N), Fz(N), TRx (Nm), TRy (Nm),
-        TRz (Nm)]”. where Fx, Fy, and Fz are the forces in the axes of the robot
+        torques. The function returns "p[Fx (N), Fy(N), Fz(N), TRx (Nm), TRy (Nm),
+        TRz (Nm)]". where Fx, Fy, and Fz are the forces in the axes of the robot
         base coordinate system measured in Newtons, and TRx, TRy, and TRz
         are the torques around these axes measured in Newton times Meters.
         
@@ -970,7 +967,7 @@ end
         
         Return Value:
         X, Y, and Z composant of the measured acceleration in
-        SI-units (m/sˆ2).
+        SI-units (m/s^2).
         '''
         raise NotImplementedError('Function Not yet implemented')
         
@@ -991,8 +988,8 @@ end
         
         True when the robot is fully at rest, and ready to accept higher external
         forces and torques, such as from industrial screwdrivers. It is useful in
-        combination with the GUI’s wait node, before starting the screwdriver
-        or other actuators inﬂuencing the position of the robot.
+        combination with the GUI's wait node, before starting the screwdriver
+        or other actuators influencing the position of the robot.
         
         Note: This function will always return false in modes other than the
         standard position mode, e.g. false in force and teach mode.
@@ -1008,14 +1005,14 @@ end
         Checks if the given pose is reachable and within the current safety
         limits of the robot.
         
-        This check considers joint limits (if the target pose is speciﬁed as joint
+        This check considers joint limits (if the target pose is specified as joint
         positions), safety planes limits, TCP orientation deviation limits and
         range of the robot. If a solution is found when applying the inverse
         kinematics to the given target TCP pose, this pose is considered
         reachable.
         
         Parameters:
-        pose: Target pose (which can also be speciﬁed as joint positions)
+        pose: Target pose (which can also be specified as joint positions)
         
         Return Value:
         True if within limits, false otherwise (bool)
@@ -1045,12 +1042,12 @@ end
     def set_gravity(self, d, wait=True):
         '''
         Set the direction of the acceleration experienced by the robot. When
-        the robot mounting is ﬁxed, this corresponds to an accleration of g
-        away from the earth’s centre.
+        the robot mounting is fixed, this corresponds to an accleration of g
+        away from the earth's centre.
         
         >>> set gravity([0, 9.82*sin(theta), 9.82*cos(theta)])
         
-        will set the acceleration for a robot that is rotated ”theta” radians
+        will set the acceleration for a robot that is rotated "theta" radians
         around the x-axis of the robot base coordinate system
         
         Parameters:
@@ -1084,7 +1081,7 @@ end
         (TCP) will be used as the Center of Gravity (CoG). If the CoG argument
         is omitted, later calls to set tcp(pose) will change CoG to the new TCP.
         
-        The CoG is speciﬁed as a vector, [CoGx, CoGy, CoGz], displacement,
+        The CoG is specified as a vector, [CoGx, CoGy, CoGz], displacement,
         from the toolmount.
         
         Parameters:
@@ -1105,7 +1102,7 @@ end
         This function must be called, when the weight distribution changes - i.e
         when the robot picks up or puts down a heavy workpiece.
         
-        The CoG is speciﬁed as a vector, [CoGx, CoGy, CoGz], displacement,
+        The CoG is specified as a vector, [CoGx, CoGy, CoGz], displacement,
         from the toolmount.
         
         Parameters:
@@ -1148,7 +1145,7 @@ end
         '''
         Set the Tool Center Point
         
-        Sets the transformation from the output ﬂange coordinate system to
+        Sets the transformation from the output flange coordinate system to
         the TCP as a pose.
         
         Parameters:
@@ -1177,7 +1174,7 @@ end
     
     def sync(self):
         '''
-        Uses up the remaining ”physical” time a thread has in the current
+        Uses up the remaining "physical" time a thread has in the current
         frame/sample.
         '''
         initialRobotTime = self.robotConnector.RobotModel.RobotTimestamp()
@@ -1200,7 +1197,8 @@ end
         raise NotImplementedError('Function Not yet implemented')
     
 ############    Module urmath    #################        
-    def pose_add(self,p_1, p_2):
+    @staticmethod
+    def pose_add(p_1, p_2):
         '''
         Pose addition
         
@@ -1220,7 +1218,7 @@ end
         '''
         Trans_1 = URBasic.kinematic.Pose2Tran_Mat(p_1)
         Trans_2 = URBasic.kinematic.Pose2Tran_Mat(p_2)
-        Trans_3 = Trans_1@Trans_2
+        Trans_3 = np.matmul(Trans_1, Trans_2)
         p_3 = URBasic.kinematic.Tran_Mat2Pose(Trans_3)
         return p_3
         
@@ -1230,9 +1228,9 @@ end
 
 ############    Module interfaces  #################
         
-    def get_conﬁgurable_digital_in(self, n):
+    def get_configurable_digital_in(self, n):
         '''
-        Get conﬁgurable digital input signal level
+        Get configurable digital input signal level
         
         See also get standard digital in and get tool digital in.
         
@@ -1244,9 +1242,9 @@ end
         '''
         return self.robotConnector.RobotModel.ConfigurableInputBits(n)
         
-    def get_conﬁgurable_digital_out(self, n):
+    def get_configurable_digital_out(self, n):
         '''
-        Get conﬁgurable digital output signal level
+        Get configurable digital output signal level
         
         See also get standard digital out and get tool digital out.
         
@@ -1261,8 +1259,8 @@ end
     
     def get_euromap_input(self, port_number):
         '''
-        Reads the current value of a speciﬁc Euromap67 input signal. See
-        http://universal-robots.com/support for signal speciﬁcations.
+        Reads the current value of a specific Euromap67 input signal. See
+        http://universal-robots.com/support for signal specifications.
         
         >>> var = get euromap input(3)
         
@@ -1277,10 +1275,10 @@ end
         
     def get_euromap_output(self, port_number):
         '''
-        Reads the current value of a speciﬁc Euromap67 output signal. This
+        Reads the current value of a specific Euromap67 output signal. This
         means the value that is sent from the robot to the injection moulding
         machine. See http://universal-robots.com/support for signal
-        speciﬁcations.
+        specifications.
         
         >>> var = get euromap output(3)
         
@@ -1293,12 +1291,12 @@ end
         '''
         raise NotImplementedError('Function Not yet implemented')
         
-    def get_ﬂag(self, n):
+    def get_flag(self, n):
         '''
         Flags behave like internal digital outputs. The keep information
         between program runs.
         Parameters
-        n: The number (id) of the ﬂag, intereger: [0:32]
+        n: The number (id) of the flag, intereger: [0:32]
         Return Value
         Boolean, The stored bit.
         '''
@@ -1331,7 +1329,7 @@ end
         wait (bool): If True, waits for next data packet before returning. (Default True)
         
         Return Value:
-        ﬂoat, The signal level [0;1]
+        float, The signal level [0;1]
         '''
         if n == 0:
             if(wait):
@@ -1385,7 +1383,7 @@ end
         n: The number (id) of the input, integer: [0:1]
         
         Return Value:
-        ﬂoat, The signal level [0,1]
+        float, The signal level [0,1]
         '''
         raise NotImplementedError('Function Not yet implemented')
     
@@ -1433,8 +1431,8 @@ end
                         free choice between 0 and 255.
                         
         signal_address: An integer specifying the address of the either the coil 
-                        or the register that this new signal should reﬂect. 
-                        Consult the conﬁguration of the modbus unit for this information.
+                        or the register that this new signal should reflect. 
+                        Consult the configuration of the modbus unit for this information.
         
         signal_type:    An integer specifying the type of signal to add. 
                         0 = digital input, 1 = digital output, 
@@ -1448,7 +1446,7 @@ end
     
     def modbus_delete_signal(self, signal_name):
         '''
-        Deletes the signal identiﬁed by the supplied signal name.
+        Deletes the signal identified by the supplied signal name.
         
         >>> modbus delete signal("output1")
         
@@ -1459,7 +1457,7 @@ end
     
     def modbus_get_signal_status(self, signal_name, is_secondary_program):
         '''
-        Reads the current value of a speciﬁc signal.
+        Reads the current value of a specific signal.
         
         >>> modbus get signal status("output1",False)
         
@@ -1479,8 +1477,8 @@ end
     
     def modbus_send_custom_command(self, IP, slave_number, function_code, data):
         '''
-        Sends a command speciﬁed by the user to the modbus unit located
-        on the speciﬁed IP address. Cannot be used to request data, since the
+        Sends a command specified by the user to the modbus unit located
+        on the specified IP address. Cannot be used to request data, since the
         response will not be received. The user is responsible for supplying data
         which is meaningful to the supplied function code. The builtin function
         takes care of constructing the modbus frame, so the user should not
@@ -1490,7 +1488,7 @@ end
         
         The above example sets the watchdog timeout on a Beckhoff BK9050
         to 600 ms. That is done using the modbus function code 6 (preset single
-        register) and then supplying the register address in the ﬁrst two bytes of
+        register) and then supplying the register address in the first two bytes of
         the data array ([17,32] = [0x1120]) and the desired register content in
         the last two bytes ([2,88] = [0x0258] = dec 600).
         
@@ -1508,7 +1506,7 @@ end
     
     def modbus_set_output_register(self, signal_name, register_value, is_secondary_program):
         '''
-        Sets the output register signal identiﬁed by the given name to the given
+        Sets the output register signal identified by the given name to the given
         value.
         
         >>> modbus set output register("output1",300,False)
@@ -1522,7 +1520,7 @@ end
         
     def modbus_set_output_signal(self, signal_name, digital_value, is_secondary_program):
         '''
-        Sets the output digital signal identiﬁed by the given name to the given
+        Sets the output digital signal identified by the given name to the given
         value.
         
         >>> modbus set output signal("output2",True,False)
@@ -1563,7 +1561,7 @@ end
     def read_input_boolean_register(self, address):
         '''
         Reads the boolean from one of the input registers, which can also be
-        accessed by a Field bus. Note, uses it’s own memory space.
+        accessed by a Field bus. Note, uses it's own memory space.
         
         >>> bool val = read input boolean register(3)
         
@@ -1575,10 +1573,10 @@ end
         '''
         raise NotImplementedError('Function Not yet implemented')
     
-    def read_input_ﬂoat_register(self, address):
+    def read_input_float_register(self, address):
         '''
-        Reads the ﬂoat from one of the input registers, which can also be
-        accessed by a Field bus. Note, uses it’s own memory space.
+        Reads the float from one of the input registers, which can also be
+        accessed by a Field bus. Note, uses it's own memory space.
         
         >>> float val = read input float register(3)
         
@@ -1586,14 +1584,14 @@ end
         address: Address of the register (0:23)
         
         Return Value:
-        The value held by the register (ﬂoat)
+        The value held by the register (float)
         '''
         raise NotImplementedError('Function Not yet implemented')
     
     def read_input_integer_register(self, address):
         '''
         Reads the integer from one of the input registers, which can also be
-        accessed by a Field bus. Note, uses it’s own memory space.
+        accessed by a Field bus. Note, uses it's own memory space.
         
         >>> int val = read input integer register(3)
         
@@ -1608,7 +1606,7 @@ end
     def read_output_boolean_register(self, address):
         '''
         Reads the boolean from one of the output registers, which can also be
-        accessed by a Field bus. Note, uses it’s own memory space.
+        accessed by a Field bus. Note, uses it's own memory space.
         
         >>> bool val = read output boolean register(3)
         
@@ -1620,10 +1618,10 @@ end
         '''
         raise NotImplementedError('Function Not yet implemented')
     
-    def read_output_ﬂoat_register(self, address):
+    def read_output_float_register(self, address):
         '''
-        Reads the ﬂoat from one of the output registers, which can also be
-        accessed by a Field bus. Note, uses it’s own memory space.
+        Reads the float from one of the output registers, which can also be
+        accessed by a Field bus. Note, uses it's own memory space.
         
         >>> float val = read output float register(3)
         
@@ -1631,14 +1629,14 @@ end
         address: Address of the register (0:23)
         
         Return Value:
-        The value held by the register (ﬂoat)
+        The value held by the register (float)
         '''
         raise NotImplementedError('Function Not yet implemented')
     
     def read_output_integer_register(self, address):
         '''
         Reads the integer from one of the output registers, which can also be
-        accessed by a Field bus. Note, uses it’s own memory space.
+        accessed by a Field bus. Note, uses it's own memory space.
         
         >>> int val = read output integer register(3)
         
@@ -1659,7 +1657,7 @@ end
         
         Parameters:
         address: Address of the port (See portmap on Support site,
-        page ”UsingModbusServer” )
+        page "UsingModbusServer" )
         
         Return Value:
         The value held by the port (True, False)
@@ -1674,7 +1672,7 @@ end
         
         Parameters:
         address: Address of the port (See portmap on Support site,
-        page ”UsingModbusServer” )
+        page "UsingModbusServer" )
         
         Return Value:
         The signed integer value held by the port (-32768 : 32767)
@@ -1690,30 +1688,30 @@ end
         >>> proxy = rpc factory("xmlrpc", "http://127.0.0.1:8080/RPC2")
         
         Parameters
-        rpcType: The type of RPC backed to use. Currently only the ”xmlrpc” protocol is available.
+        rpcType: The type of RPC backed to use. Currently only the "xmlrpc" protocol is available.
         
         url: The URL to the RPC server. Currently two protocols are
         supported: pstream and http. The pstream URL looks
-        like ”<ip-address>:<port>”, for instance
-        ”127.0.0.1:8080” to make a local connection on port
+        like "<ip-address>:<port>", for instance
+        "127.0.0.1:8080" to make a local connection on port
         8080. A http URL generally looks like
-        ”http://<ip-address>:<port>/<path>”, whereby the
+        "http://<ip-address>:<port>/<path>", whereby the
         <path> depends on the setup of the http server. In
         the example given above a connection to a local
         Python webserver on port 8080 is made, which
         expects XMLRPC calls to come in on the path
-        ”RPC2”.
+        "RPC2".
         
         Return Value:
-        A RPC handle with a connection to the speciﬁed server using
+        A RPC handle with a connection to the specified server using
         the designated RPC backend. If the server is not available
         the function and program will fail. Any function that is made
         available on the server can be called using this instance. For
-        example ”bool isTargetAvailable(int number, ...)” would be
-        ”proxy.isTargetAvailable(var 1, ...)”, whereby any number of
+        example "bool isTargetAvailable(int number, ...)" would be
+        "proxy.isTargetAvailable(var 1, ...)", whereby any number of
         arguments are supported (denoted by the ...).
         Note: Giving the RPC instance a good name makes programs much
-        more readable (i.e. ”proxy” is not a very good name).
+        more readable (i.e. "proxy" is not a very good name).
         '''
         raise NotImplementedError('Function Not yet implemented')
     
@@ -1721,26 +1719,26 @@ end
         '''
         This function will activate a watchdog for a particular input variable to
         the RTDE. When the watchdog did not receive an input update for the
-        speciﬁed variable in the time period speciﬁed by min frequency (Hz),
+        specified variable in the time period specified by min frequency (Hz),
         the corresponding action will be taken. All watchdogs are removed on
         program stop.
         
         >>> rtde set watchdog("input int register 0", 10, "stop")
         
         Parameters:
-        variable name: Input variable name (string), as speciﬁed
+        variable name: Input variable name (string), as specified
         by the RTDE interface
-        min frequency: The minimum frequency (ﬂoat) an input
+        min frequency: The minimum frequency (float) an input
         update is expected to arrive.
-        action: Optional: Either ”ignore”, ”pause” or
-        ”stop” the program on a violation of the
+        action: Optional: Either "ignore", "pause" or
+        "stop" the program on a violation of the
         minimum frequency. The default action is
-        ”pause”.
+        "pause".
         
         Return Value:
         None
         Note: Only one watchdog is necessary per RTDE input package to
-        guarantee the speciﬁed action on missing updates.
+        guarantee the specified action on missing updates.
         '''
         raise NotImplementedError('Function Not yet implemented')
         
@@ -1776,9 +1774,9 @@ end
         '''
         raise NotImplementedError('Function Not yet implemented')
     
-    def set_conﬁgurable_digital_out(self, n, b):
+    def set_configurable_digital_out(self, n, b):
         '''
-        Set conﬁgurable digital output signal level
+        Set configurable digital output signal level
         
         See also set standard digital out and set tool digital out.
         
@@ -1799,9 +1797,9 @@ end
             
     def set_euromap_output(self, port_number, signal_value):
         '''
-        Sets the value of a speciﬁc Euromap67 output signal. This means the
+        Sets the value of a specific Euromap67 output signal. This means the
         value that is sent from the robot to the injection moulding machine.
-        See http://universal-robots.com/support for signal speciﬁcations.
+        See http://universal-robots.com/support for signal specifications.
         
         >>> set euromap output(3,True)
         
@@ -1817,7 +1815,7 @@ end
         Sets whether an Euromap67 output signal must preserve its state from a
         program, or it must be set either high or low when a program is not
         running. See http://universal-robots.com/support for signal
-        speciﬁcations.
+        specifications.
         
         >>> set euromap runstate dependent choice(3,0)
         
@@ -1831,23 +1829,23 @@ end
         '''
         raise NotImplementedError('Function Not yet implemented')
     
-    def set_ﬂag(self, n, b):
+    def set_flag(self, n, b):
         '''
         Flags behave like internal digital outputs. The keep information
         between program runs.
         
         Parameters:
-        n: The number (id) of the ﬂag, integer: [0:32]
+        n: The number (id) of the flag, integer: [0:32]
         b: The stored bit. (boolean)
         '''
         raise NotImplementedError('Function Not yet implemented')
     
-    def set_runstate_conﬁgurable_digital_output_to_value(self, outputId, state):
+    def set_runstate_configurable_digital_output_to_value(self, outputId, state):
         '''
         Sets the output signal levels depending on the state of the program
         (running or stopped).
         
-        Example: Set conﬁgurable digital output 5 to high when program is not
+        Example: Set configurable digital output 5 to high when program is not
         running.
         
         >>> set runstate configurable digital output to value(5, 2)
@@ -1936,7 +1934,7 @@ end
         Set standard analog output level
         Parameters
         n: The number (id) of the input, integer: [0:1]
-        f: The relative signal level [0;1] (ﬂoat)
+        f: The relative signal level [0;1] (float)
         '''
         raise NotImplementedError('Function Not yet implemented')
     
@@ -1991,7 +1989,7 @@ end
     def set_tool_voltage(self, voltage):
         '''
         Sets the voltage level for the power supply that delivers power to the
-        connector plug in the tool ﬂange of the robot. The votage can be 0, 12
+        connector plug in the tool flange of the robot. The votage can be 0, 12
         or 24 volts.
         
         Parameters:
@@ -2003,7 +2001,7 @@ end
     def write_output_boolean_register(self, address, value):
         '''
         Writes the boolean value into one of the output registers, which can
-        also be accessed by a Field bus. Note, uses it’s own memory space.
+        also be accessed by a Field bus. Note, uses it's own memory space.
         
         >>> write output boolean register(3, True)
         
@@ -2014,21 +2012,21 @@ end
         
     def write_output_float_register(self, address, value):
         '''
-        Writes the ﬂoat value into one of the output registers, which can also
-        be accessed by a Field bus. Note, uses it’s own memory space.
+        Writes the float value into one of the output registers, which can also
+        be accessed by a Field bus. Note, uses it's own memory space.
         
         >>> write output float register(3, 37.68)
         
         Parameters:
         address: Address of the register (0:23)
-        value: Value to set in the register (ﬂoat)
+        value: Value to set in the register (float)
         '''
         raise NotImplementedError('Function Not yet implemented')
     
     def write_output_integer_register(self, address, value):
         '''
         Writes the integer value into one of the output registers, which can also
-        be accessed by a Field bus. Note, uses it’s own memory space.
+        be accessed by a Field bus. Note, uses it's own memory space.
         
         >>> write output integer register(3, 12)
         
@@ -2047,7 +2045,7 @@ end
         
         Parameters:
         address: Address of the port (See portmap on Support site,
-        page ”UsingModbusServer” )
+        page "UsingModbusServer" )
         value: Value to be set in the register (True, False)
         '''
         raise NotImplementedError('Function Not yet implemented')
@@ -2060,7 +2058,7 @@ end
         
         Parameters:
         address: Address of the port (See portmap on Support site,
-        page ”UsingModbusServer” )
+        page "UsingModbusServer" )
         value: Value to be set in the port (0 : 65536) or (-32768 :
         32767)
         '''

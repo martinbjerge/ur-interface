@@ -148,7 +148,7 @@ class RealTimeClient(object):
     def SendProgram(self,prg=''):
         '''
         Send a new command or program (string) to the UR controller. 
-        The command or program will be executed as soon as it’s received by the UR controller. 
+        The command or program will be executed as soon as it's received by the UR controller. 
         Sending a new command or program while stop and existing running command or program and start the new one.
         The program or command will also bee modified to include some control signals to be used
         for monitoring if a program execution is successful and finished.  
@@ -192,7 +192,7 @@ class RealTimeClient(object):
     def Send(self,prg=''):
         '''
         Send a new command (string) to the UR controller. 
-        The command or program will be executed as soon as it’s received by the UR controller. 
+        The command or program will be executed as soon as it's received by the UR controller. 
         Sending a new command or program while stop and existing running command or program and start the new one.
         The program or command will also bee modified to include some control signals to be used
         for monitoring if a program execution is successful and finished.  
