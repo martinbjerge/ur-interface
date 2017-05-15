@@ -25,11 +25,6 @@ __author__ = "Martin Huus Bjerge"
 __copyright__ = "Copyright 2017, Rope Robotics ApS, Denmark"
 __license__ = "MIT License"
 
-#TODO: fix hacky pymodbus ref
-import sys
-import os
-sys.path.append(os.path.join(__file__[:__file__.index("ur_interface")], "external", "pymodbus"))
-
 from URplus.forceTorqueSensor import ForceTorqueSensor
 from URplus.cteu_ep import CTEU_EP
 from URplus.adam6017 import ADAM6017
