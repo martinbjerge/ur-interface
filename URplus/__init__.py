@@ -30,6 +30,6 @@ from URplus.cteu_ep import CTEU_EP
 from URplus.adam6017 import ADAM6017
 from URplus.adamReader import AdamReader
 from URplus.mib import Mib
-from URplus.mis341 import MIS341
+#from URplus.mis341 import MIS341
 from URplus.airosSander import AirosSander
 from URplus.xsensImu import XsensImu
