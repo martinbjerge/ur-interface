@@ -86,9 +86,12 @@ class XsensImu(threading.Thread):
     def run(self):
         self.__stop_event = False
         while not self.__stop_event:
-            self.__readSample()
-        
-
+            try:
+                self.__readSample()
+            except Exception:
+                print("Error: could not read data from IMU")
+                pass
+                
     def __readSample(self):
         dataLen = self.__getSampleHeader()[3]
         self.__readDataBlock(dataLen)
