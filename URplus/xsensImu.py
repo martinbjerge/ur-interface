@@ -30,8 +30,7 @@ import URBasic
 import serial
 import struct
 import threading
-#import numpy as np
-
+import time
 
 class XsensImu(threading.Thread):
     '''
@@ -40,8 +39,7 @@ class XsensImu(threading.Thread):
     Example how to use (in my case COM3):
     
     '''
-    
-    
+        
     def __init__(self, host, robotModel=None):
         '''
         Constructor - takes the serial port of the sander
@@ -118,12 +116,12 @@ class XsensImu(threading.Thread):
             dPnt += 3
             self.__readDataPack(data[dPnt:dPnt+dHead[1]],dHead[0])
             dPnt += dHead[1]
-            
+                   
     def __getDataHeader(self,data):
             DataId = struct.unpack('>H', data[0:2])
             DataLen = data[2]
             return [DataId[0], DataLen]
-    
+     
     def __readDataPack(self,data, dataId):
         if dataId == 4128: # XDI_PacketCounter          
             PacketCounter = struct.unpack('>H', data)[0]
@@ -178,9 +176,8 @@ class XsensImu(threading.Thread):
         elif dataId == 2064: #XDI_Temperature
             self.__robotModel.dataDir['imuTemp'] = struct.unpack('>f', data)[0]
         else:
-            self.__logger.warning('Data block not implemented: ' + hex(dataId))            
+            self.__logger.warning('Data block not implemented: ' + hex(dataId))       
 
-    
     def __initDataModel(self):
             self.__robotModel.dataDir['imuSampleTimeFine'] = None
             self.__robotModel.dataDir['imuStatusWord'] = None

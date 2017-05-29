@@ -34,6 +34,7 @@ import URBasic
 import xml.etree.ElementTree as ET
 import ast
 from six import with_metaclass
+import rospkg
 
 class Singleton(type):
     _instances = {}
@@ -59,7 +60,8 @@ class DataLogging(with_metaclass(Singleton, object)):
         self.__eventLogFileMode = 'w'
         self.__dataLogFileMode = 'w'
 
-        configFilename = URBasic.__file__[0:URBasic.__file__.find('URBasic')] + 'logConfig.xml'
+        r = rospkg.RosPack()
+        configFilename = os.path.join(r.get_path('ur_interface'), 'logConfig.xml')
         self.__readConfig(configFileName=configFilename)
 
         self.GetLogPath(path=path, developerTestingFlag=self.__developerTestingFlag)
