@@ -21,15 +21,24 @@ Except as contained in this notice, the name of "Rope Robotics ApS" shall not be
 in advertising or otherwise to promote the sale, use or other dealings in this Software
 without prior written authorization from "Rope Robotics ApS".
 '''
-__author__ = "Martin Huus Bjerge"
+from pandas.util.testing import network
+
+__author__ = "Steffen Jacobsen"
 __copyright__ = "Copyright 2017, Rope Robotics ApS, Denmark"
 __license__ = "MIT License"
 
-from URplus.forceTorqueSensor import ForceTorqueSensor
-from URplus.cteu_ep import CTEU_EP
-from URplus.adam6017 import ADAM6017
-from URplus.adamReader import AdamReader
-from URplus.mib import Mib
-#from URplus.mis341 import MIS341
-from URplus.airosSander import AirosSander
-from URplus.xsensImu import XsensImu
+import time
+import canopen
+
+def test():
+    network = canopen.Network()
+    motor = network.add_node(1, 'YukonDrive-1021-ADO_V4.15-31.EDS')
+    network.connect(channel='can0', bustype='socketcan', bitrate=1000000)
+    motor.nmt.state = 'OPERATIONAL'
+    hb_prod = motor.sdo['Producer_heartbeat_time']
+    hb_prod.raw = 0x0FA0
+    print('waiting for heartbeat')
+    motor.nmt.wait_for_heartbeat()
+    print('received a heartbeat')
+if __name__ == '__main__':
+    test()
