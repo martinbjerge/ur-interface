@@ -46,7 +46,7 @@ class BeckhoffReader(threading.Thread):
         self.__initDataModel()
         self.__counter = 0
         self.__stop_flag = False
-        self.__self.__beckhoff = BECKHOFF(host=host)
+        self.__beckhoff = BECKHOFF(host=host)
         self.start()
 
     def __readSample(self):

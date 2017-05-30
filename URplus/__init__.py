@@ -34,3 +34,4 @@ from URplus.mib import Mib
 from URplus.airosSander import AirosSander
 from URplus.xsensImu import XsensImu
 from URplus.beckhoff import BECKHOFF
+from URplus.beckhoffReader import BeckhoffReader
