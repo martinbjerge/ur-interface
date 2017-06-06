@@ -1,3 +1,5 @@
+# coding: latin-1
+
 '''
 Created on Mar 26, 2017
 
@@ -6,7 +8,7 @@ Created on Mar 26, 2017
 
 import time
 from datetime import datetime
-
+from future.utils import with_metaclass
 import ctypes as ct
 import URplus.pyllt as llt
 #from URBasic.dataLogging import Singleton
@@ -18,7 +20,7 @@ class Singleton2(type):
             self._instances[self] = super(Singleton2, self).__call__(*args, **kwargs)
         return self._instances[self]
 
-class MicroEpsilonScanControl(metaclass=Singleton2):
+class MicroEpsilonScanControl(with_metaclass(Singleton2)):
     """
     Class for interfacing with the Micro-Epsilon line laser scanner
 
@@ -117,17 +119,17 @@ class MicroEpsilonScanControl(metaclass=Singleton2):
 
     def setup(self):
         raise NotImplementedError
-    
+
     def setLaserOn(self):
         """
         Turn on laser.
         """
         raise NotImplementedError
-    
+
     def setLaserOff(self):
         """
         Turn off laser.
-        
+
         Useful as a safety precaution or to exclude it from the camera image.
         """
         raise NotImplementedError
@@ -140,7 +142,7 @@ class MicroEpsilonScanControl(metaclass=Singleton2):
             remove_outliers (bool, False): If known outliers should be removed before returning the results
 
         Returns:
-            x,z 
+            x,z
         """
         ret = llt.GetActualProfile(self.hLLT, self.profile_buffer, len(self.profile_buffer), llt.TProfileConfig.PROFILE,
                                    ct.byref(self.lost_profiles))
@@ -169,5 +171,3 @@ class MicroEpsilonScanControl(metaclass=Singleton2):
         Remove noise.
         """
         raise NotImplementedError
-
-
