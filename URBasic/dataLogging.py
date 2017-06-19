@@ -109,7 +109,7 @@ class DataLogging(with_metaclass(Singleton, object)):
         Path format .\[path]\YY-mm-dd\HH-MM-SS\
         '''
         if path is None:
-            path = os.path.abspath('~/rr_log')
+            path = os.path.abspath('rr_log')
         else:
             path = path
 
@@ -121,6 +121,7 @@ class DataLogging(with_metaclass(Singleton, object)):
                 self.directory =  os.path.join(path, time.strftime("%Y-%m-%d", time.localtime()), time.strftime("%H-%M-%S", time.localtime()))
             if not os.path.exists(self.directory):
                 os.makedirs(self.directory)
+        print(self.directory + self.logDir)
         return self.directory, self.logDir
 
     def AddEventLogging(self, name='root', log2file=True, log2Consol=True, level = logging.INFO):
