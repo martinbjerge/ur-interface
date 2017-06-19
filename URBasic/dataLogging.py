@@ -109,11 +109,10 @@ class DataLogging(with_metaclass(Singleton, object)):
         Path format .\[path]\YY-mm-dd\HH-MM-SS\
         '''
         if path is None:
-            path = URBasic.__file__[0:URBasic.__file__.find('URBasic')] + 'log'
+            path = os.path.abspath('~/rr_log')
         else:
-            path = os.path.join(*(re.split('\\\\|/', path)))
-        if path[-1:]=='\\' or path[-1:]=='/':
-            path = path[0:-1]
+            path = path
+
         if self.directory is None:
             self.logDir = path
             if developerTestingFlag:
