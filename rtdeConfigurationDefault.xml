@@ -52,10 +52,10 @@
         <!--<field name="tool_output_voltage" type="INT32"/>-->
         <!--<field name="tool_output_current" type="DOUBLE"/>-->
         <!--<field name="tcp_force_scalar" type="DOUBLE"/>-->
-        
+
         <field name="output_bit_registers0_to_31" type="UINT32"/>
         <!--<field name="output_bit_registers32_to_63" type="UINT32"/>-->
-        
+
         <field name="output_int_register_0" type="INT32"/>
         <field name="output_int_register_1" type="INT32"/>
         <!--<field name="output_int_register_2" type="INT32"/>-->
@@ -80,7 +80,7 @@
         <!--<field name="output_int_register_21" type="INT32"/>-->
         <!--<field name="output_int_register_22" type="INT32"/>-->
         <!--<field name="output_int_register_23" type="INT32"/>-->
-        
+
         <field name="output_double_register_0" type="DOUBLE"/>
         <field name="output_double_register_1" type="DOUBLE"/>
         <field name="output_double_register_2" type="DOUBLE"/>
@@ -106,7 +106,7 @@
         <!--<field name="output_double_register_22" type="DOUBLE"/>-->
         <!--<field name="output_double_register_23" type="DOUBLE"/>-->
     </receive>
-	
+
 	<send key="in">
         <!--<field name="speed_slider_mask" type="UINT32" initValue="0"/>-->
 		<!--<field name="speed_slider_fraction" type="DOUBLE" initValue="0"/>-->
@@ -114,14 +114,14 @@
 		<field name="configurable_digital_output_mask" type="UINT8" initValue="0"/>
 		<field name="standard_digital_output" type="UINT8" initValue="0"/>
 		<field name="configurable_digital_output" type="UINT8" initValue="0"/>
-		<!--<field name="standard_analog_output_mask" type="UINT8" initValue="0"/>-->
-		<!--<field name="standard_analog_output_type" type="UINT8" initValue="0"/>-->
-		<!--<field name="standard_analog_output_0" type="DOUBLE" initValue="0"/>-->
-		<!--<field name="standard_analog_output_1" type="DOUBLE" initValue="0"/>-->
-		
+		<field name="standard_analog_output_mask" type="UINT8" initValue="0"/>
+		<field name="standard_analog_output_type" type="UINT8" initValue="0"/>
+		<field name="standard_analog_output_0" type="DOUBLE" initValue="0"/>
+		<field name="standard_analog_output_1" type="DOUBLE" initValue="0"/>
+
 		<field name="input_bit_registers0_to_31" type="UINT32" initValue="0"/>
 		<!--<field name="input_bit_registers32_to_63" type="UINT32" initValue="0"/>-->
-		
+
 		<field name="input_int_register_0" type="INT32" initValue="0"/>
 		<field name="input_int_register_1" type="INT32" initValue="0"/>
 		<field name="input_int_register_2" type="INT32" initValue="0"/>
@@ -145,8 +145,8 @@
 		<!--<field name="input_int_register_20" type="INT32" initValue="0"/>-->
 		<!--<field name="input_int_register_21" type="INT32" initValue="0"/>-->
 		<!--<field name="input_int_register_22" type="INT32" initValue="0"/>-->
-		<!--<field name="input_int_register_23" type="INT32" initValue="0"/>-->		
-		
+		<!--<field name="input_int_register_23" type="INT32" initValue="0"/>-->
+
 		<field name="input_double_register_0" type="DOUBLE" initValue="0"/>
 		<field name="input_double_register_1" type="DOUBLE" initValue="0"/>
 		<field name="input_double_register_2" type="DOUBLE" initValue="0"/>

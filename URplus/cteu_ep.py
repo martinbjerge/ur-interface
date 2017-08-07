@@ -96,9 +96,10 @@ class CTEU_EP(object):
 
         #Valves are 0 to 11 - todo make input validation
         result = self.__client.read_coils(valveNumber, 1)
-        if(result == None): #Just one retry
-            time.sleep(0.2)
-            result = self.__client.read_coils(valveNumber, 1)
+        for nr in range(0,10):
+            if(result == None): #Just one retry
+                time.sleep(0.2)
+                result = self.__client.read_coils(valveNumber, 1)
         if(result != None):
             return result.bits[0]
         else:
