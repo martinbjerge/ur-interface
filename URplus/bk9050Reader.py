@@ -35,7 +35,7 @@ class BK9050Reader(threading.Thread):
 
     def __init__(self, host, robotModel=None):
         threading.Thread.__init__(self)
-        self.__beckhoff = None
+        self.__bk9050= None
         if host is None:
             return
         if robotModel is None:
@@ -59,7 +59,7 @@ class BK9050Reader(threading.Thread):
             self.join()
 
     def connected(self):
-        if(self.__beckhoff is not None):
+        if(self.__bk9050 is not None):
             return self.__bk9050.connected
         else:
             return False

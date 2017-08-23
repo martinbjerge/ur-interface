@@ -33,5 +33,7 @@ from URplus.mib import Mib
 #from URplus.mis341 import MIS341
 from URplus.airosSander import AirosSander
 from URplus.xsensImu import XsensImu
-from URplus.beckhoff import BECKHOFF
-from URplus.beckhoffReader import BeckhoffReader
+# from URplus.beckhoff import BECKHOFF
+# from URplus.beckhoffReader import BeckhoffReader
+from URplus.bk9050 import BK9050
+from URplus.bk9050Reader import BK9050Reader

@@ -83,7 +83,8 @@ class CTEU_EP(object):
                 result = True
                 break
             except Exception as e:
-                rospy.logwarn('modbus connection error occured in cteu_ep, with the following exception:\n\r' + str(e) + '\n\rFor the following request: ' + str(valveNumber) + ' set to ' + str(state))
+                rospy.logwarn('modbus connection error occured in cteu_ep, with the following exception:\n\r'
+                              + str(e) + '\n\rFor the following request: ' + str(valveNumber) + ' set to ' + str(state))
                 result = False
                 time.sleep(0.1)
 
@@ -99,7 +100,6 @@ class CTEU_EP(object):
             self.__logger.warning('GetValvePosition but not Connected')
             return
 
-        #Valves are 0 to 11 - todo make input validation
         for i in range(5):
             try:
                 result = self.__client.read_coils(valveNumber, 1)
@@ -107,6 +107,7 @@ class CTEU_EP(object):
                     return result.bits[0]
                 time.sleep(0.1)
             except Exception as e:
-                rospy.logwarn('modbus connection error occured in cteu_ep, with the following exception:\n\r' + str(e)+ '\n\rFor the following request: read ' + str(valveNumber))
+                rospy.logwarn('modbus connection error occured in cteu_ep, with the following exception:\n\r'
+                              + str(e)+ '\n\rFor the following request: read ' + str(valveNumber))
                 result = None
         return result
