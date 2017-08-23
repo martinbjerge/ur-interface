@@ -29,6 +29,8 @@ __license__ = "MIT License"
 import time
 import URBasic
 from pymodbus.client.sync import ModbusTcpClient as ModbusClient
+from pymodbus.exceptions import ModbusException
+import rospy
 
 class CTEU_EP(object):
     '''
@@ -75,15 +77,18 @@ class CTEU_EP(object):
 
         if self.__robotModel.StopRunningFlag():
             return
-        result = self.__client.write_coil(valveNumber, state)
-        for nr in range(0,10):
-            if(result == None): #Just one retry
-                time.sleep(0.2)
-                result = self.__client.write_coil(valveNumber, state)
-            else:
-                return True
-        self.__logger.warning('Valve not turned')
-        return False
+        for i in range(5):
+            try:
+                self.__client.write_coil(valveNumber, state)
+                result = True
+                break
+            except Exception as e:
+                rospy.logwarn('modbus connection error occured in cteu_ep, with the following exception:\n\r' + str(e) + '\n\rFor the following request: ' + str(valveNumber) + ' set to ' + str(state))
+                result = False
+                time.sleep(0.1)
+
+        rospy.logdebug('cteu set valve: ' + str(valveNumber) + ', ' + str(state) + ', ' + str(result))
+        return result
 
     def getValvePosition(self, valveNumber):
         '''
@@ -95,11 +100,13 @@ class CTEU_EP(object):
             return
 
         #Valves are 0 to 11 - todo make input validation
-        result = self.__client.read_coils(valveNumber, 1)
-        if(result == None): #Just one retry
-            time.sleep(0.2)
-            result = self.__client.read_coils(valveNumber, 1)
-        if(result != None):
-            return result.bits[0]
-        else:
-            return None
+        for i in range(5):
+            try:
+                result = self.__client.read_coils(valveNumber, 1)
+                if(result != None):
+                    return result.bits[0]
+                time.sleep(0.1)
+            except Exception as e:
+                rospy.logwarn('modbus connection error occured in cteu_ep, with the following exception:\n\r' + str(e)+ '\n\rFor the following request: read ' + str(valveNumber))
+                result = None
+        return result
