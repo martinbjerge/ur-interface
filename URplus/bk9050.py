@@ -53,10 +53,10 @@ class BK9050(object):
         Get the raw value of all the analog inputs at once in raw
         registers and values
         '''
-        reading = self.__client.read_holding_registers(0x0000, 16)
-	    result  = [0 for i in range(8)]
+        reading = self._client.read_holding_registers(0x0000, 16)
+        result  = [0 for i in range(8)]
         for x in range(0,8):
-            result[x] = self.__getValueFromReading(reading=reading.registers[x*2+1])
+            result[x] = self._getValueFromReading(reading=reading.registers[x*2+1])
         return result
 
     def getAnalogInput(self,inputNumber):
