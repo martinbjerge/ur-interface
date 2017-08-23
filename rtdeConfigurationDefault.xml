@@ -115,7 +115,7 @@
 		<field name="standard_digital_output" type="UINT8" initValue="0"/>
 		<field name="configurable_digital_output" type="UINT8" initValue="0"/>
 		<field name="standard_analog_output_mask" type="UINT8" initValue="0"/>
-		<field name="standard_analog_output_type" type="UINT8" initValue="0"/>
+		<field name="standard_analog_output_type" type="UINT8" initValue="1"/>
 		<field name="standard_analog_output_0" type="DOUBLE" initValue="0"/>
 		<field name="standard_analog_output_1" type="DOUBLE" initValue="0"/>
 

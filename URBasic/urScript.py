@@ -1937,14 +1937,11 @@ end
         f: The relative signal level [0;1] (float)
         '''
 
+        self.robotConnector.RTDE.setData('standard_analog_output_mask', 2**n)
+        self.robotConnector.RTDE.setData('standard_analog_output_type', 2**1)
 
-        #self.robotConnector.RTDE.setData('standard_analog_output_mask', 2**n)
-        if n==0:
-            self.robotConnector.RTDE.setData('standard_analog_output_0', f)
-        elif n==1:
-            self.robotConnector.RTDE.setData('standard_analog_output_1', f)
-        else:
-            raise NotImplementedError('Only analog 0 and 1 are possible')
+        self.robotConnector.RTDE.setData('standard_analog_output_0', f)
+        self.robotConnector.RTDE.sendData()
 
 
 

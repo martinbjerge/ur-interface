@@ -75,6 +75,27 @@ def rotate_tcp(gradient_vec=[0,0,0]):
 
     return rotation_vec
 
+def aling_tcp_to_vector(start_vector=[0,0,1],vector_align=[0,0,1]):
+
+
+    start_vector/= np.linalg.norm(start_vector)
+    vector_align /= np.linalg.norm(vector_align)
+
+    rot_angle = np.arccos(np.clip(np.dot(vector_align, start_vector), -1.0, 1.0))
+
+    min_angle  =0.01
+
+    if rot_angle < min_angle:
+        rotation_vec = [0,0,0]
+    elif rot_angle > np.pi - min_angle :
+        rotation_vec = [0,-np.pi,0]
+    else:
+        vec_norm = np.cross(start_vector, vector_align)
+        vec_norm = vec_norm/np.linalg.norm(vec_norm)
+        rotation_vec = vec_norm * rot_angle
+
+    return rotation_vec
+
 
 def Robot_parameter_screw_axes(rob='ur10'):
     '''
