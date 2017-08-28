@@ -52,6 +52,9 @@ class CTEU_EP(object):
             elif type(self.valve_ids[i]) is not int:
                 self.valve_ids.pop(i)
 
+        #Define timeout on setValve:
+        self._ATTACH_TIMEOUT = 0.05
+
         #Publisher
         self._valve_state             = SetValveStatus()
         self._latest_valve_status_msg = None
@@ -61,14 +64,16 @@ class CTEU_EP(object):
     def _get_valve_callback(self,msg):
         self._latest_valve_status_msg = msg
 
-    def setValve(self, valveNumber, state, blocked=True):
+    def setValve(self, valveNumber, state, timeout=2):
         self._valve_state.valve_id     = int(valveNumber)
         self._valve_state.valve_state  = bool(state)
         self._valveblock_publisher.publish(self._valve_state)
-        if blocked:
-            while(self.getValvePosition(valveNumber) != state
-                    or self.getValvePosition(valveNumber) == None):
-                time.sleep(0.05)
+        cycles = 0
+        while(self.getValvePosition(valveNumber) != state
+                or self.getValvePosition(valveNumber) == None
+                or cycles * self._ATTACH_TIMEOUT > timeout):
+            cycles += 1
+            time.sleep(self._ATTACH_TIMEOUT)
 
     def getValvePosition(self, valveNumber):
         if self._latest_valve_status_msg is not None:
