@@ -31,83 +31,48 @@ import URBasic
 from pymodbus.client.sync import ModbusTcpClient as ModbusClient
 from pymodbus.exceptions import ModbusException
 import rospy
+from rr_elsa_controller.srv import *
+from rr_elsa_controller.msg import *
 
 class CTEU_EP(object):
     '''
     Controlling the Pneumatics on the robot via a FESTO CTEU-EP that
-    is controlling a valveblock - this is via Modbus over TCP
+    is controlling a valveblock - this is via Modbus over TCP. This
+    Class acts as an adapter function.
     '''
     def __init__(self, host, robotModel):
-        '''
-        Constructor - takes ip address to the CTEU-EP box
-        '''
-        self.__connectionState = URBasic.connectionState.ConnectionState.DISCONNECTED
+        rospy.loginfo("valveblock interface initiated")
 
-        logger = URBasic.dataLogging.DataLogging()
-        name = logger.AddEventLogging(__name__)
-        self.__logger = logger.__dict__[name]
+        #Get Valve ID:
+        pneu_params = rospy.get_param('/pneumatics', dict())
+        self.valve_ids = [valve for subset in pneu_params.values() for valve in subset.values()]
+        for i in reversed(range(len(self.valve_ids))):
+            if type(self.valve_ids[i]) is list:
+                self.valve_ids.extend([x for x in self.valve_ids.pop(i)])
+            elif type(self.valve_ids[i]) is not int:
+                self.valve_ids.pop(i)
 
-        if host is None: #Only for enable code completion
-            return
+        #Publisher
+        self._valve_state             = SetValveStatus()
+        self._latest_valve_status_msg = None
+        self._valveblock_publisher    = rospy.Publisher('hmi/set_valveblock',SetValveStatus,queue_size=1)
+        self._valveblock_subscriber   = rospy.Subscriber('hmi/get_valveblock',GetValveStatus,self._get_valve_callback,queue_size=20)
 
-        if(False):
-            assert isinstance(robotModel, URBasic.robotModel.RobotModel)  ### This line is to get code completion for RobotModel
-        self.__robotModel = robotModel
-
-        self.__client = ModbusClient(host=host)
-        connected = self.__client.connect()
-        if(connected):
-            self.__logger.info("Modbus connected to CTEU-EP")
-            self.__connectionState = URBasic.connectionState.ConnectionState.CONNECTED
-
-        else:
-            self.__connectionState = URBasic.connectionState.ConnectionState.ERROR
-
+    def _get_valve_callback(self,msg):
+        self._latest_valve_status_msg = msg
 
     def setValve(self, valveNumber, state):
-
-        '''
-        Set a valve - 0 to 23 to True or False
-        '''
-        #Valves are 0 to 11 - todo make input validation
-        #valveNumber = valveNumber*2
-        if not self.__connectionState>URBasic.connectionState.ConnectionState.DISCONNECTED:
-            self.__logger.warning('SetValve but not Connected')
-            return
-
-        if self.__robotModel.StopRunningFlag():
-            return
-        for i in range(5):
-            try:
-                self.__client.write_coil(valveNumber, state)
-                result = True
-                break
-            except Exception as e:
-                rospy.logwarn('modbus connection error occured in cteu_ep, with the following exception:\n\r'
-                              + str(e) + '\n\rFor the following request: ' + str(valveNumber) + ' set to ' + str(state))
-                result = False
-                time.sleep(0.1)
-
-        rospy.logdebug('cteu set valve: ' + str(valveNumber) + ', ' + str(state) + ', ' + str(result))
-        return result
+        self._valve_state.valve_id     = int(valveNumber)
+        self._valve_state.valve_state  = bool(state)
+        self._valveblock_publisher.publish(self._valve_state)
 
     def getValvePosition(self, valveNumber):
-        '''
-        Get the state of a valve - 0 to 23
-        Returns True or False if valve is set or not - None if error
-        '''
-        if not self.__connectionState>URBasic.connectionState.ConnectionState.DISCONNECTED:
-            self.__logger.warning('GetValvePosition but not Connected')
-            return
-
-        for i in range(5):
+        if self._latest_valve_status_msg is not None:
+            states=self._latest_valve_status_msg.valve_states
             try:
-                result = self.__client.read_coils(valveNumber, 1)
-                if(result != None):
-                    return result.bits[0]
-                time.sleep(0.1)
-            except Exception as e:
-                rospy.logwarn('modbus connection error occured in cteu_ep, with the following exception:\n\r'
-                              + str(e)+ '\n\rFor the following request: read ' + str(valveNumber))
-                result = None
-        return result
+                return bool(states[valveNumber])
+            except ValueError as e:
+                rospy.loginfo("Index: "+str(valveNumber)+" out of range")
+                return None
+        else:
+            return None
