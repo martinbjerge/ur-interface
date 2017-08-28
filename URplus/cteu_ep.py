@@ -66,7 +66,8 @@ class CTEU_EP(object):
         self._valve_state.valve_state  = bool(state)
         self._valveblock_publisher.publish(self._valve_state)
         if blocked:
-            while getValvePosition(valveNumber) != state:
+            while(self.getValvePosition(valveNumber) != state
+                    or self.getValvePosition(valveNumber) == None):
                 time.sleep(0.05)
 
     def getValvePosition(self, valveNumber):
