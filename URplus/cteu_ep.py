@@ -55,16 +55,19 @@ class CTEU_EP(object):
         #Publisher
         self._valve_state             = SetValveStatus()
         self._latest_valve_status_msg = None
-        self._valveblock_publisher    = rospy.Publisher('hmi/set_valveblock',SetValveStatus,queue_size=1)
-        self._valveblock_subscriber   = rospy.Subscriber('hmi/get_valveblock',GetValveStatus,self._get_valve_callback,queue_size=20)
+        self._valveblock_publisher    = rospy.Publisher('hmi/set_valveblock',SetValveStatus,queue_size=10)
+        self._valveblock_subscriber   = rospy.Subscriber('hmi/get_valveblock',GetValveStatus,self._get_valve_callback,queue_size=100)
 
     def _get_valve_callback(self,msg):
         self._latest_valve_status_msg = msg
 
-    def setValve(self, valveNumber, state):
+    def setValve(self, valveNumber, state, blocked=True):
         self._valve_state.valve_id     = int(valveNumber)
         self._valve_state.valve_state  = bool(state)
         self._valveblock_publisher.publish(self._valve_state)
+        if blocked:
+            while getValvePosition(valveNumber) != state:
+                time.sleep(0.05)
 
     def getValvePosition(self, valveNumber):
         if self._latest_valve_status_msg is not None:
