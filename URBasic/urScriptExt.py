@@ -66,7 +66,7 @@ class UrScriptExt(URBasic.urScript.UrScript):
         self.__logger = logger.__dict__[name]
         self.print_actual_tcp_pose()
         self.print_actual_joint_positions()
-        self.__logger.info('Init done')
+        self.__logger.info('Init done, UrScriptExt')
 
     def close(self):
         self.print_actual_tcp_pose()

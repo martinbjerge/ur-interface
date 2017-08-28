@@ -439,5 +439,5 @@ def roll_pose_robot_frame(pose=[0,0,0, 0,0,0],roll=0):
 
     rotation_matrix_new=np.matmul(roll_matrix,rotation_matrix)
     axis_angle_new=RotatMatr2AxisAng(Matrix=rotation_matrix_new)
-    pose[3:]=axis_angle_new
+    pose[3:]=axis_angle_new[:]
     return pose

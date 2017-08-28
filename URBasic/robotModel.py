@@ -44,7 +44,7 @@ class RobotModel(object):
         logger = URBasic.dataLogging.DataLogging()
         name = logger.AddEventLogging(__name__)
         self.__logger = logger.__dict__[name]
-        self.__logger.info('Init done')
+        self.__logger.info('Init done, RobotModel')
 
         #Universal Robot Model content
         self.password = None

@@ -67,7 +67,7 @@ class UrScript(object):
         while(self.robotConnector.RobotModel.ActualTCPPose() is None):      ## check paa om vi er startet
             print("waiting for everything to be ready")
             time.sleep(1)
-        self.__logger.info('Init done')
+        self.__logger.info('Init done, UrScript')
 #############   Module motion   ###############
 
     def waitRobotIdleOrStopFlag(self):
@@ -78,7 +78,7 @@ class UrScript(object):
         if self.robotConnector.RobotModel.rtcProgramExecutionError:
             raise RuntimeError('Robot program execution error!!!')
 
-    def movej(self, q=None, a=1.4, v =1.05, t =0, r =0, wait=True, pose=None):
+    def movej(self, q=None, a=1.0, v =0.5, t =0, r =0, wait=True, pose=None):
         '''
         Move to position (linear in joint-space) When using this command, the
         robot must be at standstill or come from a movej og movel with a
@@ -1222,7 +1222,7 @@ end
         p_3 = URBasic.kinematic.Tran_Mat2Pose(Trans_3)
         return p_3
 
-    
+
 
 
 
