@@ -56,6 +56,7 @@ class MicroEpsilonScanControl(with_metaclass(Singleton2)):
         # Create instance and set IP address
         self.hLLT = llt.CreateLLTDevice()
 
+
         # Get available interfaces
         ret = llt.GetDeviceInterfaces(available_interfaces_p, len(available_interfaces))
         if ret < 1:
@@ -68,7 +69,7 @@ class MicroEpsilonScanControl(with_metaclass(Singleton2)):
         # Connect
         ret = llt.Connect(self.hLLT)
         if ret < 1:
-            raise ConnectionError("Error connect: " + str(ret))
+            raise Exception("µepsilon could not connect: " + str(ret))
 
         # Get available resolutions
         ret = llt.GetResolutions(
