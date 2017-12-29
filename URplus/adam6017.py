@@ -129,7 +129,7 @@ class ADAM6017(object):
                 return None     #Reading out of range
             value = 16/65535*reading
             return value+4
-        if(inputRange == inputRange.ZeroTo20mA):
+        if(inputRange == InputRange.ZeroTo20mA):
             if(reading > 65500):
                 return None     #Reading out of range
             return 20/65535*reading
