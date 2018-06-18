@@ -26,7 +26,7 @@ __copyright__ = "Copyright 2017, Rope Robotics ApS, Denmark"
 __license__ = "MIT License"
 
 import URBasic
-import URplus
+#import URplus #import if any UPplus modules is needed
 
 class RobotConnector(object):
     '''

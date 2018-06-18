@@ -356,7 +356,7 @@ class DashBoard(threading.Thread):
                 return True
             except (socket.timeout, socket.error):
                 self.__sock = None
-                self._logger.error('RTC connecting')
+                self._logger.error('Dashboard connecting')
 
         return False
 
@@ -391,10 +391,10 @@ class DashBoard(threading.Thread):
         t0 = time.time()
         while (time.time()-t0<self.__reconnectTimeout) and self.__conn_state < ConnectionState.CONNECTED:
             if not self.__connect():
-                self._logger.warning("FT connection failed!")
+                self._logger.warning("UR Dashboard connection failed!")
 
         if self.__conn_state < ConnectionState.CONNECTED:
-            self._logger.error("FT interface not able to connect and timed out!")
+            self._logger.error("UR Dashboard interface not able to connect and timed out!")
             return
         
         while (not self.__stop_event) and (time.time()-t0<self.__reconnectTimeout):
@@ -456,9 +456,9 @@ class DashBoard(threading.Thread):
                     self.wait_dbs()
                     return True
             except:
-                self.__logger.error('Could not send program!')
+                self._logger.error('Could not send program!')
 
-        self.__logger.error('Program re-sending timed out - Could not send program!')
+        self._logger.error('Program re-sending timed out - Could not send program!')
         return False
 
 
