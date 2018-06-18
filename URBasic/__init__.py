@@ -32,7 +32,7 @@ from URBasic.connectionState import ConnectionState
 from URBasic.dashboard import DashBoard
 from URBasic.dataLog import DataLog
 from URBasic.dataLogging import DataLogging
-from URBasic.kinematic import *
+#from URBasic.kinematic import *
 from URBasic.manipulation import *
 from URBasic.realTimeClient import RealTimeClient
 from URBasic.robotConnector import RobotConnector

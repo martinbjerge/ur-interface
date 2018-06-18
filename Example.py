@@ -31,7 +31,7 @@ import URBasic
 import time
 
 
-host = '192.168.25.128'   #E.g. a Universal Robot offline simulator, please adjust to match your IP
+host = '192.168.0.113'   #E.g. a Universal Robot offline simulator, please adjust to match your IP
 acc = 0.9
 vel = 0.9
 
@@ -69,7 +69,7 @@ def ExampleExtendedFunctions():
     This is an example of an extension to the Universal Robot script library. 
     How to update the force parameters remote via the RTDE interface, 
     hence without sending new programs to the controller.
-    This enables to update force “realtime” (125Hz)  
+    This enables to update force "realtime" (125Hz)  
     '''
     robotModle = URBasic.robotModel.RobotModel()
     robot = URBasic.urScriptExt.UrScriptExt(host=host,robotModel=robotModle)
