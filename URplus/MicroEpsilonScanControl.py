@@ -37,8 +37,9 @@ class MicroEpsilonScanControl(with_metaclass(Singleton2)):
         self.profile_buffer = (ct.c_ubyte * (resolution * 64))()
         self.timestamp = (ct.c_ubyte * 16)()
         available_resolutions = (ct.c_uint * 4)()
-        available_interfaces = (ct.c_uint * 6)()
-        self.lost_profiles = ct.c_int()
+        available_interfaces = [ct.create_string_buffer(8) for i in range(6)]
+        available_interfaces_p = (ct.c_char_p * 6)(*map(ct.addressof, available_interfaces))
+        self.lost_profiles = ct.c_uint()
         self.shutter_opened = ct.c_double(0.0)
         self.shutter_closed = ct.c_double(0.0)
         self.profile_count = ct.c_uint(0)
@@ -53,11 +54,11 @@ class MicroEpsilonScanControl(with_metaclass(Singleton2)):
         self.null_ptr_int = ct.POINTER(ct.c_uint)()
 
         # Create instance and set IP address
-        self.hLLT = llt.CreateLLTDevice(llt.TInterfaceType.INTF_TYPE_ETHERNET)
+        self.hLLT = llt.CreateLLTDevice()
+
 
         # Get available interfaces
-        ret = llt.GetDeviceInterfacesFast(
-            self.hLLT, available_interfaces, len(available_interfaces))
+        ret = llt.GetDeviceInterfaces(available_interfaces_p, len(available_interfaces))
         if ret < 1:
             raise ValueError("Error getting interfaces : " + str(ret))
 
@@ -68,7 +69,7 @@ class MicroEpsilonScanControl(with_metaclass(Singleton2)):
         # Connect
         ret = llt.Connect(self.hLLT)
         if ret < 1:
-            raise ConnectionError("Error connect: " + str(ret))
+            raise Exception("µepsilon could not connect: " + str(ret))
 
         # Get available resolutions
         ret = llt.GetResolutions(
@@ -149,7 +150,7 @@ class MicroEpsilonScanControl(with_metaclass(Singleton2)):
         if ret != len(self.profile_buffer):
             print("Error get profile buffer data: " + str(ret))
 
-        ret = llt.ConvertProfile2Values(self.hLLT, self.profile_buffer, self.resolution, llt.TProfileConfig.PROFILE, self.scanner_type, 0, 1,
+        ret = llt.ConvertProfile2Values(self.profile_buffer, len(self.profile_buffer), self.resolution, self.scanner_type, 0,
                                         self.null_ptr_short, self.intensities, self.null_ptr_short, self.x, self.z, self.null_ptr_int, self.null_ptr_int)
         if ret & llt.CONVERT_X is 0 or ret & llt.CONVERT_Z is 0 or ret & llt.CONVERT_MAXIMUM is 0:
             raise ValueError("Error converting data: " + str(ret))
@@ -157,8 +158,7 @@ class MicroEpsilonScanControl(with_metaclass(Singleton2)):
         for i in range(16):
             self.timestamp[i] = self.profile_buffer[self.resolution * 64 - 16 + i]
 
-        llt.Timestamp2TimeAndCount(self.timestamp, ct.byref(self.shutter_opened), ct.byref(
-            self.shutter_closed), ct.byref(self.profile_count))
+        llt.Timestamp2TimeAndCount(self.timestamp, ct.byref(self.shutter_opened), ct.byref(self.shutter_closed), ct.byref(self.profile_count), self.null_ptr_short)
 
         if remove_outliers:
             raise NotImplementedError

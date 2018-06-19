@@ -2,11 +2,12 @@ import ctypes as ct
 from enum import IntEnum
 import os.path
 
-dll_name = "LLT.dll"
-dll_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), dll_name)
+lib_name = "libmescan.so.1.0"
+lib_path = "/usr/local/lib" + os.path.sep + lib_name
 
 # Callback
-CBFUNC = ct.CFUNCTYPE(None, ct.POINTER(ct.c_ubyte), ct.c_uint, ct.c_uint)
+buffer_cb_func = ct.CFUNCTYPE(None, ct.c_void_p, ct.c_uint, ct.c_void_p)
+buffer_cl_func = ct.CFUNCTYPE(None, ct.c_void_p, ct.c_void_p)
 
 # Convert Data
 CONVERT_X = 0x00000800
@@ -17,7 +18,90 @@ CONVERT_THRESHOLD = 0x00000400
 CONVERT_M0 = 0x00002000
 CONVERT_M1 = 0x00004000
 
-# RS422 Interface Function
+# Processing flags
+PROC_HIGH_RESOLUTION = 1
+PROC_CALIBRATION = (1 << 1)
+PROC_MULTIREFL_ALL = (0 << 2)
+PROC_MULITREFL_FIRST = (1 << 2)
+PROC_MULITREFL_LAST = (2 << 2)
+PROC_MULITREFL_LARGESTAREA = (3 << 2)
+PROC_MULITREFL_MAXINTENS = (4 << 2)
+PROC_MULITREFL_SINGLE = (5 << 2)
+PROC_POSTPROCESSING_ON = (1 << 5)
+PROC_FLIP_DISTANCE = (1 << 6)
+PROC_FLIP_POSITION = (1 << 7)
+PROC_AUTOSHUTTER_DELAY = (1 << 8)
+PROC_SHUTTERALIGN_CENTRE = (0 << 9)
+PROC_SHUTTERALIGN_RIGHT = (1 << 9)
+PROC_SHUTTERALIGN_LEFT = (2 << 9)
+PROC_SHUTTERALIGN_OFF = (3 << 9)
+PROC_AUTOSHUTTER_ADVANCED = (1 << 11)
+
+# Threshold flags
+THRESHOLD_DYNAMIC = (1 << 24)
+THRESHOLD_VIDEO_FILTER = (1 << 11)
+THRESHOLD_BACKGROUND_FILTER = (1 << 10)
+
+# Shutter flags
+SHUTTER_AUTOMATIC = (1 << 24)
+
+# Laser power flags
+LASER_OFF = 0
+LASER_REDUCED_POWER = 1
+LASER_FULL_POWER = 2
+LASER_PULSEMODE = (1 << 11)
+
+# Temperature register
+TEMP_PREPARE_VALUE = 0x86000000
+
+# Trigger flags
+TRIG_MODE_EDGE = (0 << 16)
+TRIG_MODE_PULSE = (1 << 16)
+TRIG_MODE_GATE = (2 << 16)
+TRIG_MODE_ENCODER = (3 << 16)
+TRIG_INPUT_RS422 = (0 << 21)
+TRIG_INPUT_DIGIN = (1 << 21)
+TRIG_POLARITY_LOW = (0 << 24)
+TRIG_POLARITY_HIGH = (1 << 24)
+TRIG_EXT_ACTIVE = (1 << 25)
+TRIG_INTERNAL = (0 << 25)
+
+# Measuring field flags
+MEASFIELD_ACTIVATE_FREE = (1 << 11)
+
+# Maintenance flags
+MAINTENANCE_LOOPBACK = (1 << 1)
+MAINTENANCE_ENCODER_ACTIVE = (1 << 3)
+MAINTENANCE_SUPPRESS_REGISTER_RESET = (1 << 5)
+MAINTENANCE_UM_LOAD_VIA_DIGIN = (0 << 6)
+MAINTENANCE_UM_SUPPRESS_UNTIL_REBOOT = (1 << 6)
+MAINTENANCE_UM_SUPPRESS_UNTIL_GVCP_CLOSE = (2 << 6)
+MAINTENANCE_UM_SUPPRESS_UNTIL_REBOOT_GVCP_CLOSE = (3 << 6)
+
+# Multiport flags
+MULTI_LEVEL_5V = (0 << 11)
+MULTI_LEVEL_24V = (1 << 11)
+MULTI_RS422_TERM_ON = (0 << 10)
+MULTI_RS422_TERM_OFF = (1 << 10)
+MULTI_ENCODER_BIDIRECT = (0 << 9)
+MULTI_ENCODER_UNIDIRECT = (1 << 9)
+MULTI_DIGIN_ENC_INDEX = (0 << 4)
+MULTI_DIGIN_ENC_TRIG = (1 << 4)
+MULTI_DIGIN_TRIG_ONLY = (2 << 4)
+MULTI_DIGIN_TRIG_UM = (3 << 4)
+MULTI_DIGIN_UM = (4 << 4)
+MULTI_DIGIN_TS = (5 << 4)
+MULTI_DIGIN_FRAMETRIG_BI = (6 << 4)
+MULTI_DIGIN_FRAMETRIG_UNI = (7 << 4)
+MULTI_RS422_115200 = 0
+MULTI_RS422_57600 = 1
+MULTI_RS422_38400 = 2
+MULTI_RS422_19200 = 3
+MULTI_RS422_9600 = 4
+MULTI_RS422_TRIG_IN = 5
+MULTI_RS422_TRIG_OUT = 6
+MULTI_RS422_CMM = 7
+
 RS422_INTERFACE_FUNCTION_AUTO_27xx = 0
 RS422_INTERFACE_FUNCTION_SERIALPORT_115200_27xx = 1
 RS422_INTERFACE_FUNCTION_TRIGGER_27xx = 2
@@ -29,69 +113,68 @@ RS422_INTERFACE_FUNCTION_SERIALPORT_57600_27xx = 8
 RS422_INTERFACE_FUNCTION_SERIALPORT_38400_27xx = 9
 RS422_INTERFACE_FUNCTION_SERIALPORT_19200_27xx = 10
 RS422_INTERFACE_FUNCTION_SERIALPORT_9600_27xx = 11
-RS422_INTERFACE_FUNCTION_SERIALPORT_115200 = 0
-RS422_INTERFACE_FUNCTION_SERIALPORT_57600 = 1
-RS422_INTERFACE_FUNCTION_SERIALPORT_38400 = 2
-RS422_INTERFACE_FUNCTION_SERIALPORT_19200 = 3
-RS422_INTERFACE_FUNCTION_SERIALPORT_9600 = 4
-RS422_INTERFACE_FUNCTION_TRIGGER_INPUT = 5
-RS422_INTERFACE_FUNCTION_TRIGGER_OUTPUT = 6
-RS422_INTERFACE_FUNCTION_CMM_TRIGGER = 7
 
-ERROR_OK = 0
-ERROR_SERIAL_COMM = 1
-ERROR_SERIAL_LLT = 7
-ERROR_CONNECTIONLOST = 10
-ERROR_STOPSAVING = 100
+# Profile filter flags
+FILTER_RESAMPLE_EXTRAPOLATE_POINTS = (1 << 11)
+FILTER_RESAMPLE_ALL_INFO = (1 << 10)
+FILTER_RESAMPLE_DISABLED = (0 << 4)
+FILTER_RESAMPLE_TINY = (1 << 4)
+FILTER_RESAMPLE_VERYSMALL = (2 << 4)
+FILTER_RESAMPLE_SMALL = (3 << 4)
+FILTER_RESAMPLE_MEDIUM = (4 << 4)
+FILTER_RESAMPLE_LARGE = (5 << 4)
+FILTER_RESAMPLE_VERYLARGE = (6 << 4)
+FILTER_RESAMPLE_HUGE = (7 << 4)
+FILTER_MEDIAN_DISABLED = (0 << 2)
+FILTER_MEDIAN_3 = (1 << 2)
+FILTER_MEDIAN_5 = (2 << 2)
+FILTER_MEDIAN_7 = (3 << 2)
+FILTER_AVG_DISABLED = 0
+FILTER_AVG_3 = 1
+FILTER_AVG_5 = 2
+FILTER_AVG_7 = 3
 
-IS_FUNC_NO = 0
-IS_FUNC_YES = 1
+# Container flags
+CONTAINER_STRIPE_4 = (1 << 23)
+CONTAINER_STRIPE_3 = (1 << 22)
+CONTAINER_STRIPE_2 = (1 << 21)
+CONTAINER_STRIPE_1 = (1 << 20)
+CONTAINER_JOIN = (1 << 19)
+CONTAINER_DATA_SIGNED = (1 << 18)
+CONTAINER_DATA_LSBF = (1 << 17)
+CONTAINER_DATA_TS = (1 << 11)
+CONTAINER_DATA_EMPTYFIELD4TS = (1 << 10)
+CONTAINER_DATA_LOOPBACK = (1 << 9)
+CONTAINER_DATA_MOM0U = (1 << 8)
+CONTAINER_DATA_MOM0L = (1 << 7)
+CONTAINER_DATA_MOM1U = (1 << 6)
+CONTAINER_DATA_MOM1L = (1 << 5)
+CONTAINER_DATA_WIDTH = (1 << 4)
+CONTAINER_DATA_INTENS = (1 << 3)
+CONTAINER_DATA_THRES = (1 << 2)
+CONTAINER_DATA_X = (1 << 1)
+CONTAINER_DATA_Z = (1 << 0)
 
-# General return data
-GENNERAL_FUNCTION_DEVICE_NAME_NOT_SUPPORTED = 4
-GENERAL_FUNCTION_PACKET_SIZE_CHANGED = 3
-GENERAL_FUNCTION_CONTAINER_MODE_HEIGHT_CHANGED = 2
+# General return values
+GENERAL_FUNCTION_DEVICE_NAME_NOT_SUPPORTED = 4
 GENERAL_FUNCTION_OK = 1
 GENERAL_FUNCTION_NOT_AVAILABLE = 0
 
-# Error variables
-ERROR_GENERAL_WHILE_LOAD_PROFILE = -1000
-ERROR_GENERAL_NOT_CONNECTED = -1001
-ERROR_GENERAL_DEVICE_BUSY = -1002
-ERROR_GENERAL_WHILE_LOAD_PROFILE_OR_GET_PROFILES = -1003
-ERROR_GENERAL_WHILE_GET_PROFILES = -1004
-ERROR_GENERAL_GET_SET_ADDRESS = -1005
-ERROR_GENERAL_POINTER_MISSING = -1006
-ERROR_GENERAL_WHILE_SAVE_PROFILES = -1007
-ERROR_GENERAL_SECOND_CONNECTION_TO_LLT = -1008
 ERROR_GETDEVICENAME_SIZE_TOO_LOW = -1
 ERROR_GETDEVICENAME_NO_BUFFER = -2
-ERROR_LOADSAVE_WRITING_LAST_BUFFER = -50
-ERROR_LOADSAVE_WHILE_SAVE_PROFILE = -51
-ERROR_LOADSAVE_NO_PROFILELENGTH_POINTER = -52
-ERROR_LOADSAVE_NO_LOAD_PROFILE = -53
-ERROR_LOADSAVE_STOP_ALREADY_LOAD = -54
-ERROR_LOADSAVE_CANT_OPEN_FILE = -55
-ERROR_LOADSAVE_FILE_POSITION_TOO_HIGH = -57
-ERROR_LOADSAVE_AVI_NOT_SUPPORTED = -58
-ERROR_LOADSAVE_NO_REARRANGEMENT_POINTER = -59
-ERROR_LOADSAVE_WRONG_PROFILE_CONFIG = -60
-ERROR_LOADSAVE_NOT_TRANSFERING = -61
-ERROR_PROFTRANS_SHOTS_NOT_ACTIVE = -100
-ERROR_PROFTRANS_SHOTS_COUNT_TOO_HIGH = -101
-ERROR_PROFTRANS_WRONG_PROFILE_CONFIG = -102
-ERROR_PROFTRANS_FILE_EOF = -103
+
+ERROR_PROFTRANS_WRONG_DATA_SIZE = -100
+ERROR_PROFTRANS_WRONG_DATA_FORMAT = -101
+ERROR_PROFTRANS_WRONG_RESOLUTION = -102
+ERROR_PROFTRANS_REFLECTION_NO_DATA = -103
 ERROR_PROFTRANS_NO_NEW_PROFILE = -104
 ERROR_PROFTRANS_BUFFER_SIZE_TOO_LOW = -105
 ERROR_PROFTRANS_NO_PROFILE_TRANSFER = -106
-ERROR_PROFTRANS_PACKET_SIZE_TOO_HIGH = -107
-ERROR_PROFTRANS_CREATE_BUFFERS = -108
-ERROR_PROFTRANS_WRONG_PACKET_SIZE_FOR_CONTAINER = -109
 ERROR_PROFTRANS_REFLECTION_NUMBER_TOO_HIGH = -110
-ERROR_PROFTRANS_MULTIPLE_SHOTS_ACTIVE = -111
-ERROR_PROFTRANS_BUFFER_HANDOUT = -112
 ERROR_PROFTRANS_WRONG_BUFFER_POINTER = -113
 ERROR_PROFTRANS_WRONG_TRANSFER_CONFIG = -114
+ERROR_PROFTRANS_LOOPBACK_NOT_SUPPORTED = -115
+
 ERROR_SETGETFUNCTIONS_WRONG_BUFFER_COUNT = -150
 ERROR_SETGETFUNCTIONS_PACKET_SIZE = -151
 ERROR_SETGETFUNCTIONS_WRONG_PROFILE_CONFIG = -152
@@ -101,39 +184,49 @@ ERROR_SETGETFUNCTIONS_WRONG_FEATURE_ADRESS = -155
 ERROR_SETGETFUNCTIONS_SIZE_TOO_LOW = -156
 ERROR_SETGETFUNCTIONS_WRONG_PROFILE_SIZE = -157
 ERROR_SETGETFUNCTIONS_MOD_4 = -158
-ERROR_SETGETFUNCTIONS_REARRANGEMENT_PROFILE = -159
 ERROR_SETGETFUNCTIONS_USER_MODE_TOO_HIGH = -160
 ERROR_SETGETFUNCTIONS_USER_MODE_FACTORY_DEFAULT = -161
 ERROR_SETGETFUNCTIONS_HEARTBEAT_TOO_HIGH = -162
-ERROR_POSTPROCESSING_NO_PROF_BUFFER = -200
-ERROR_POSTPROCESSING_MOD_4 = -201
-ERROR_POSTPROCESSING_NO_RESULT = -202
-ERROR_POSTPROCESSING_LOW_BUFFERSIZE = -203
-ERROR_POSTPROCESSING_WRONG_RESULT_SIZE = -204
-ERROR_GETDEVINTERFACES_WIN_NOT_SUPPORTED = -250
-ERROR_GETDEVINTERFACES_REQUEST_COUNT = -251
-ERROR_GETDEVINTERFACES_CONNECTED = -252
-ERROR_GETDEVINTERFACES_INTERNAL = -253
+
+# Error values
+ERROR_GETDEVINTERFACE_REQUEST_COUNT = -251
+ERROR_GETDEVINTERFACE_INTERNAL = -253
+
 ERROR_CONNECT_LLT_COUNT = -300
 ERROR_CONNECT_SELECTED_LLT = -301
 ERROR_CONNECT_ALREADY_CONNECTED = -302
 ERROR_CONNECT_LLT_NUMBER_ALREADY_USED = -303
 ERROR_CONNECT_SERIAL_CONNECTION = -304
 ERROR_CONNECT_INVALID_IP = -305
+
 ERROR_PARTPROFILE_NO_PART_PROF = -350
 ERROR_PARTPROFILE_TOO_MUCH_BYTES = -351
 ERROR_PARTPROFILE_TOO_MUCH_POINTS = -352
 ERROR_PARTPROFILE_NO_POINT_COUNT = -353
 ERROR_PARTPROFILE_NOT_MOD_UNITSIZE_POINT = -354
 ERROR_PARTPROFILE_NOT_MOD_UNITSIZE_DATA = -355
-ERROR_CMMTRIGGER_NO_DIVISOR = -400
-ERROR_CMMTRIGGER_TIMEOUT_AFTER_TRANSFERPROFILES = -401
-ERROR_CMMTRIGGER_TIMEOUT_AFTER_SETCMMTRIGGER = -402
+
 ERROR_TRANSERRORVALUE_WRONG_ERROR_VALUE = -450
 ERROR_TRANSERRORVALUE_BUFFER_SIZE_TOO_LOW = -451
-ERROR_READWRITECONFIG_CANT_CREATE_FILE = -500
-ERROR_READWRITECONFIG_CANT_OPEN_FILE = -501
-ERROR_READWRITECONFIG_QUEUE_TO_SMALL = -502
+
+ERROR_TRANSMISSION_CANCEL_NO_CAM = -888
+ERROR_DEVPROP_NOT_AVAILABLE = -999
+
+ERROR_GENERAL_NOT_CONNECTED = -1001
+ERROR_GENERAL_DEVICE_BUSY = -1002
+ERROR_TRANSMISSION_CANCEL_NO_TRANSMISSION_ACTIVE = -1003
+ERROR_TRANSMISSION_CANCEL_TRANSMISSION_ACTIVE = -1004
+ERROR_GENERAL_GET_SET_ADDRESS = -1005
+ERROR_GENERAL_POINTER_MISSING = -1006
+ERROR_GENERAL_WHILE_SAVE_PROFILES = -1007
+ERROR_GENERAL_VALUE_NOT_ALLOWED = -1008
+
+ERROR_DEVPROP_NOT_FOUND = -1300
+ERROR_DEVPROP_DECODE = -1301
+ERROR_DEVPROP_DEPRECATED = -1302
+ERROR_DEVPROP_READ_FAILURE = -1303
+ERROR_DEVPROP_WRONG_FILE_FORMAT = -1304
+ERROR_DEVPROP_WRONG_CAMERA = -1305
 
 # Feature Register
 FEATURE_FUNCTION_SERIAL = 0xf0000410
@@ -153,29 +246,20 @@ FEATURE_FUNCTION_THRESHOLD = 0xf0f00810
 INQUIRY_FUNCTION_THRESHOLD = 0xf0f00510
 FEATURE_FUNCTION_MAINTENANCEFUNCTIONS = 0xf0f0088c
 INQUIRY_FUNCTION_MAINTENANCEFUNCTIONS = 0xf0f0058c
-FEATURE_FUNCTION_ANALOGFREQUENCY = 0xf0f00828
-INQUIRY_FUNCTION_ANALOGFREQUENCY = 0xf0f00528
-FEATURE_FUNCTION_ANALOGOUTPUTMODES = 0xf0f00820
-INQUIRY_FUNCTION_ANALOGOUTPUTMODES = 0xf0f00520
-FEATURE_FUNCTION_CMMTRIGGER = 0xf0f00888
-INQUIRY_FUNCTION_CMMTRIGGER = 0xf0f00588
 FEATURE_FUNCTION_REARRANGEMENT_PROFILE = 0xf0f0080c
 INQUIRY_FUNCTION_REARRANGEMENT_PROFILE = 0xf0f0050c
 FEATURE_FUNCTION_PROFILE_FILTER = 0xf0f00818
 INQUIRY_FUNCTION_PROFILE_FILTER = 0xf0f00518
 FEATURE_FUNCTION_RS422_INTERFACE_FUNCTION = 0xf0f008c0
 INQUIRY_FUNCTION_RS422_INTERFACE_FUNCTION = 0xf0f005c0
-FEATURE_FUNCTION_SATURATION = 0xf0f00814
-INQUIRY_FUNCTION_SATURATION = 0xf0f00514
 FEATURE_FUNCTION_TEMPERATURE = 0xf0f0082c
 INQUIRY_FUNCTION_TEMPERATURE = 0xf0f0052c
-FEATURE_FUNCTION_CAPTURE_QUALITY = 0xf0f008c4
-INQUIRY_FUNCTION_CAPTURE_QUALITY = 0xf0f005c4
 FEATURE_FUNCTION_SHARPNESS = 0xf0f00808
 INQUIRY_FUNCTION_SHARPNESS = 0xf0f00508
 FEATURE_FUNCTION_PACKET_DELAY = 0x00000d08
-FEATURE_FUNCTION_CONNECTION_SPEED = 0x00000670
 
+# MISC
+WAIT_OBJECT_0 = 0
 
 # Structs
 class TPartialProfile(ct.Structure):
@@ -183,6 +267,33 @@ class TPartialProfile(ct.Structure):
                 ('nStartPointData', ct.c_uint),
                 ('nPointCount', ct.c_uint),
                 ('nPointDataWidth', ct.c_uint)]
+
+
+class MEDeviceData(ct.Structure):
+    _fields_ = [('device_series', ct.c_int),
+                ('scaling', ct.c_double),
+                ('offset', ct.c_double),
+                ('max_packet_size', ct.c_int),
+                ('max_frequency', ct.c_int),
+                ('post_proc', ct.c_int),
+                ('min_x_display', ct.c_double),
+                ('max_x_display', ct.c_double),
+                ('min_y_display', ct.c_double),
+                ('max_y_display', ct.c_double),
+                ('rotate_image', ct.c_int),
+                ('min_width', ct.c_double)]
+
+
+class EHANDLE(ct.Structure):
+    pass
+
+
+class LLT(ct.Structure):
+    pass
+
+
+class ArvDevice(ct.Structure):
+    pass
 
 
 # Enums
@@ -195,360 +306,350 @@ class CtypesEnum(IntEnum):
 
 
 class TScannerType(CtypesEnum):
-    scanCONTROL28xx_25 = 0
-    scanCONTROL28xx_100 = 1
-    scanCONTROL28xx_10 = 2
-
     scanCONTROL27xx_25 = 1000
     scanCONTROL27xx_100 = 1001
     scanCONTROL27xx_50 = 1002
+    scanCONTROL27xx_xxx = 1999
 
     scanCONTROL26xx_25 = 2000
     scanCONTROL26xx_100 = 2001
     scanCONTROL26xx_50 = 2002
     scanCONTROL26xx_10 = 2003
+    scanCONTROL26xx_xxx = 2999
 
     scanCONTROL29xx_25 = 3000
     scanCONTROL29xx_100 = 3001
     scanCONTROL29xx_50 = 3002
     scanCONTROL29xx_10 = 3003
-
-
-class TFileType(CtypesEnum):
-    AVI = 0
-    LLT = 1
-    CSV = 2
-    BMP = 3
-    CSV_NEG = 4
-
-
-class TCallbackType(CtypesEnum):
-    STD_CALL = 0
-    C_DECL = 1
+    scanCONTROL29xx_xxx = 3999
 
 
 class TProfileConfig(CtypesEnum):
     NONE = 0
     PROFILE = 1
-    CONTAINER = 1
-    VIDEO_IMAGE = 1
-    PURE_PROFILE = 2
-    QUARTER_PROFILE = 3
-    CSV_PROFILE = 4
+    VIDEO_IMAGE = 2
     PARTIAL_PROFILE = 5
+    CONTAINER = 6
+
+
+class TStreamPriorityState(CtypesEnum):
+    PRIO_NOT_SET = 0
+    PRIO_SET_SUCCESS = 1
+    PRIO_SET_NICE_FAILED = 2
+    PRIO_SET_RT_FAILED = 3
+    PRIO_SET_FAILED = 4
 
 
 class TTransferProfileType(CtypesEnum):
     NORMAL_TRANSFER = 0
-    SHOT_TRANSFER = 1
     NORMAL_CONTAINER_MODE = 2
-    SHOT_CONTAINER_MODE = 3
     NONE_TRANSFER = 4
 
 
-class TInterfaceType(CtypesEnum):
-    INTF_TYPE_UNKNOWN = 0
-    INTF_TYPE_SERIAL = 1
-    INTF_TYPE_FIREWIRE = 2
-    INTF_TYPE_ETHERNET = 3
-
-
-class TTransferVideoType(CtypesEnum):
-    VIDEO_MODE_0 = 0
-    VIDEO_MODE_1 = 1
-    NONE_VIDEOMODE = 2
-
 # DLL Loader
-llt = ct.CDLL(dll_path)
+llt = ct.CDLL(lib_path)
 
-# ID functions
-GetDeviceName = llt['c_GetDeviceName']
-GetDeviceName.restype = ct.c_int
-GetDeviceName.argtypes = [ct.c_uint, ct.c_char_p, ct.c_uint,  ct.c_char_p, ct.c_uint]
+#
+# Basic
+#
 
-GetLLTType = llt['c_GetLLTType']
-GetLLTType.restype = ct.c_int
-GetLLTType.argtypes = [ct.c_uint, ct.POINTER(ct.c_int)]
-
-GetLLTVersions = llt['c_GetLLTVersions']
-GetLLTVersions.restype = ct.c_int
-GetLLTVersions.argtypes = [ct.c_uint, ct.POINTER(ct.c_uint), ct.POINTER(ct.c_uint), ct.POINTER(ct.c_uint)]
-
-# Init Functions
-CreateLLTDevice = llt['c_CreateLLTDevice']
-CreateLLTDevice.restype = ct.c_uint
-CreateLLTDevice.argtypes = [TInterfaceType]
-
-GetDeviceInterfaces = llt['c_GetDeviceInterfaces']
+# Search for interfaces
+# Hint: make interface array with:
+# available_interfaces = [ct.create_string_buffer(8) for i in range(6)]
+# available_interfaces_p = (ct.c_char_p * 6)(*map(ct.addressof, available_interfaces))
+GetDeviceInterfaces = llt['get_device_interfaces']
 GetDeviceInterfaces.restype = ct.c_int
-GetDeviceInterfaces.argtypes = [ct.c_uint, ct.POINTER(ct.c_uint), ct.c_uint]
+GetDeviceInterfaces.argtypes = [ct.POINTER(ct.c_char_p), ct.c_uint]
 
-GetDeviceInterfacesFast = llt['c_GetDeviceInterfacesFast']
-GetDeviceInterfacesFast.restype = ct.c_int
-GetDeviceInterfacesFast.argtypes = [ct.c_uint, ct.POINTER(ct.c_uint), ct.c_uint]
+# Init Device
+InitDevice = llt['init_device']
+InitDevice.restype = ct.c_int
+InitDevice.argtypes = [ct.c_char_p, ct.POINTER(MEDeviceData), ct.c_char_p]
 
-SetDeviceInterface = llt['c_SetDeviceInterface']
-SetDeviceInterface.restype = ct.c_int
-SetDeviceInterface.argtypes = [ct.c_uint, ct.c_uint, ct.c_int]
+# Getter
+GetLLTTypeByName = llt['get_llt_type_by_name']
+GetLLTTypeByName.restype = ct.c_int
+GetLLTTypeByName.argtypes = [ct.c_char_p, ct.POINTER(ct.c_int)]
 
-GetInterfaceType = llt['c_GetInterfaceType']
-GetInterfaceType.restype = ct.c_int
-GetInterfaceType.argtypes = [ct.c_uint]
-
-GetInterfaceType = llt['c_GetDiscoveryBroadcastTarget']
-GetInterfaceType.restype = ct.c_int
-GetInterfaceType.argtypes = [ct.c_uint]
-
-GetInterfaceType = llt['c_SetDiscoveryBroadcastTarget']
-GetInterfaceType.restype = ct.c_int
-GetInterfaceType.argtypes = [ct.c_uint, ct.c_uint, ct.c_int]
-
-# Delete Device
-DelDevice = llt['c_DelDevice']
-DelDevice.restype = ct.c_uint
-DelDevice.argtypes = [ct.c_uint]
-
-# Connect
-Connect = llt['c_Connect']
-Connect.restype = ct.c_int
-Connect.argtypes = [ct.c_uint]
-
-Disconnect = llt['c_Disconnect']
-Disconnect.restype = ct.c_int
-Disconnect.argtypes = [ct.c_uint]
-
-# Write Config
-ExportLLTConfig = llt['c_ExportLLTConfig']
-ExportLLTConfig.restype = ct.c_int
-ExportLLTConfig.argtypes = [ct.c_uint, ct.c_char_p]
-
-# Transfer and Profile Functions
-TransferProfiles = llt['c_TransferProfiles']
-TransferProfiles.restype = ct.c_int
-TransferProfiles.argtypes = [ct.c_uint, TTransferProfileType, ct.c_int]
-
-TransferVideoStream = llt['c_TransferVideoStream']
-TransferVideoStream.restype = ct.c_int
-TransferVideoStream.argtypes = [ct.c_uint, TTransferVideoType, ct.c_int, ct.POINTER(ct.c_uint), ct.POINTER(ct.c_uint)]
-
-GetActualProfile = llt['c_GetActualProfile']
-GetActualProfile.restype = ct.c_int
-GetActualProfile.argtypes = [ct.c_uint, ct.POINTER(ct.c_ubyte), ct.c_uint, TProfileConfig, ct.POINTER(ct.c_int)]
-
-GetProfile = llt['c_GetProfile']
-GetProfile.restype = ct.c_int
-GetProfile.argtypes = [ct.c_uint]
-
-MultiShot = llt['c_MultiShot']
-MultiShot.restype = ct.c_int
-MultiShot.argtypes = [ct.c_uint, ct.c_uint]
-
-SetHoldBuffersForPolling = llt['c_SetHoldBuffersForPolling']
-SetHoldBuffersForPolling.restype = ct.c_int
-SetHoldBuffersForPolling.argtypes = [ct.c_uint, ct.c_uint]
-
-GetHoldBuffersForPolling = llt['c_GetHoldBuffersForPolling']
-GetHoldBuffersForPolling.restype = ct.c_int
-GetHoldBuffersForPolling.argtypes = [ct.c_uint, ct.POINTER(ct.c_uint)]
+GetScalingAndOffsetByType = llt['get_scaling_and_offset_by_type']
+GetScalingAndOffsetByType.restype = ct.c_int
+GetScalingAndOffsetByType.argtypes = [ct.c_int, ct.POINTER(ct.c_double), ct.POINTER(ct.c_double)]
 
 # Convert Profiles
-ConvertProfile2Values = llt['c_ConvertProfile2Values']
+ConvertProfile2Values = llt['convert_profile_2_values']
 ConvertProfile2Values.restype = ct.c_int
-ConvertProfile2Values.argtypes = [ct.c_uint, ct.POINTER(ct.c_ubyte), ct.c_uint, TProfileConfig, TScannerType, ct.c_uint,
-                                  ct.c_uint, ct.POINTER(ct.c_ushort), ct.POINTER(ct.c_ushort), ct.POINTER(ct.c_ushort),
+ConvertProfile2Values.argtypes = [ct.POINTER(ct.c_ubyte), ct.c_uint, ct.c_uint, TScannerType, ct.c_uint,
+                                  ct.POINTER(ct.c_ushort), ct.POINTER(ct.c_ushort), ct.POINTER(ct.c_ushort),
                                   ct.POINTER(ct.c_double), ct.POINTER(ct.c_double), ct.POINTER(ct.c_uint),
                                   ct.POINTER(ct.c_uint)]
 
-ConvertPartProfile2Values = llt['c_ConvertPartProfile2Values']
+ConvertPartProfile2Values = llt['convert_part_profile_2_values']
 ConvertPartProfile2Values.restype = ct.c_int
-ConvertPartProfile2Values.argtypes = [ct.c_uint, ct.POINTER(ct.c_ubyte), ct.POINTER(TPartialProfile), TScannerType,
-                                      ct.c_int, ct.c_uint, ct.POINTER(ct.c_ushort), ct.POINTER(ct.c_ushort),
+ConvertPartProfile2Values.argtypes = [ct.POINTER(ct.c_ubyte), ct.c_uint, ct.POINTER(TPartialProfile), TScannerType,
+                                      ct.c_uint, ct.POINTER(ct.c_ushort), ct.POINTER(ct.c_ushort),
                                       ct.POINTER(ct.c_ushort), ct.POINTER(ct.c_double), ct.POINTER(ct.c_double),
                                       ct.POINTER(ct.c_uint), ct.POINTER(ct.c_uint)]
 
+ConvertRearrangedContainer2Values = llt['convert_rearranged_container_2_values']
+ConvertRearrangedContainer2Values.restype = ct.c_int
+ConvertRearrangedContainer2Values.argtypes = [ct.POINTER(ct.c_ubyte), ct.c_uint, ct.c_uint, ct.c_uint, TScannerType,
+                                      ct.c_uint, ct.POINTER(ct.c_ushort), ct.POINTER(ct.c_ushort),
+                                      ct.POINTER(ct.c_ushort), ct.POINTER(ct.c_double), ct.POINTER(ct.c_double)]
+
 # Timestamp
-Timestamp2TimeAndCount = llt['c_Timestamp2TimeAndCount']
+Timestamp2TimeAndCount = llt['timestamp_2_time_and_count']
 Timestamp2TimeAndCount.restype = None
 Timestamp2TimeAndCount.argtypes = [ct.POINTER(ct.c_ubyte), ct.POINTER(ct.c_double), ct.POINTER(ct.c_double),
-                                   ct.POINTER(ct.c_uint)]
+                                   ct.POINTER(ct.c_uint), ct.POINTER(ct.c_ushort)]
 
-Timestamp2CmmTriggerAndInCounter = llt['c_Timestamp2CmmTriggerAndInCounter']
-Timestamp2CmmTriggerAndInCounter.restype = None
-Timestamp2CmmTriggerAndInCounter.argtypes = [ct.POINTER(ct.c_ubyte), ct.POINTER(ct.c_uint), ct.POINTER(ct.c_int),
-                                             ct.POINTER(ct.c_int), ct.POINTER(ct.c_uint)]
+# Event funcs
+CreateEvent = llt['create_event']
+CreateEvent.restype = ct.POINTER(EHANDLE)
+CreateEvent.argtypes = []
+
+SetEvent = llt['set_event']
+SetEvent.argtypes = [ct.POINTER(EHANDLE)]
+
+ResetEvent = llt['reset_event']
+ResetEvent.argtypes = [ct.POINTER(EHANDLE)]
+
+FreeEvent = llt['free_event']
+FreeEvent.argtypes = [ct.POINTER(EHANDLE)]
+
+WaitForSingleObject = llt['wait_for_single_object']
+WaitForSingleObject.restype = ct.c_int
+WaitForSingleObject.argtypes = [ct.POINTER(EHANDLE), ct.c_uint]
+
+#
+# Advanced
+#
+
+# Device
+
+CreateLLTDevice = llt['create_llt_device']
+CreateLLTDevice.restype = ct.POINTER(LLT)
+CreateLLTDevice.argtypes = []
+
+DelDevice = llt['del_device']
+DelDevice.restype = ct.c_int
+DelDevice.argtypes = [ct.POINTER(LLT)]
+
+# Connect
+
+Connect = llt['connect_llt']
+Connect.restype = ct.c_int
+Connect.argtypes = [ct.POINTER(LLT)]
+
+Disconnect = llt['disconnect_llt']
+Disconnect.restype = ct.c_int
+Disconnect.argtypes = [ct.POINTER(LLT)]
+
+SetDeviceInterface = llt['set_device_interface']
+SetDeviceInterface.restype = ct.c_int
+SetDeviceInterface.argtypes = [ct.POINTER(LLT), ct.c_char_p]
+
+# MUST BE CALLED BEFORE CONNECT
+SetPathToDeviceProperties = llt['set_path_device_properties']
+SetPathToDeviceProperties.restype = ct.c_int
+SetPathToDeviceProperties.argtypes = [ct.POINTER(LLT), ct.c_char_p]
+
+# ID functions
+
+GetLLTType = llt['get_llt_type']
+GetLLTType.restype = ct.c_int
+GetLLTType.argtypes = [ct.POINTER(LLT), ct.POINTER(ct.c_int)]
+
+GetDeviceName = llt['get_device_name']
+GetDeviceName.restype = ct.c_int
+GetDeviceName.argtypes = [ct.POINTER(LLT), ct.POINTER(ct.c_char_p), ct.POINTER(ct.c_char_p)]
+
+GetLLTVersions = llt['get_llt_version']
+GetLLTVersions.restype = ct.c_int
+GetLLTVersions.argtypes = [ct.POINTER(LLT), ct.POINTER(ct.c_char_p)]
+
+# path to device_properties.dat must be set
+# USAGE:
+# me_dev_data = ct.POINTER(llt.MEDeviceData)()
+# llt.GetMEDeviceData(hLLT, ct.byref(me_dev_data))
+# print(me_dev_data.contents.scaling)
+GetMEDeviceData = llt['get_medevice_data']
+GetMEDeviceData.restype = ct.c_int
+GetMEDeviceData.argtypes = [ct.POINTER(LLT), ct.POINTER(ct.POINTER(MEDeviceData))]
+
+GetArvDevice = llt['get_arv_device']
+GetArvDevice.restype = ct.c_int
+GetArvDevice.argtypes = [ct.POINTER(LLT), ct.POINTER(ct.POINTER(ArvDevice))]
+
+GetStreamStatistics = llt['get_stream_statistics']
+GetStreamStatistics.restype = ct.c_int
+GetStreamStatistics.argtypes = [ct.POINTER(LLT), ct.POINTER(ct.c_ulong), ct.POINTER(ct.c_ulong), ct.POINTER(ct.c_ulong)]
+
+# Getter for parameter
+
+GetProfileConfig = llt['get_profile_config']
+GetProfileConfig.restype = ct.c_int
+GetProfileConfig.argtypes = [ct.POINTER(LLT), ct.POINTER(ct.c_int)]
+
+GetFeature = llt['get_feature']
+GetFeature.restype = ct.c_int
+GetFeature.argtypes = [ct.POINTER(LLT), ct.c_uint, ct.POINTER(ct.c_uint)]
+
+GetPartialProfile = llt['get_partial_profile']
+GetPartialProfile.restype = ct.c_int
+GetPartialProfile.argtypes = [ct.POINTER(LLT), ct.POINTER(TPartialProfile)]
+
+GetProfileContainerSize = llt['get_profile_container_size']
+GetProfileContainerSize.restype = ct.c_int
+GetProfileContainerSize.argtypes = [ct.POINTER(LLT), ct.POINTER(ct.c_uint), ct.POINTER(ct.c_uint)]
+
+GetMaxProfileContainerSize = llt['get_max_profile_container_size']
+GetMaxProfileContainerSize.restype = ct.c_int
+GetMaxProfileContainerSize.argtypes = [ct.POINTER(LLT), ct.POINTER(ct.c_uint), ct.POINTER(ct.c_uint)]
+
+GetBufferCount = llt['get_buffer_count']
+GetBufferCount.restype = ct.c_int
+GetBufferCount.argtypes = [ct.POINTER(LLT), ct.POINTER(ct.c_uint)]
+
+GetResolutions = llt['get_resolutions']
+GetResolutions.restype = ct.c_int
+GetResolutions.argtypes = [ct.POINTER(LLT), ct.POINTER(ct.c_uint), ct.c_uint]
+
+GetResolution = llt['get_resolution']
+GetResolution.restype = ct.c_int
+GetResolution.argtypes = [ct.POINTER(LLT), ct.POINTER(ct.c_uint)]
+
+GetPartialProfileUnitSize = llt['get_partial_profile_unit_size']
+GetPartialProfileUnitSize.restype = ct.c_int
+GetPartialProfileUnitSize.argtypes = [ct.POINTER(LLT), ct.POINTER(ct.c_uint), ct.POINTER(ct.c_uint)]
+
+GetMinMaxPacketSize = llt['get_min_max_packet_size']
+GetMinMaxPacketSize.restype = ct.c_int
+GetMinMaxPacketSize.argtypes = [ct.POINTER(LLT), ct.POINTER(ct.c_uint), ct.POINTER(ct.c_uint)]
+
+GetPacketSize = llt['get_packet_size']
+GetPacketSize.restype = ct.c_int
+GetPacketSize.argtypes = [ct.POINTER(LLT), ct.POINTER(ct.c_uint)]
+
+GetStreamNiceValue = llt['get_stream_nice_value']
+GetStreamNiceValue.restype = ct.c_int
+GetStreamNiceValue.argtypes = [ct.POINTER(LLT), ct.POINTER(ct.c_uint)]
+
+GetStreamPriority = llt['get_stream_priority']
+GetStreamPriority.restype = ct.c_int
+GetStreamPriority.argtypes = [ct.POINTER(LLT), ct.POINTER(ct.c_uint)]
+
+GetLLTScalingAndOffset = llt['get_llt_scaling_and_offset']
+GetLLTScalingAndOffset.restype = ct.c_int
+GetLLTScalingAndOffset.argtypes = [ct.POINTER(LLT), ct.POINTER(ct.c_double), ct.POINTER(ct.c_double)]
+
+GetHoldBuffersForPolling = llt['get_hold_buffers_for_polling']
+GetHoldBuffersForPolling.restype = ct.c_int
+GetHoldBuffersForPolling.argtypes = [ct.POINTER(LLT), ct.POINTER(ct.c_uint)]
+
+GetStreamPriorityState = llt['get_stream_priority_state']
+GetStreamPriorityState.restype = ct.c_int
+GetStreamPriorityState.argtypes = [ct.POINTER(LLT), ct.POINTER(ct.c_int)]
 
 # Set Functions
-SetFeature = llt['c_SetFeature']
-SetFeature.restype = ct.c_int
-SetFeature.argtypes = [ct.c_uint, ct.c_uint, ct.c_uint]
 
-SetBufferCount = llt['c_SetBufferCount']
-SetBufferCount.restype = ct.c_int
-SetBufferCount.argtypes = [ct.c_uint, ct.c_uint]
-
-SetMainReflection = llt['c_SetMainReflection']
-SetMainReflection.restype = ct.c_int
-SetMainReflection.argtypes = [ct.c_uint, ct.c_uint]
-
-SetMaxFileSize = llt['c_SetMaxFileSize']
-SetMaxFileSize.restype = ct.c_int
-SetMaxFileSize.argtypes = [ct.c_uint, ct.c_uint]
-
-SetPacketSize = llt['c_SetPacketSize']
-SetPacketSize.restype = ct.c_int
-SetPacketSize.argtypes = [ct.c_uint, ct.c_uint]
-
-SetProfileConfig = llt['c_SetProfileConfig']
+SetProfileConfig = llt['set_profile_config']
 SetProfileConfig.restype = ct.c_int
-SetProfileConfig.argtypes = [ct.c_uint, TProfileConfig]
+SetProfileConfig.argtypes = [ct.POINTER(LLT), ct.c_int]
 
-SetResolution = llt['c_SetResolution']
+SetFeature = llt['set_feature']
+SetFeature.restype = ct.c_int
+SetFeature.argtypes = [ct.POINTER(LLT), ct.c_uint, ct.c_uint]
+
+SetResolution = llt['set_resolution']
 SetResolution.restype = ct.c_int
-SetResolution.argtypes = [ct.c_uint, ct.c_uint]
+SetResolution.argtypes = [ct.POINTER(LLT), ct.c_uint]
 
-SetProfileContainerSize = llt['c_SetProfileContainerSize']
+SetProfileContainerSize = llt['set_profile_container_size']
 SetProfileContainerSize.restype = ct.c_int
-SetProfileContainerSize.argtypes = [ct.c_uint, ct.c_uint, ct.c_uint]
+SetProfileContainerSize.argtypes = [ct.POINTER(LLT), ct.c_uint, ct.c_uint]
 
-SetEthernetHeartbeatTimeout = llt['c_SetEthernetHeartbeatTimeout']
-SetEthernetHeartbeatTimeout.restype = ct.c_int
-SetEthernetHeartbeatTimeout.argtypes = [ct.c_uint, ct.c_uint]
-
-# Get Functions
-GetFeature = llt['c_GetFeature']
-GetFeature.restype = ct.c_int
-GetFeature.argtypes = [ct.c_uint, ct.c_uint, ct.POINTER(ct.c_uint)]
-
-GetMinMaxPacketSize = llt['c_GetMinMaxPacketSize']
-GetMinMaxPacketSize.restype = ct.c_int
-GetMinMaxPacketSize.argtypes = [ct.c_uint, ct.POINTER(ct.c_uint), ct.POINTER(ct.c_uint)]
-
-GetResolutions = llt['c_GetResolutions']
-GetResolutions.restype = ct.c_int
-GetResolutions.argtypes = [ct.c_uint, ct.POINTER(ct.c_uint), ct.c_uint]
-
-GetBufferCount = llt['c_GetBufferCount']
-GetBufferCount.restype = ct.c_int
-GetBufferCount.argtypes = [ct.c_uint, ct.POINTER(ct.c_uint)]
-
-GetMainReflection = llt['c_GetMainReflection']
-GetMainReflection.restype = ct.c_int
-GetMainReflection.argtypes = [ct.c_uint, ct.POINTER(ct.c_uint)]
-
-GetMaxFileSize = llt['c_GetMaxFileSize']
-GetMaxFileSize.restype = ct.c_int
-GetMaxFileSize.argtypes = [ct.c_uint, ct.POINTER(ct.c_uint)]
-
-GetPacketSize = llt['c_GetPacketSize']
-GetPacketSize.restype = ct.c_int
-GetPacketSize.argtypes = [ct.c_uint, ct.POINTER(ct.c_uint)]
-
-GetProfileConfig = llt['c_GetProfileConfig']
-GetProfileConfig.restype = ct.c_int
-GetProfileConfig.argtypes = [ct.c_uint, ct.POINTER(ct.c_uint)]
-
-GetProfileConfig = llt['c_GetResolution']
-GetProfileConfig.restype = ct.c_int
-GetProfileConfig.argtypes = [ct.c_uint, ct.POINTER(ct.c_uint)]
-
-GetProfileConfig = llt['c_GetProfileContainerSize']
-GetProfileConfig.restype = ct.c_int
-GetProfileConfig.argtypes = [ct.c_uint, ct.POINTER(ct.c_uint), ct.POINTER(ct.c_uint)]
-
-GetMaxProfileContainerSize = llt['c_GetMaxProfileContainerSize']
-GetMaxProfileContainerSize.restype = ct.c_int
-GetMaxProfileContainerSize.argtypes = [ct.c_uint, ct.POINTER(ct.c_uint), ct.POINTER(ct.c_uint)]
-
-GetEthernetHeartbeatTimeout = llt['c_GetEthernetHeartbeatTimeout']
-GetEthernetHeartbeatTimeout.restype = ct.c_int
-GetEthernetHeartbeatTimeout.argtypes = [ct.c_uint, ct.POINTER(ct.c_uint)]
-
-# Maintenance parameter
-GetActualUserMode = llt['c_GetActualUserMode']
-GetActualUserMode.restype = ct.c_int
-GetActualUserMode.argtypes = [ct.c_uint, ct.POINTER(ct.c_uint), ct.POINTER(ct.c_uint)]
-
-ReadWriteUserModes = llt['c_ReadWriteUserModes']
-ReadWriteUserModes.restype = ct.c_int
-ReadWriteUserModes.argtypes = [ct.c_uint, ct.c_int, ct.c_uint]
-
-SaveGlobalParameter = llt['c_SaveGlobalParameter']
-SaveGlobalParameter.restype = ct.c_int
-SaveGlobalParameter.argtypes = [ct.c_uint]
-
-TriggerProfile = llt['c_TriggerProfile']
-TriggerProfile.restype = ct.c_int
-TriggerProfile.argtypes = [ct.c_uint]
-
-# Partial profiles function
-GetPartialProfileUnitSize = llt['c_GetPartialProfileUnitSize']
-GetPartialProfileUnitSize.restype = ct.c_int
-GetPartialProfileUnitSize.argtypes = [ct.c_uint, ct.POINTER(ct.c_uint), ct.POINTER(ct.c_uint)]
-
-GetPartialProfile = llt['c_GetPartialProfile']
-GetPartialProfile.restype = ct.c_int
-GetPartialProfile.argtypes = [ct.c_uint, ct.POINTER(TPartialProfile)]
-
-SetPartialProfile = llt['c_SetPartialProfile']
+SetPartialProfile = llt['set_partial_profile']
 SetPartialProfile.restype = ct.c_int
-SetPartialProfile.argtypes = [ct.c_uint, ct.POINTER(TPartialProfile)]
+SetPartialProfile.argtypes = [ct.POINTER(LLT), ct.POINTER(TPartialProfile)]
 
-# Is Functions
-IsInterfaceType = llt['c_IsInterfaceType']
-IsInterfaceType.restype = ct.c_int
-IsInterfaceType.argtypes = [ct.c_uint, ct.c_int]
+SetBufferCount = llt['set_buffer_count']
+SetBufferCount.restype = ct.c_int
+SetBufferCount.argtypes = [ct.POINTER(LLT), ct.c_uint]
 
-IsTransferingProfiles = llt['c_IsTransferingProfiles']
-IsTransferingProfiles.restype = ct.c_int
-IsTransferingProfiles.argtypes = [ct.c_uint]
+SetPacketSize = llt['set_packet_size']
+SetPacketSize.restype = ct.c_int
+SetPacketSize.argtypes = [ct.POINTER(LLT), ct.c_uint]
 
-# PostProcessing
-ReadPostProcessingParameter = llt['c_ReadPostProcessingParameter']
-ReadPostProcessingParameter.restype = ct.c_int
-ReadPostProcessingParameter.argtypes = [ct.c_uint, ct.POINTER(ct.c_uint), ct.c_uint]
+SetStreamNiceValue = llt['set_stream_nice_value']
+SetStreamNiceValue.restype = ct.c_int
+SetStreamNiceValue.argtypes = [ct.POINTER(LLT), ct.c_uint]
 
-WritePostProcessingParameter = llt['c_WritePostProcessingParameter']
-WritePostProcessingParameter.restype = ct.c_int
-WritePostProcessingParameter.argtypes = [ct.c_uint, ct.POINTER(ct.c_uint), ct.c_uint]
+SetStreamPriority = llt['set_stream_priority']
+SetStreamPriority.restype = ct.c_int
+SetStreamPriority.argtypes = [ct.POINTER(LLT), ct.c_uint]
 
-ConvertProfile2ModuleResult = llt['c_ConvertProfile2ModuleResult']
-ConvertProfile2ModuleResult.restype = ct.c_int
-ConvertProfile2ModuleResult.argtypes = [ct.c_uint, ct.POINTER(ct.c_ubyte), ct.c_uint, ct.POINTER(ct.c_ubyte), ct.c_uint,
-                                        ct.POINTER(TPartialProfile)]
+SetHoldBuffersForPolling = llt['set_hold_buffers_for_polling']
+SetHoldBuffersForPolling.restype = ct.c_int
+SetHoldBuffersForPolling.argtypes = [ct.POINTER(LLT), ct.c_uint]
 
-# Load/Save Functions
-SaveProfiles = llt['c_SaveProfiles']
-SaveProfiles.restype = ct.c_int
-SaveProfiles.argtypes = [ct.c_uint, ct.c_char_p, TFileType]
+# Maintenance
 
-LoadProfiles = llt['c_LoadProfiles']
-LoadProfiles.restype = ct.c_int
-LoadProfiles.argtypes = [ct.c_uint, ct.c_char_p, ct.POINTER(TPartialProfile), ct.POINTER(ct.c_uint),
-                         ct.POINTER(ct.c_uint), ct.POINTER(ct.c_uint)]
+GetActualUserMode = llt['get_actual_usermode']
+GetActualUserMode.restype = ct.c_int
+GetActualUserMode.argtypes = [ct.POINTER(LLT), ct.POINTER(ct.c_uint), ct.POINTER(ct.c_uint)]
 
-LoadProfilesGetPos = llt['c_LoadProfilesGetPos']
-LoadProfilesGetPos.restype = ct.c_int
-LoadProfilesGetPos.argtypes = [ct.c_uint, ct.POINTER(ct.c_uint), ct.POINTER(ct.c_uint)]
+ReadWriteUserModes = llt['read_write_usermodes']
+ReadWriteUserModes.restype = ct.c_int
+ReadWriteUserModes.argtypes = [ct.POINTER(LLT), ct.c_bool, ct.c_uint]
 
-LoadProfilesSetPos = llt['c_LoadProfilesSetPos']
-LoadProfilesSetPos.restype = ct.c_int
-LoadProfilesSetPos.argtypes = [ct.c_uint, ct.c_uint]
+SetCustomCalibration = llt['set_custom_calibration']
+SetCustomCalibration.restype = ct.c_int
+SetCustomCalibration.argtypes = [ct.POINTER(LLT), ct.c_double, ct.c_double, ct.c_double, ct.c_double, ct.c_double]
+
+ResetCustomCalibration = llt['reset_custom_calibration']
+ResetCustomCalibration.restype = ct.c_int
+ResetCustomCalibration.argtypes = [ct.POINTER(LLT)]
 
 # Register Functions
-RegisterCallback = llt['c_RegisterCallback']
-RegisterCallback.restype = ct.c_int
-RegisterCallback.argtypes = [ct.c_uint, TCallbackType, CBFUNC, ct.c_uint]
 
-RegisterErrorMsg = llt['c_RegisterErrorMsg']
-RegisterErrorMsg.restype = ct.c_int
-RegisterErrorMsg.argtypes = [ct.c_uint, ct.c_uint, ct.POINTER(ct.c_int), ct.POINTER(ct.c_uint)]
+RegisterBufferCallback = llt['register_buffer_callback']
+RegisterBufferCallback.restype = ct.c_int
+RegisterBufferCallback.argtypes = [ct.POINTER(LLT), buffer_cb_func, ct.c_void_p]
 
-# Special CMM Trigger Functions
-StopTransmissionAndCmmTrigger = llt['c_StopTransmissionAndCmmTrigger']
-StopTransmissionAndCmmTrigger.restype = ct.c_int
-StopTransmissionAndCmmTrigger.argtypes = [ct.c_uint, ct.c_uint, TTransferProfileType, ct.c_uint, ct.c_char_p, TFileType,
-                                          ct.c_uint]
+RegisterControlLostCallback = llt['register_control_lost_callback']
+RegisterControlLostCallback.restype = ct.c_int
+RegisterControlLostCallback.argtypes = [ct.POINTER(LLT), buffer_cl_func, ct.c_void_p]
 
-StopTransmissionAndCmmTrigger = llt['c_StopTransmissionAndCmmTrigger']
-StopTransmissionAndCmmTrigger.restype = ct.c_int
-StopTransmissionAndCmmTrigger.argtypes = [ct.c_uint, ct.c_int, ct.c_uint]
+# Transfer
+
+TransferProfiles = llt['transfer_profiles']
+TransferProfiles.restype = ct.c_int
+TransferProfiles.argtypes = [ct.POINTER(LLT), ct.c_int, ct.c_bool]
+
+GetActualProfile = llt['get_actual_profile']
+GetActualProfile.restype = ct.c_int
+GetActualProfile.argtypes = [ct.POINTER(LLT), ct.POINTER(ct.c_ubyte), ct.c_uint, TProfileConfig, ct.POINTER(ct.c_uint)]
+
+# Advanced
+
+TriggerProfile = llt['trigger_profile']
+TriggerProfile.restype = ct.c_int
+TriggerProfile.argtypes = [ct.POINTER(LLT)]
+
+SetPeakFilter = llt['set_peak_filter']
+SetPeakFilter.restype = ct.c_int
+SetPeakFilter.argtypes = [ct.POINTER(LLT), ct.c_ushort, ct.c_ushort, ct.c_ushort, ct.c_ushort]
+
+SetFreeMeasuringField = llt['set_free_measuring_field']
+SetFreeMeasuringField.restype = ct.c_int
+SetFreeMeasuringField.argtypes = [ct.POINTER(LLT), ct.c_ushort, ct.c_ushort, ct.c_ushort, ct.c_ushort]
+
+SetDynamicMeasuringFieldTracking = llt['set_dynamic_measuring_field_tracking']
+SetDynamicMeasuringFieldTracking.restype = ct.c_int
+SetDynamicMeasuringFieldTracking.argtypes = [ct.POINTER(LLT), ct.c_ushort, ct.c_ushort, ct.c_ushort, ct.c_ushort]
+
+# MISC
+
+TranslateErrorValues = llt['translate_error_values']
+TranslateErrorValues.restype = ct.c_int
+TranslateErrorValues.argtypes = [ct.POINTER(LLT), ct.POINTER(ct.c_char_p), ct.c_uint]

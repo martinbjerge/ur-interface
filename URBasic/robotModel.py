@@ -44,7 +44,7 @@ class RobotModel(object):
         logger = URBasic.dataLogging.DataLogging()
         name = logger.AddEventLogging(__name__)
         self.__logger = logger.__dict__[name]
-        self.__logger.info('Init done')
+        self.__logger.info('Init done, RobotModel')
 
         #Universal Robot Model content
         self.password = None
@@ -152,7 +152,7 @@ class RobotModel(object):
                          'output_double_register_22':None,
                          'output_double_register_23':None,
                          'urPlus_force_torque_sensor':None,
-                         'urPlus_totalMovedVerticalDistance':None
+                         'urPlus_totalMovedVerticalDistance':0
                          }
 
 

@@ -75,6 +75,27 @@ def rotate_tcp(gradient_vec=[0,0,0]):
 
     return rotation_vec
 
+def aling_tcp_to_vector(start_vector=[0,0,1],vector_align=[0,0,1]):
+
+
+    start_vector/= np.linalg.norm(start_vector)
+    vector_align /= np.linalg.norm(vector_align)
+
+    rot_angle = np.arccos(np.clip(np.dot(vector_align, start_vector), -1.0, 1.0))
+
+    min_angle  =0.01
+
+    if rot_angle < min_angle:
+        rotation_vec = [0,0,0]
+    elif rot_angle > np.pi - min_angle :
+        rotation_vec = [0,-np.pi,0]
+    else:
+        vec_norm = np.cross(start_vector, vector_align)
+        vec_norm = vec_norm/np.linalg.norm(vec_norm)
+        rotation_vec = vec_norm * rot_angle
+
+    return rotation_vec
+
 
 def Robot_parameter_screw_axes(rob='ur10'):
     '''
@@ -396,3 +417,27 @@ def Vektor_from_Base_to_TCP(vectorBase,axisangle):
     vectorBase = np.array(vectorBase)
     vectorTCP= np.cos(angle)*vectorBase+np.sin(angle)*np.cross(eRot,vectorBase)+(1-np.cos(angle))*np.dot(eRot,vectorBase)*eRot
     return vectorTCP
+
+def roll_pose_robot_frame(pose=[0,0,0, 0,0,0],roll=0):
+    """
+    Function to calculate the pose rolled around the y axis (blade direction).
+
+    Parameters:
+    pose (np.array, 6*1): the pose to be rotated
+    roll (float): the angle in deg to rotate around the y axis.
+    """
+    # rotates an axis angle around the y frame
+    axis_angle=pose[3:]
+    rotation_matrix=AxisAng2RotaMatri(angle_vec=axis_angle)
+
+    roll_matrix=np.zeros((3,3))
+    roll_matrix[0,0] =1
+    roll_matrix[1,1] =np.cos(roll)
+    roll_matrix[1,2] =-np.sin(roll)
+    roll_matrix[2,1] =np.sin(roll)
+    roll_matrix[2,2] =np.cos(roll)
+
+    rotation_matrix_new=np.matmul(roll_matrix,rotation_matrix)
+    axis_angle_new=RotatMatr2AxisAng(Matrix=rotation_matrix_new)
+    pose[3:]=axis_angle_new[:]
+    return pose

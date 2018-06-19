@@ -60,13 +60,13 @@ class UrScriptExt(URBasic.urScript.UrScript):
     def __init__(self, host, robotModel, hasForceTorque=False):
         if host is None: #Only for enable code completion
             return
-        super(UrScriptExt, self).__init__(host, robotModel, hasForceTorque)        
+        super(UrScriptExt, self).__init__(host, robotModel, hasForceTorque)
         logger = URBasic.dataLogging.DataLogging()
         name = logger.AddEventLogging(__name__)
         self.__logger = logger.__dict__[name]
         self.print_actual_tcp_pose()
         self.print_actual_joint_positions()
-        self.__logger.info('Init done')
+        self.__logger.info('Init done, UrScriptExt')
 
     def close(self):
         self.print_actual_tcp_pose()
