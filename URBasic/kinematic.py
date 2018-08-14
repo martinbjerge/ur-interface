@@ -25,6 +25,13 @@ __author__ = "Martin Huus Bjerge"
 __copyright__ = "Copyright 2017, Rope Robotics ApS, Denmark"
 __license__ = "MIT License"
 
+
+'''
+The functions in this files is not all tested and might not give a correct result, 
+hence we recommend not using the function in this file without prior testing. 
+Alternatively use other python libraries to support kinematic calculations.
+'''
+
 import ikpy  as ik
 import numpy as np
 import sympy as sp
