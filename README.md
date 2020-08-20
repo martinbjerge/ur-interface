@@ -1,3 +1,5 @@
+!!!!*****  This repository is no longer maintained  ****!!!!
+
 The Example.py show how to get started using this library
 
 The purpose of this repository is to provide a framework that enables communication with a Universal Robots robot (UR3, UR5 or UR10).
