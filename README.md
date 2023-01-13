@@ -1,4 +1,3 @@
-!!!!*****  This repository is no longer maintained  ****!!!!
 
 The Example.py show how to get started using this library
 
