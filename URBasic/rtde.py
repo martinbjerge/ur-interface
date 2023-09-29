@@ -69,8 +69,13 @@ class RTDE(threading.Thread): #, metaclass=Singleton
     logger (URBasis_DataLogging obj): A instance if a logger object if common logging is needed.
 
     Example:
-    rob = URBasic.rtde.RTDE('192.168.56.101', 'rtde_configuration.xml')
-    rob.close_rtde()
+    import URBasic
+    import time
+    RobotModel = URBasic.robotModel.RobotModel()
+    RobotModel.ipAddress = '192.168.56.101'
+    rob = URBasic.rtde.RTDE(RobotModel)
+    time.sleep(10)
+    rob.close()
     '''
 
 
