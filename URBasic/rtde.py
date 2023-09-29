@@ -88,7 +88,7 @@ class RTDE(threading.Thread): #, metaclass=Singleton
         self.__robotModel = robotModel
 
         logger = URBasic.dataLogging.DataLogging()
-        name = logger.AddEventLogging(__name__,log2Consol=False)
+        name = logger.AddEventLogging(__name__,log2Consol=True)
         self._logger = logger.__dict__[name]
         self.__reconnectTimeout = 600 #Seconds (while in run)
         self.__dataSend = RTDEDataObject()

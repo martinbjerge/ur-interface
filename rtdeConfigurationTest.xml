@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--  ###########################     NOTE: VERY IMPORTANT     ##############################   -->
+<!-- Universal Robots do not support more than 96 values in recieve or send config at one time  -->
+<rtde_config>
+    <receive key="out">
+        <field name="actual_q" type="VECTOR6D"/>
+        <!--<field name="actual_qd" type="VECTOR6D"/>-->
+        <!--<field name="actual_TCP_pose" type="VECTOR6D"/>-->
+    </receive>
+	
+	<send key="in">
+		<field name="input_int_register_0" type="INT32" initValue="0"/>
+	</send>
+</rtde_config>
